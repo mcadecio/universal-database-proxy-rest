@@ -1,0 +1,20 @@
+<configuration xmlns="http://jgitver.github.io/maven/configuration/1.1.0"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://jgitver.github.io/maven/configuration/1.1.0
+               https://jgitver.github.io/maven/configuration/jgitver-configuration-v1_1_0.xsd">
+
+    <strategy>CONFIGURABLE</strategy>
+    <autoIncrementPatch>true</autoIncrementPatch>
+    <useDirty>false</useDirty>
+    <useCommitDistance>false</useCommitDistance>
+    <useGitCommitId>false</useGitCommitId>
+    <branchPolicies>
+        <branchPolicy>
+            <pattern>(.*(master).*)</pattern>
+            <transformations>
+                <transformation>IGNORE</transformation>
+            </transformations>
+        </branchPolicy>
+    </branchPolicies>
+
+</configuration>

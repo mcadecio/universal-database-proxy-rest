@@ -6,7 +6,7 @@
 
     <groupId>com.dercio</groupId>
     <artifactId>database-proxy</artifactId>
-    <version>1.0</version>
+    <version>0.0.0</version>
     <name>Vertx Template</name>
 
     <properties>
@@ -25,6 +25,7 @@
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
         <maven-shade-plugin.version>3.3.0</maven-shade-plugin.version>
         <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
+        <netty.version>4.1.74.Final</netty.version>
         <vertx.version>4.3.0</vertx.version>
         <reflections.version>0.10.2</reflections.version>
     </properties>
@@ -39,15 +40,23 @@
 
         <dependency>
             <groupId>io.vertx</groupId>
-            <artifactId>vertx-rx-java2</artifactId>
+            <artifactId>vertx-web-api-service</artifactId>
             <version>${vertx.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.vertx</groupId>
-            <artifactId>vertx-web-api-service</artifactId>
+            <artifactId>vertx-pg-client</artifactId>
             <version>${vertx.version}</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/io.netty/netty-codec-haproxy -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-haproxy</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+
 
         <!-- GUICE-->
         <dependency>
