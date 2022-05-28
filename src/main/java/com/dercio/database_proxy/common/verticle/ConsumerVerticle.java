@@ -3,9 +3,9 @@ package com.dercio.database_proxy.common.verticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Promise;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
-@Slf4j
+@Log4j2
 public abstract class ConsumerVerticle extends AbstractVerticle {
 
     public abstract String getAddress();

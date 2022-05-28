@@ -4,9 +4,9 @@ import com.dercio.database_proxy.common.verticle.VerticleDeployer;
 import com.google.inject.Guice;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
-@Slf4j
+@Log4j2
 public class Application {
 
     public static void main(String[] args) {

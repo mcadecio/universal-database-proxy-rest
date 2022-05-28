@@ -4,14 +4,14 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
 
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
-@Slf4j
+@Log4j2
 public class HealthHandler implements Handler<RoutingContext> {
 
     @Override

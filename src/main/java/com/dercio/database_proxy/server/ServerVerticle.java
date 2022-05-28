@@ -1,16 +1,19 @@
 package com.dercio.database_proxy.server;
 
 import com.dercio.database_proxy.common.verticle.Verticle;
-import com.dercio.database_proxy.server.handlers.*;
+import com.dercio.database_proxy.server.handlers.FailureHandler;
+import com.dercio.database_proxy.server.handlers.HealthHandler;
+import com.dercio.database_proxy.server.handlers.NotFoundHandler;
+import com.dercio.database_proxy.server.handlers.RequestLoggingHandler;
 import com.google.inject.Inject;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
-@Slf4j
+@Log4j2
 @Verticle
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
 public class ServerVerticle extends AbstractVerticle {
@@ -40,8 +43,8 @@ public class ServerVerticle extends AbstractVerticle {
                 .requestHandler(router)
                 .listen(httpConfig.getPort())
                 .onSuccess(event -> log.info("HTTP Server Started ... {}", event.actualPort()))
-                .onFailure(error -> log.error("Error starting up", error))
-                .onComplete(event -> startPromise.complete());
+                .onSuccess(event -> startPromise.complete())
+                .onFailure(startPromise::fail);
     }
 
     @Override

@@ -4,12 +4,12 @@ import com.dercio.database_proxy.common.AnnotationProcessor;
 import com.google.inject.Injector;
 import io.vertx.core.*;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.reflections.Reflections;
 
 import static org.reflections.scanners.Scanners.TypesAnnotated;
 
-@Slf4j
+@Log4j2
 @AllArgsConstructor
 public class VerticleDeployer implements AnnotationProcessor<DeploymentOptions> {
 

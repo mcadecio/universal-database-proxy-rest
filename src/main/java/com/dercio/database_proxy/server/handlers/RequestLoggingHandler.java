@@ -1,9 +1,9 @@
 package com.dercio.database_proxy.server.handlers;
 
 import io.vertx.ext.web.RoutingContext;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
-@Slf4j
+@Log4j2
 public class RequestLoggingHandler {
 
     public void logRequestReceipt(RoutingContext rc) {

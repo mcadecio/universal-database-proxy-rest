@@ -3,14 +3,14 @@ package com.dercio.database_proxy.server.handlers;
 import com.dercio.database_proxy.common.response.ErrorResponse;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import static com.simplaex.http.StatusCode._400;
 import static com.simplaex.http.StatusCode._500;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
-@Slf4j
+@Log4j2
 public class FailureHandler implements Handler<RoutingContext> {
 
     @Override

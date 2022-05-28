@@ -4,9 +4,9 @@ import com.dercio.database_proxy.common.codec.CodecRegister;
 import com.dercio.database_proxy.common.module.ModuleInstaller;
 import com.google.inject.AbstractModule;
 import io.vertx.core.Vertx;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
-@Slf4j
+@Log4j2
 public class ApplicationModule extends AbstractModule {
     private final Vertx vertx;
 

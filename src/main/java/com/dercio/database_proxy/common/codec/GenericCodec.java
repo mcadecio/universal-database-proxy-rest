@@ -3,14 +3,14 @@ package com.dercio.database_proxy.common.codec;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
 import io.vertx.core.json.Json;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
-@Slf4j
+@Log4j2
 public class GenericCodec<T> implements MessageCodec<T, T> {
     private final Class<T> cls;
 
