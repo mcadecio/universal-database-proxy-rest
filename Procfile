@@ -1,0 +1,1 @@
+web: java -Xmx512m -Dproject.base.package=$BASE_PACKAGE -Dserver.port=$PORT -Dcors.allowed.domain=$CORS_ALLOWED_DOMAIN -jar target/database-proxy-1.0.jar

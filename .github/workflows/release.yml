@@ -1,0 +1,37 @@
+name: Run Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+          cache: maven
+      - name: Run Verify
+        run: mvn -B verify --file pom.xml
+  deploy:
+    name: Deploy To Heroku
+    runs-on: ubuntu-latest
+    needs:
+      - test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to Heroku
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: database-proxy
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
+        env:
+          HD_CORS_ALLOWED_DOMAIN: ${{secrets.CORS_ALLOWED_DOMAIN}}
+          HD_BASE_PACKAGE: com.dercio.database_proxy
