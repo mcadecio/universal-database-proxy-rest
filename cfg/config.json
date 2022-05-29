@@ -1,0 +1,15 @@
+{
+  "proxy": {
+    "name": "postgres-proxy",
+    "source": {
+      "host": "localhost",
+      "port": 5433,
+      "type": "SOCKS5"
+    },
+    "destination": {
+      "host": "localhost",
+      "port": 5432,
+      "type": "SOCKS5"
+    }
+  }
+}
