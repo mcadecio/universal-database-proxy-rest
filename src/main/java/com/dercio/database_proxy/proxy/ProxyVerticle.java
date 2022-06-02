@@ -3,6 +3,7 @@ package com.dercio.database_proxy.proxy;
 import com.dercio.database_proxy.common.verticle.Verticle;
 import com.google.inject.Inject;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.net.NetServer;
 import lombok.RequiredArgsConstructor;
@@ -19,20 +20,40 @@ public class ProxyVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
-        this.netServer = vertx.createNetServer();
 
-        netServer.connectHandler(proxyHandler);
+        vertx.eventBus()
+                .<ProxyRequest>consumer("proxy.server")
+                .handler(message -> message.body()
+                        .getAction()
+                        .on(ProxyAction.OPEN, this::openServer)
+                        .on(ProxyAction.CLOSE, this::closeServer)
+                );
 
-        var sourceConfig = proxyConfig.getSource();
-        netServer
-                .listen(sourceConfig.getPort(), sourceConfig.getHost())
-                .onSuccess(server -> log.info("TCP Server Started ... {}", server.actualPort()))
-                .onSuccess(server -> startPromise.complete())
+        netServer = vertx.createNetServer().connectHandler(proxyHandler);
+
+        openServer()
+                .onSuccess(startPromise::complete)
                 .onFailure(startPromise::fail);
     }
 
     @Override
     public void stop(Promise<Void> stopPromise) {
-        netServer.close(result -> stopPromise.complete());
+        closeServer()
+                .onSuccess(stopPromise::complete)
+                .onFailure(stopPromise::fail);
+    }
+
+    private Future<Void> openServer() {
+        var sourceConfig = proxyConfig.getSource();
+        return netServer
+                .close()
+                .compose(unused -> netServer.listen(sourceConfig.getPort(), sourceConfig.getHost()))
+                .onSuccess(server -> log.info("TCP Server Started ... {}", server.actualPort()))
+                .mapEmpty();
+    }
+
+    private Future<Void> closeServer() {
+        log.info("TCP Server Stopped");
+        return netServer.close();
     }
 }

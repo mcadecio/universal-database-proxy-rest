@@ -4,7 +4,7 @@
 
 ```shell
 mvn clean package
-java -jar target/database-proxy-x.x.jar
+java -jar  -Dproject.base.package=com.dercio.database_proxy -Dlog4j.configurationFile=cfg/log4j2.xml -Dproject.config=cfg/config.json target/database-proxy-x.x.jar
 ```
 
 ## Usage

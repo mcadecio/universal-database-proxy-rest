@@ -1,6 +1,7 @@
 package com.dercio.database_proxy.server;
 
 import com.dercio.database_proxy.common.verticle.Verticle;
+import com.dercio.database_proxy.proxy.ProxyRequest;
 import com.dercio.database_proxy.server.handlers.FailureHandler;
 import com.dercio.database_proxy.server.handlers.HealthHandler;
 import com.dercio.database_proxy.server.handlers.NotFoundHandler;
@@ -12,6 +13,8 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
+import static com.simplaex.http.StatusCode._200;
 
 @Log4j2
 @Verticle
@@ -33,6 +36,16 @@ public class ServerVerticle extends AbstractVerticle {
         router.get("/health")
                 .handler(requestLoggingHandler::logRequestReceipt)
                 .handler(healthHandler)
+                .handler(requestLoggingHandler::logResponseDispatch);
+
+        router.post("/proxy")
+                .handler(requestLoggingHandler::logRequestReceipt)
+                .handler(event -> {
+                    var body = event.body().asJsonObject().mapTo(ProxyRequest.class);
+                    vertx.eventBus().publish("proxy.server", body);
+                    event.response().setStatusCode(_200.getCode());
+                    event.next();
+                })
                 .handler(requestLoggingHandler::logResponseDispatch);
 
         router.route().failureHandler(failureHandler);
