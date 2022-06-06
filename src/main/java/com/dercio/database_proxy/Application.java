@@ -5,7 +5,6 @@ import com.google.inject.Guice;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.log4j.Log4j2;
@@ -18,9 +17,8 @@ public class Application {
         ConfigRetriever.create(vertx, configRetrieverOptions())
                 .getConfig()
                 .onSuccess(config -> {
-                    var deployment = new DeploymentOptions();
                     var injector = Guice.createInjector(new ApplicationModule(vertx, config));
-                    new VerticleDeployer(vertx, injector).process(deployment);
+                    injector.getInstance(VerticleDeployer.class).process(injector);
                 });
     }
 

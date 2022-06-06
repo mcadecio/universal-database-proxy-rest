@@ -1,28 +1,38 @@
 package com.dercio.database_proxy.common.verticle;
 
 import com.dercio.database_proxy.common.AnnotationProcessor;
+import com.dercio.database_proxy.common.exceptions.VerticleDisabledException;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
-import io.vertx.core.*;
-import lombok.AllArgsConstructor;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.reflections.Reflections;
+
+import java.util.Set;
 
 import static org.reflections.scanners.Scanners.TypesAnnotated;
 
 @Log4j2
-@AllArgsConstructor
-public class VerticleDeployer implements AnnotationProcessor<DeploymentOptions> {
+@RequiredArgsConstructor(onConstructor_ = {@Inject})
+public class VerticleDeployer implements AnnotationProcessor<Injector> {
 
     private final Vertx vertx;
-    private final Injector injector;
+    private final Set<AbstractVerticle> verticles;
 
     @Override
-    public void process(DeploymentOptions deploymentOptions) {
+    public void process(Injector injector) {
 
         Handler<AsyncResult<String>> handler = result -> {
             if (result.failed()) {
-                log.error("Failed to deploy verticle", result.cause());
-                System.exit(500);
+                if (!(result.cause() instanceof VerticleDisabledException))
+                    log.error(result.cause().getMessage(), result.cause());
+                else
+                    log.info(result.cause().getMessage());
+
             }
         };
 
@@ -31,6 +41,8 @@ public class VerticleDeployer implements AnnotationProcessor<DeploymentOptions> 
                 .map(injector::getInstance)
                 .filter(AbstractVerticle.class::isInstance)
                 .map(AbstractVerticle.class::cast)
-                .forEach(verticle -> vertx.deployVerticle(verticle, deploymentOptions, handler));
+                .forEach(verticle -> vertx.deployVerticle(verticle, handler));
+
+        verticles.forEach(verticle -> vertx.deployVerticle(verticle, handler));
     }
 }

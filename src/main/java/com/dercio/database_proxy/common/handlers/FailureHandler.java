@@ -1,4 +1,4 @@
-package com.dercio.database_proxy.server.handlers;
+package com.dercio.database_proxy.common.handlers;
 
 import com.dercio.database_proxy.common.response.ErrorResponse;
 import io.vertx.core.Handler;
@@ -16,7 +16,7 @@ public class FailureHandler implements Handler<RoutingContext> {
     @Override
     public void handle(RoutingContext event) {
 
-        log.error("Error: {}", event.failure().getMessage());
+        log.error("Error: {}", event.failure().getMessage(), event.failure());
 
         var error = extractError(event.failure());
 

@@ -1,0 +1,23 @@
+version: '3.5'
+
+name: database-proxy
+services:
+  crdb:
+    image: cockroachdb/cockroach:v22.1.0
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    command: start-single-node --insecure
+    volumes:
+      - "${PWD}/cockroach-data/crdb:/cockroach/cockroach-data"
+      - ./init-cockroach.sql:/docker-entrypoint-initdb.d/init.sql
+  postgres:
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: database-proxy
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init-postgres.sql:/docker-entrypoint-initdb.d/init.sql

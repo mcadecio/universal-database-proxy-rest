@@ -1,5 +1,13 @@
 # database-proxy
 
+This project is meant to provide a simple restful interface to interact with databases. It features the ability to 
+act as a proxy between any servers over a TCP connection. Also, it has the ability to read selected tables and 
+generate an OpenApi spec.
+
+Currently, it supports the following databases:
+* PostgresDB
+* CockroachDB
+
 ## Installation
 
 ```shell

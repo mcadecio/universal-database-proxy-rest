@@ -1,4 +1,4 @@
-package com.dercio.database_proxy.server.handlers;
+package com.dercio.database_proxy.common.handlers;
 
 import io.vertx.ext.web.RoutingContext;
 import lombok.extern.log4j.Log4j2;

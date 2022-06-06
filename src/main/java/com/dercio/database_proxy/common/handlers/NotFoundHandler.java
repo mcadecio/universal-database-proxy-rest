@@ -1,4 +1,4 @@
-package com.dercio.database_proxy.server.handlers;
+package com.dercio.database_proxy.common.handlers;
 
 import com.dercio.database_proxy.common.response.ErrorResponse;
 import io.vertx.core.Handler;
