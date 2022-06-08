@@ -8,7 +8,7 @@ import java.util.Map;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PgTypeMapper {
     public static final String STRING = "string";
-    private static final String INTEGER = "integer";
+    public static final String INTEGER = "integer";
     private static final String NUMERIC = "numeric";
     private static final String BIGINT = "bigint";
     private static final String DATE = "date";

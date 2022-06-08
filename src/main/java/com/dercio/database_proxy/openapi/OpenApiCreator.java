@@ -3,10 +3,7 @@ package com.dercio.database_proxy.openapi;
 import com.dercio.database_proxy.common.database.Table;
 import com.dercio.database_proxy.common.database.TableColumn;
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -17,10 +14,7 @@ import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.vertx.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.simplaex.http.StatusCode._200;
@@ -28,6 +22,9 @@ import static com.simplaex.http.StatusCode._204;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 
 public class OpenApiCreator {
+
+    private OpenApiCreator() {
+    }
 
     public static OpenAPI create(List<Table> tableList) {
         return new OpenAPI()
@@ -38,6 +35,24 @@ public class OpenApiCreator {
                         .map(tableName -> new Tag().name(tableName))
                         .collect(Collectors.toList()))
                 .paths(generatePaths(tableList));
+    }
+
+    private static Schema createSchemaFromColumns(List<TableColumn> columns) {
+        Map<String, Schema> properties = columns.stream()
+                .map(column -> Map.entry(column.getColumnName(), new ObjectSchema()
+                        .type(column.getDataType())))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        var requiredProperties = columns
+                .stream()
+                .filter(column -> !column.isNullable())
+                .map(TableColumn::getColumnName)
+                .collect(Collectors.toList());
+
+        ObjectSchema objectSchema = new ObjectSchema();
+        objectSchema.properties(properties);
+        objectSchema.required(requiredProperties);
+        return objectSchema;
     }
 
     private static Paths generatePaths(List<Table> tableList) {
@@ -94,6 +109,19 @@ public class OpenApiCreator {
         return getOperation;
     }
 
+    private static Parameter createPkPathParameter(Table table) {
+        return table.getColumns()
+                .stream()
+                .filter(column -> column.getColumnName().equals(table.getPkColumnName()))
+                .findAny()
+                .map(column -> new Parameter()
+                        .name(column.getColumnName())
+                        .in("path")
+                        .required(true)
+                        .schema(new ObjectSchema().type(column.getDataType())))
+                .orElseThrow(); // TODO: Throw dedicated exception
+    }
+
     private static Operation generateGetByIdOperation(Table table) {
         Operation getOperation = new Operation();
         getOperation.setSummary("Get a  " + table.getTableName() + " by id");
@@ -102,39 +130,7 @@ public class OpenApiCreator {
         getOperation.setTags(Collections.singletonList(table.getTableName()));
         addOperationMetadata(getOperation, table);
 
-        Parameter parameter = new Parameter()
-                .name(table.getPkColumnName())
-                .in("path")
-                .required(true)
-                .schema(new ObjectSchema());
-
-        table.getColumns()
-                .stream()
-                .filter(column -> column.getColumnName().equals(table.getPkColumnName()))
-                .findAny()
-                .map(TableColumn::getDataType)
-                .ifPresent(type -> parameter.getSchema().type(type));
-
-
-        var properties = new LinkedHashMap<String, Schema>();
-
-        table.getColumns().forEach(column -> {
-            Schema propertySchema = new ObjectSchema();
-            propertySchema.type(column.getDataType());
-
-            properties.put(column.getColumnName(), propertySchema);
-        });
-
-        var requiredProperties = table.getColumns()
-                .stream()
-                .filter(column -> !column.isNullable())
-                .map(TableColumn::getColumnName)
-                .collect(Collectors.toList());
-
-        ObjectSchema objectSchema = new ObjectSchema();
-        objectSchema.properties(properties);
-        objectSchema.required(requiredProperties);
-
+        var objectSchema = createSchemaFromColumns(table.getColumns());
 
         MediaType mediaType = new MediaType();
         mediaType.setSchema(objectSchema);
@@ -150,7 +146,8 @@ public class OpenApiCreator {
         apiResponses.addApiResponse(String.valueOf(_200.getCode()), apiResponse);
 
 
-        getOperation.addParametersItem(parameter);
+        Parameter pathParameter = createPkPathParameter(table);
+        getOperation.addParametersItem(pathParameter);
         getOperation.setResponses(apiResponses);
 
         return getOperation;
@@ -164,38 +161,7 @@ public class OpenApiCreator {
         putOperation.setTags(Collections.singletonList(table.getTableName()));
         addOperationMetadata(putOperation, table);
 
-        Parameter parameter = new Parameter()
-                .name(table.getPkColumnName())
-                .in("path")
-                .required(true)
-                .schema(new ObjectSchema());
-
-        table.getColumns()
-                .stream()
-                .filter(column -> column.getColumnName().equals(table.getPkColumnName()))
-                .findAny()
-                .map(TableColumn::getDataType)
-                .ifPresent(type -> parameter.getSchema().type(type));
-
-
-        var properties = new LinkedHashMap<String, Schema>();
-
-        table.getColumns().forEach(column -> {
-            Schema propertySchema = new ObjectSchema();
-            propertySchema.type(column.getDataType());
-
-            properties.put(column.getColumnName(), propertySchema);
-        });
-
-        var requiredProperties = table.getColumns()
-                .stream()
-                .filter(column -> !column.isNullable())
-                .map(TableColumn::getColumnName)
-                .collect(Collectors.toList());
-
-        ObjectSchema objectSchema = new ObjectSchema();
-        objectSchema.properties(properties);
-        objectSchema.required(requiredProperties);
+        var objectSchema = createSchemaFromColumns(table.getColumns());
 
         Content requestBodycontent = new Content();
         requestBodycontent.addMediaType(APPLICATION_JSON.toString(), new MediaType().schema(objectSchema));
@@ -212,7 +178,8 @@ public class OpenApiCreator {
         ApiResponses apiResponses = new ApiResponses();
         apiResponses.addApiResponse(String.valueOf(_204.getCode()), apiResponse);
 
-        putOperation.addParametersItem(parameter);
+        Parameter pathParameter = createPkPathParameter(table);
+        putOperation.addParametersItem(pathParameter);
         putOperation.setRequestBody(requestBody);
         putOperation.setResponses(apiResponses);
 
@@ -227,24 +194,12 @@ public class OpenApiCreator {
         deleteOperation.setTags(Collections.singletonList(table.getTableName()));
         addOperationMetadata(deleteOperation, table);
 
-        Parameter parameter = new Parameter()
-                .name(table.getPkColumnName())
-                .in("path")
-                .required(true)
-                .schema(new ObjectSchema());
-
-        table.getColumns()
-                .stream()
-                .filter(column -> column.getColumnName().equals(table.getPkColumnName()))
-                .findAny()
-                .map(TableColumn::getDataType)
-                .ifPresent(type -> parameter.getSchema().type(type));
-
         ApiResponses apiResponses = new ApiResponses();
         apiResponses.addApiResponse(String.valueOf(_200.getCode()), new ApiResponse()
                 .description("Deleted " + table.getTableName() + " successfully."));
 
-        deleteOperation.addParametersItem(parameter);
+        Parameter pathParameter = createPkPathParameter(table);
+        deleteOperation.addParametersItem(pathParameter);
         deleteOperation.responses(apiResponses);
 
         return deleteOperation;
@@ -258,24 +213,7 @@ public class OpenApiCreator {
         getOperation.setTags(Collections.singletonList(table.getTableName()));
         addOperationMetadata(getOperation, table);
 
-        var properties = new LinkedHashMap<String, Schema>();
-
-        table.getColumns().forEach(column -> {
-            Schema propertySchema = new ObjectSchema();
-            propertySchema.type(column.getDataType());
-
-            properties.put(column.getColumnName(), propertySchema);
-        });
-
-        var requiredProperties = table.getColumns()
-                .stream()
-                .filter(column -> !column.isNullable())
-                .map(TableColumn::getColumnName)
-                .collect(Collectors.toList());
-
-        ObjectSchema objectSchema = new ObjectSchema();
-        objectSchema.properties(properties);
-        objectSchema.required(requiredProperties);
+        var objectSchema = createSchemaFromColumns(table.getColumns());
 
         ArraySchema schema = new ArraySchema()
                 .items(objectSchema);
@@ -305,25 +243,7 @@ public class OpenApiCreator {
         postOperation.setTags(Collections.singletonList(table.getTableName()));
         addOperationMetadata(postOperation, table);
 
-
-        var properties = new LinkedHashMap<String, Schema>();
-
-        table.getColumns().forEach(column -> {
-            Schema propertySchema = new ObjectSchema();
-            propertySchema.type(column.getDataType());
-
-            properties.put(column.getColumnName(), propertySchema);
-        });
-
-        var requiredProperties = table.getColumns()
-                .stream()
-                .filter(column -> !column.isNullable())
-                .map(TableColumn::getColumnName)
-                .collect(Collectors.toList());
-
-        ObjectSchema objectSchema = new ObjectSchema();
-        objectSchema.properties(properties);
-        objectSchema.required(requiredProperties);
+        var objectSchema = createSchemaFromColumns(table.getColumns());
 
         Content requestBodycontent = new Content();
         requestBodycontent.addMediaType(APPLICATION_JSON.toString(), new MediaType().schema(objectSchema));

@@ -19,9 +19,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
-import static com.dercio.database_proxy.postgres.PgTypeMapper.STRING;
+import static com.dercio.database_proxy.postgres.PgTypeMapper.INTEGER;
 import static java.lang.String.format;
 
 @Log4j2
@@ -110,8 +111,8 @@ public class PgRepository implements Repository {
         var client = sqlClientMap.get(tableOption.getDatabase());
 
         return getTableInfo(tableOption)
-                .map(tableInfo -> generateSelectQuery(tableInfo, pathParams))
-                .compose(query -> client.query(query).execute())
+                .compose(table -> client.preparedQuery(generateSelectQuery(table))
+                        .execute(Tuple.of(findPkValue(table, pathParams))))
                 .onSuccess(items -> log.info("Retrieved [{}] rows", items.size()))
                 .map(rows -> StreamSupport.stream(rows.spliterator(), false)
                         .map(Row::toJson)
@@ -128,8 +129,8 @@ public class PgRepository implements Repository {
         );
 
         return getTableInfo(tableOption)
-                .map(tableInfo -> generateInsertQuery(tableInfo, data))
-                .compose(query -> client.query(query).execute())
+                .compose(table -> client.preparedQuery(generateInsertQuery(table))
+                        .execute(generateTupeForInsert(table, data)))
                 .mapEmpty();
     }
 
@@ -148,8 +149,8 @@ public class PgRepository implements Repository {
 
         return getTableInfo(tableOption)
                 .compose(tableInfo -> validaUpdateRequest(tableInfo, data, pathParams))
-                .map(tableInfo -> generateUpdateQuery(tableInfo, data))
-                .compose(query -> client.query(query).execute())
+                .compose(table -> client.preparedQuery(generateUpdateQuery(table))
+                        .execute(generateTupeForInsert(table, data)))
                 .mapEmpty();
     }
 
@@ -163,8 +164,8 @@ public class PgRepository implements Repository {
         );
 
         return getTableInfo(tableOption)
-                .map(tableInfo -> generateDeleteQuery(tableInfo, pathParams))
-                .compose(query -> client.query(query).execute())
+                .compose(table -> client.preparedQuery(generateDeleteQuery(table))
+                        .execute(Tuple.of(findPkValue(table, pathParams))))
                 .mapEmpty();
     }
 
@@ -179,27 +180,28 @@ public class PgRepository implements Repository {
         return Future.failedFuture(new IllegalStateException("Inconsistent Ids"));
     }
 
-    private String generateSelectQuery(Table table, Map<String, String> pathParams) {
-
-        var primaryKeyValue = table.getColumns()
+    private Object findPkValue(Table table, Map<String, String> pathParams) {
+        return table.getColumns()
                 .stream()
                 .filter(column -> column.getColumnName().equals(table.getPkColumnName()))
                 .findFirst()
                 .map(column -> {
                     var value = pathParams.get(column.getColumnName());
-                    if (Objects.equals(column.getDataType(), STRING)) {
-                        return "'" + value + "'";
+                    if (Objects.equals(column.getDataType(), INTEGER)) {
+                        return Long.parseLong(value);
                     }
                     return value;
                 })
-                .orElseThrow();
+                .orElseThrow(); // TODO: throw dedicated exception
+    }
+
+    private String generateSelectQuery(Table table) {
 
         var query = format(
-                "SELECT * FROM %s.%s WHERE %s = %s",
+                "SELECT * FROM %s.%s WHERE %s = $1",
                 table.getSchemaName(),
                 table.getTableName(),
-                table.getPkColumnName(),
-                primaryKeyValue
+                table.getPkColumnName()
         );
 
         log.info("Generated select query [{}]", query);
@@ -207,26 +209,13 @@ public class PgRepository implements Repository {
         return query;
     }
 
-    private String generateDeleteQuery(Table table, Map<String, String> pathParams) {
-        var primaryKeyValue = table.getColumns()
-                .stream()
-                .filter(column -> column.getColumnName().equals(table.getPkColumnName()))
-                .findFirst()
-                .map(column -> {
-                    var value = pathParams.get(column.getColumnName());
-                    if (Objects.equals(column.getDataType(), STRING)) {
-                        return "'" + value + "'";
-                    }
-                    return value;
-                })
-                .orElseThrow();
+    private String generateDeleteQuery(Table table) {
 
         var query = format(
-                "DELETE FROM %s.%s WHERE %s = %s",
+                "DELETE FROM %s.%s WHERE %s = $1",
                 table.getSchemaName(),
                 table.getTableName(),
-                table.getPkColumnName(),
-                primaryKeyValue
+                table.getPkColumnName()
         );
 
         log.info("Generated delete query [{}]", query);
@@ -234,81 +223,60 @@ public class PgRepository implements Repository {
         return query;
     }
 
-    private String generateInsertQuery(Table table, JsonObject body) {
-        StringBuilder builder = new StringBuilder();
-        table.getColumns()
-                .stream()
-                .map(column -> {
-                    var value = body.getValue(column.getColumnName());
-                    if (Objects.equals(column.getDataType(), STRING)) {
-                        return "'" + value + "'";
-                    }
-                    return value;
-                })
-                .forEach(value -> {
-                    builder.append(value);
-                    builder.append(",");
-                });
-
-        var values = builder.toString();
-
-        var query = format(
-                "INSERT INTO %s.%s(%s) VALUES (%s)",
+    private String generateInsertQuery(Table table) {
+        var baseQuery = format(
+                "INSERT INTO %s.%s(%s) VALUES ",
                 table.getSchemaName(),
                 table.getTableName(),
                 table.getColumns()
                         .stream()
                         .map(TableColumn::getColumnName)
-                        .collect(Collectors.joining(", ")),
-                values.substring(0, values.length() - 1)
+                        .collect(Collectors.joining(", "))
         );
 
-        log.info("Generated insert query {}", query);
+        String valuePlaceholders = "(" +
+                IntStream.rangeClosed(1, table.getColumns().size())
+                        .mapToObj(i -> String.format("$%d", i))
+                        .collect(Collectors.joining(",")) +
+                ")";
 
+        var finalQuery = baseQuery + valuePlaceholders;
 
-        return query;
+        log.info("Generated insert query {}", finalQuery);
+
+        return finalQuery;
     }
 
-    private String generateUpdateQuery(Table table, JsonObject body) {
-        StringBuilder builder = new StringBuilder();
-        table.getColumns()
+    private Tuple generateTupeForInsert(Table table, JsonObject body) {
+        return Tuple.from(table.getColumns()
+                .stream()
+                .map(column -> body.getValue(column.getColumnName()))
+                .collect(Collectors.toList()));
+    }
+
+    private String generateColumnsToUpdate(List<TableColumn> columns) {
+        return IntStream.range(0, columns.size())
+                .mapToObj(i -> String.format("%s = $%d",
+                        columns.get(i).getColumnName(),
+                        i + 2))
+                .collect(Collectors.joining(", "));
+    }
+
+    private String generateUpdateQuery(Table table) {
+
+        var values = generateColumnsToUpdate(table.getColumns()
                 .stream()
                 .filter(column -> !column.getColumnName().equals(table.getPkColumnName()))
-                .map(column -> {
-                    var value = body.getValue(column.getColumnName());
-                    if (Objects.equals(column.getDataType(), STRING)) {
-                        value = "'" + value + "'";
-                    }
-
-                    return format("%s = %s", column.getColumnName(), value);
-                })
-                .forEach(value -> {
-                    builder.append(value);
-                    builder.append(",");
-                });
-
-        var values = builder.toString();
-
-        var primaryKeyValue = table.getColumns()
-                .stream()
-                .filter(column -> column.getColumnName().equals(table.getPkColumnName()))
-                .findFirst()
-                .map(column -> {
-                    var value = body.getValue(column.getColumnName());
-                    if (Objects.equals(column.getDataType(), STRING)) {
-                        return "'" + value + "'";
-                    }
-                    return value;
-                })
-                .orElseThrow();
+                .collect(Collectors.toList())
+        );
 
         var query = format(
-                "UPDATE %s.%s SET %s WHERE %s = %s",
+                "UPDATE %s.%s SET %s WHERE %s = $%d",
                 table.getSchemaName(),
                 table.getTableName(),
-                values.substring(0, values.length() - 1),
+                values,
                 table.getPkColumnName(),
-                primaryKeyValue
+                table.getColumns().size() - 1 // TODO: Find a way to keep the order of the columns always the same
         );
 
         log.info("Generated update query {}", query);

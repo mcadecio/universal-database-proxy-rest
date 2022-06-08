@@ -9,7 +9,6 @@ services:
       - "8080:8080"
     command: start-single-node --insecure
     volumes:
-      - "${PWD}/cockroach-data/crdb:/cockroach/cockroach-data"
       - ./init-cockroach.sql:/docker-entrypoint-initdb.d/init.sql
   postgres:
     environment:
