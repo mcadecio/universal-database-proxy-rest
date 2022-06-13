@@ -2,7 +2,7 @@ package com.dercio.database_proxy.restapi;
 
 import com.dercio.database_proxy.common.database.Repository;
 import com.dercio.database_proxy.common.database.TableRequest;
-import com.dercio.database_proxy.common.response.ErrorResponse;
+import com.dercio.database_proxy.common.mapper.Mapper;
 import com.google.inject.Inject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -18,13 +18,14 @@ import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 @Log4j2
-@RequiredArgsConstructor(onConstructor_ = {@Inject})
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class RestApiHandler {
 
     private static final String DATABASE = "database";
     private static final String SCHEMA = "schema";
     private static final String TABLE = "table";
 
+    private final Mapper mapper;
     private final Repository repository;
 
     public void getResources(RoutingContext event) {
@@ -56,8 +57,13 @@ public class RestApiHandler {
                     if (optionalJsonObject.isPresent()) {
                         response.end(optionalJsonObject.get().encode());
                     } else {
-                        ErrorResponse error = ErrorResponse.of(_404.getLabel(), _404.getCode());
-                        response.setStatusCode(error.getStatusCode()).end(error.encode());
+                        var error = com.dercio.database_proxy.common.error.ErrorResponse.builder()
+                                .path(event.normalizedPath())
+                                .code(_404.getCode())
+                                .message(_404.getLabel())
+                                .build();
+
+                        response.setStatusCode(error.getCode()).end(mapper.encode(error));
                     }
                 })
                 .onFailure(event::fail);

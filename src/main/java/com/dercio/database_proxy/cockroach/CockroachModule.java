@@ -3,6 +3,7 @@ package com.dercio.database_proxy.cockroach;
 import com.dercio.database_proxy.common.database.TableRequest;
 import com.dercio.database_proxy.common.handlers.FailureHandler;
 import com.dercio.database_proxy.common.handlers.NotFoundHandler;
+import com.dercio.database_proxy.common.mapper.Mapper;
 import com.dercio.database_proxy.common.module.Module;
 import com.dercio.database_proxy.postgres.PgRepository;
 import com.dercio.database_proxy.restapi.RestApiHandler;
@@ -27,7 +28,8 @@ public class CockroachModule extends AbstractModule {
             FailureHandler failureHandler,
             NotFoundHandler notFoundHandler,
             Vertx vertx,
-            CrbApiConfig apiConfig
+            CrbApiConfig apiConfig,
+            Mapper mapper
     ) {
 
         var pgRepository = new PgRepository(createCrbClients(vertx, apiConfig));
@@ -35,7 +37,7 @@ public class CockroachModule extends AbstractModule {
         return new RestApiVerticle(
                 failureHandler,
                 notFoundHandler,
-                new RestApiHandler(pgRepository),
+                new RestApiHandler(mapper, pgRepository),
                 pgRepository,
                 apiConfig
         );

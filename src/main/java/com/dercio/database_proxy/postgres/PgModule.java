@@ -1,11 +1,12 @@
 package com.dercio.database_proxy.postgres;
 
+import com.dercio.database_proxy.common.database.TableRequest;
 import com.dercio.database_proxy.common.handlers.FailureHandler;
 import com.dercio.database_proxy.common.handlers.NotFoundHandler;
+import com.dercio.database_proxy.common.mapper.Mapper;
 import com.dercio.database_proxy.common.module.Module;
 import com.dercio.database_proxy.restapi.RestApiHandler;
 import com.dercio.database_proxy.restapi.RestApiVerticle;
-import com.dercio.database_proxy.common.database.TableRequest;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.ProvidesIntoSet;
 import io.vertx.core.AbstractVerticle;
@@ -26,7 +27,8 @@ public class PgModule extends AbstractModule {
             FailureHandler failureHandler,
             NotFoundHandler notFoundHandler,
             Vertx vertx,
-            PgApiConfig pgApiConfig
+            PgApiConfig pgApiConfig,
+            Mapper mapper
     ) {
 
         var pgRepository = new PgRepository(createPgClients(vertx, pgApiConfig));
@@ -34,7 +36,7 @@ public class PgModule extends AbstractModule {
         return new RestApiVerticle(
                 failureHandler,
                 notFoundHandler,
-                new RestApiHandler(pgRepository),
+                new RestApiHandler(mapper, pgRepository),
                 pgRepository,
                 pgApiConfig
         );

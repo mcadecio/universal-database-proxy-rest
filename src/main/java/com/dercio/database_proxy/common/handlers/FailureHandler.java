@@ -2,8 +2,7 @@ package com.dercio.database_proxy.common.handlers;
 
 import com.dercio.database_proxy.common.error.ErrorFactory;
 import com.dercio.database_proxy.common.error.ErrorResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.dercio.database_proxy.common.mapper.Mapper;
 import com.google.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
@@ -25,9 +24,7 @@ import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
 public class FailureHandler implements Handler<RoutingContext> {
 
-    private static final ObjectMapper mapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule());
-
+    private final Mapper mapper;
     private final ErrorFactory errorFactory;
     private final Map<Class<? extends Throwable>, BiFunction<Throwable, HttpServerRequest, ErrorResponse>>
             exceptionMapper = Map.of(
@@ -47,7 +44,7 @@ public class FailureHandler implements Handler<RoutingContext> {
         event.response()
              .setStatusCode(error.getCode())
              .putHeader(CONTENT_TYPE, APPLICATION_JSON)
-             .end(mapper.writeValueAsString(error));
+             .end(mapper.encode(error));
     }
 
     ErrorResponse handleBodyProcessorException(Throwable throwable, HttpServerRequest request) {
