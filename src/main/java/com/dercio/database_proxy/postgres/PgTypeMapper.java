@@ -21,7 +21,10 @@ public class PgTypeMapper {
             BIGINT, INTEGER,
             DATE, STRING,
             CHARACTER_VARYING, STRING,
-            BOOLEAN, BOOLEAN
+            BOOLEAN, BOOLEAN,
+            "uuid", STRING,
+            "text", STRING,
+            "timestamp with time zone", STRING
     );
 
     public static String fromPgToSwagger(String pgType) {

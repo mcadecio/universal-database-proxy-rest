@@ -15,7 +15,6 @@ import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -147,6 +146,10 @@ public class PgRepository implements Repository {
                 tableOption.getTable()
         );
 
+        if (data.size() == 1) {
+            return Future.succeededFuture();
+        }
+
         return getTableInfo(tableOption)
                 .compose(tableInfo -> validaUpdateRequest(tableInfo, data, pathParams))
                 .compose(table -> client.preparedQuery(generateUpdateQuery(table))
@@ -187,10 +190,8 @@ public class PgRepository implements Repository {
                 .findFirst()
                 .map(column -> {
                     var value = pathParams.get(column.getColumnName());
-                    if (Objects.equals(column.getDataType(), INTEGER)) {
-                        return Long.parseLong(value);
-                    }
-                    return value;
+                    return column.getDataType().equals(INTEGER) ?
+                            Long.parseLong(value) : value;
                 })
                 .orElseThrow(); // TODO: throw dedicated exception
     }
@@ -271,12 +272,11 @@ public class PgRepository implements Repository {
         );
 
         var query = format(
-                "UPDATE %s.%s SET %s WHERE %s = $%d",
+                "UPDATE %s.%s SET %s WHERE %s = $1", // TODO: Find a way to keep the order of the columns always the same
                 table.getSchemaName(),
                 table.getTableName(),
                 values,
-                table.getPkColumnName(),
-                table.getColumns().size() - 1 // TODO: Find a way to keep the order of the columns always the same
+                table.getPkColumnName()
         );
 
         log.info("Generated update query {}", query);

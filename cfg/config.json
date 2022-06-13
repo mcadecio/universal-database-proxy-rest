@@ -1,6 +1,6 @@
 {
   "proxy": {
-    "enabled": false,
+    "enabled": true,
     "name": "postgres-proxy",
     "httpServer": {
       "host": "localhost",
@@ -21,7 +21,7 @@
     "enabled": true,
     "host": "localhost",
     "port": 8000,
-    "openApiFilePath": "/home/dercio/personal/database-proxy/cfg/pgOpenApi.yaml",
+    "openApiFilePath": "./cfg/pgOpenApi.yaml",
     "database": {
       "host": "localhost",
       "port": 5432,
@@ -45,7 +45,7 @@
     "enabled": true,
     "host": "localhost",
     "port": 8010,
-    "openApiFilePath": "/home/dercio/personal/database-proxy/cfg/crbOpenApi.yaml",
+    "openApiFilePath": "./cfg/crbOpenApi.yaml",
     "database": {
       "host": "localhost",
       "port": 26257,
@@ -56,6 +56,11 @@
           "database": "defaultdb",
           "schema": "vehicles",
           "table": "cars"
+        },
+        {
+          "database": "defaultdb",
+          "schema": "vehicles",
+          "table": "wheel"
         }
       ]
     }

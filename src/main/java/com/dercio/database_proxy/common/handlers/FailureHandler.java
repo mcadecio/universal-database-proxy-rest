@@ -1,9 +1,20 @@
 package com.dercio.database_proxy.common.handlers;
 
-import com.dercio.database_proxy.common.response.ErrorResponse;
+import com.dercio.database_proxy.common.error.ErrorFactory;
+import com.dercio.database_proxy.common.error.ErrorResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.inject.Inject;
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.validation.BodyProcessorException;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+
+import java.util.Map;
+import java.util.function.BiFunction;
 
 import static com.simplaex.http.StatusCode._400;
 import static com.simplaex.http.StatusCode._500;
@@ -11,27 +22,40 @@ import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 @Log4j2
+@RequiredArgsConstructor(onConstructor_ = {@Inject})
 public class FailureHandler implements Handler<RoutingContext> {
 
+    private static final ObjectMapper mapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule());
+
+    private final ErrorFactory errorFactory;
+    private final Map<Class<? extends Throwable>, BiFunction<Throwable, HttpServerRequest, ErrorResponse>>
+            exceptionMapper = Map.of(
+            BodyProcessorException.class, this::handleBodyProcessorException
+    );
+
+    @SneakyThrows
     @Override
     public void handle(RoutingContext event) {
 
         log.error("Error: {}", event.failure().getMessage(), event.failure());
 
-        var error = extractError(event.failure());
+        var error = exceptionMapper.getOrDefault(event.failure().getClass(), this::handleException)
+                                   .apply(event.failure(), event.request());
+        // TODO: Standardise error responses based on exception
 
         event.response()
-                .setStatusCode(error.getStatusCode())
-                .putHeader(CONTENT_TYPE, APPLICATION_JSON)
-                .end(error.encode());
+             .setStatusCode(error.getCode())
+             .putHeader(CONTENT_TYPE, APPLICATION_JSON)
+             .end(mapper.writeValueAsString(error));
     }
 
-    private ErrorResponse extractError(Throwable throwable) {
-        if (throwable instanceof NullPointerException) {
-            return ErrorResponse.of("Internal Server Error: NullPointerException", _500.getCode());
-        } else {
-            return ErrorResponse.of(throwable.getMessage(), _400.getCode());
-        }
+    ErrorResponse handleBodyProcessorException(Throwable throwable, HttpServerRequest request) {
+        return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
+
     }
 
+    ErrorResponse handleException(Throwable throwable, HttpServerRequest request) {
+        return errorFactory.createErrorResponse(_500.getCode(), request.uri(), _500.getLabel());
+    }
 }

@@ -13,6 +13,7 @@ import lombok.extern.log4j.Log4j2;
 public class Application {
 
     public static void main(String[] args) {
+        // TODO: Write component tests
         var vertx = Vertx.vertx();
         ConfigRetriever.create(vertx, configRetrieverOptions())
                 .getConfig()

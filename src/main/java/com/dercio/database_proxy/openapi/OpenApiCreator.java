@@ -40,7 +40,8 @@ public class OpenApiCreator {
     private static Schema createSchemaFromColumns(List<TableColumn> columns) {
         Map<String, Schema> properties = columns.stream()
                 .map(column -> Map.entry(column.getColumnName(), new ObjectSchema()
-                        .type(column.getDataType())))
+                        .type(column.getDataType())
+                        .nullable(column.isNullable())))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         var requiredProperties = columns
@@ -255,6 +256,8 @@ public class OpenApiCreator {
 
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setDescription("A new " + table.getTableName() + " has been created.");
+
+        // TODO: Add bad request response
 
 
         ApiResponses apiResponses = new ApiResponses();
