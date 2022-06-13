@@ -14,8 +14,6 @@ import org.reflections.Reflections;
 
 import java.util.Set;
 
-import static org.reflections.scanners.Scanners.TypesAnnotated;
-
 @Log4j2
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
 public class VerticleDeployer implements AnnotationProcessor<Injector> {
@@ -36,7 +34,8 @@ public class VerticleDeployer implements AnnotationProcessor<Injector> {
             }
         };
 
-        new Reflections(basePackage()).get(TypesAnnotated.with(Verticle.class).asClass())
+        new Reflections(basePackage())
+                .getTypesAnnotatedWith(Verticle.class)
                 .stream()
                 .map(injector::getInstance)
                 .filter(AbstractVerticle.class::isInstance)

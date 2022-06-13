@@ -9,11 +9,8 @@ import com.dercio.database_proxy.common.handlers.NotFoundHandler;
 import com.dercio.database_proxy.openapi.OpenApiCreator;
 import com.google.inject.Inject;
 import io.swagger.v3.core.util.Yaml;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.CompositeFuture;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
+import io.vertx.core.*;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -22,8 +19,6 @@ import io.vertx.ext.web.openapi.RouterBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,14 +71,11 @@ public class RestApiVerticle extends AbstractVerticle {
 
     private Future<List<Table>> createOpenApiFile(List<Table> tables) {
         var openAPI = OpenApiCreator.create(tables);
-        try (FileOutputStream fileOutputStream = new FileOutputStream(apiConfig.getOpenApiFilePath())) {
-            fileOutputStream.write(Yaml.pretty(openAPI).getBytes());
-            fileOutputStream.flush();
-            log.info("OpenApi File created");
-            return Future.succeededFuture(tables);
-        } catch (IOException ioException) {
-            return Future.failedFuture(ioException);
-        }
+        return vertx.fileSystem()
+                .writeFile(apiConfig.getOpenApiFilePath(), Buffer.buffer(Yaml.pretty(openAPI)))
+                .map(tables)
+                .onSuccess(unused -> log.info("OpenApi File created"))
+                .onFailure(error -> log.error("Failed to create OpenApi File: {}", error.getMessage()));
     }
 
     private Future<List<Table>> retrieveTableInfo() {

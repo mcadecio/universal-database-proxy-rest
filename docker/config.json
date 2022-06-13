@@ -1,0 +1,68 @@
+{
+  "proxy": {
+    "enabled": true,
+    "name": "postgres-proxy",
+    "httpServer": {
+      "host": "0.0.0.0",
+      "port": 1234
+    },
+    "source": {
+      "host": "0.0.0.0",
+      "port": 5433,
+      "type": "SOCKS5"
+    },
+    "destination": {
+      "host": "postgres",
+      "port": 5432,
+      "type": "SOCKS5"
+    }
+  },
+  "postgresApi": {
+    "enabled": true,
+    "host": "0.0.0.0",
+    "port": 8000,
+    "openApiFilePath": "./pgOpenApi.yaml",
+    "database": {
+      "host": "postgres",
+      "port": 5432,
+      "username": "postgres",
+      "password": "POSTGRES_PASSWORD",
+      "tables": [
+        {
+          "database": "database-proxy",
+          "schema": "money",
+          "table": "budgets"
+        },
+        {
+          "database": "database-proxy",
+          "schema": "football",
+          "table": "national_football_teams"
+        }
+      ]
+    }
+  },
+  "cockroachApi": {
+    "enabled": true,
+    "host": "0.0.0.0",
+    "port": 8010,
+    "openApiFilePath": "./crbOpenApi.yaml",
+    "database": {
+      "host": "crdb",
+      "port": 26257,
+      "username": "root",
+      "password": "CRB_PASSWORD",
+      "tables": [
+        {
+          "database": "defaultdb",
+          "schema": "vehicles",
+          "table": "cars"
+        },
+        {
+          "database": "defaultdb",
+          "schema": "vehicles",
+          "table": "wheel"
+        }
+      ]
+    }
+  }
+}

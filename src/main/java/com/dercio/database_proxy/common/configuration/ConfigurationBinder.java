@@ -11,8 +11,6 @@ import org.reflections.Reflections;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static org.reflections.scanners.Scanners.TypesAnnotated;
-
 @Log4j2
 @RequiredArgsConstructor
 public class ConfigurationBinder implements AnnotationProcessor<JsonObject> {
@@ -22,7 +20,7 @@ public class ConfigurationBinder implements AnnotationProcessor<JsonObject> {
     @Override
     public void process(JsonObject config) {
         new Reflections(basePackage())
-                .get(TypesAnnotated.with(Configuration.class).asClass())
+                .getTypesAnnotatedWith(Configuration.class)
                 .forEach(aClass -> {
                     var configName = aClass.getAnnotation(Configuration.class).name();
                     Optional.ofNullable(config.getJsonObject(configName))

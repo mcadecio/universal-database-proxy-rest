@@ -7,14 +7,12 @@ import org.reflections.Reflections;
 
 import java.util.function.Consumer;
 
-import static org.reflections.scanners.Scanners.TypesAnnotated;
-
 public class ModuleInstaller implements AnnotationProcessor<Consumer<AbstractModule>> {
 
     @Override
     public void process(Consumer<AbstractModule> install) {
         new Reflections(basePackage())
-                .get(TypesAnnotated.with(Module.class).asClass())
+                .getTypesAnnotatedWith(Module.class)
                 .stream()
                 .map(this::createInstance)
                 .filter(AbstractModule.class::isInstance)
