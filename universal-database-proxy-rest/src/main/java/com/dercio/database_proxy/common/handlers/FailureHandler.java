@@ -8,7 +8,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.BodyProcessorException;
-import io.vertx.pgclient.PgException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -29,8 +28,7 @@ public class FailureHandler implements Handler<RoutingContext> {
     private final ErrorFactory errorFactory;
     private final Map<Class<? extends Throwable>, BiFunction<Throwable, HttpServerRequest, ErrorResponse>>
             exceptionMapper = Map.of(
-            BodyProcessorException.class, this::handleBodyProcessorException,
-            PgException.class, this::handlePgException
+            BodyProcessorException.class, this::handleBodyProcessorException
     );
 
     @SneakyThrows
@@ -40,22 +38,18 @@ public class FailureHandler implements Handler<RoutingContext> {
         log.error("Error: {}", event.failure().getMessage(), event.failure());
 
         var error = exceptionMapper.getOrDefault(event.failure().getClass(), this::handleException)
-                .apply(event.failure(), event.request());
+                                   .apply(event.failure(), event.request());
         // TODO: Standardise error responses based on exception
 
         event.response()
-                .setStatusCode(error.getCode())
-                .putHeader(CONTENT_TYPE, APPLICATION_JSON)
-                .end(mapper.encode(error));
+             .setStatusCode(error.getCode())
+             .putHeader(CONTENT_TYPE, APPLICATION_JSON)
+             .end(mapper.encode(error));
     }
 
     ErrorResponse handleBodyProcessorException(Throwable throwable, HttpServerRequest request) {
         return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
 
-    }
-
-    ErrorResponse handlePgException(Throwable throwable, HttpServerRequest request) {
-        return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
     }
 
     ErrorResponse handleException(Throwable throwable, HttpServerRequest request) {
