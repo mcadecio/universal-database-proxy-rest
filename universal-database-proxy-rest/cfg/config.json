@@ -26,7 +26,7 @@
       "host": "localhost",
       "port": 5432,
       "username": "postgres",
-      "password": "PG_PASSWORD",
+      "password": "admin",
       "tables": [
         {
           "database": "database-proxy",
@@ -50,7 +50,7 @@
       "host": "localhost",
       "port": 26257,
       "username": "root",
-      "password": "CRB_PASSWORD",
+      "password": "",
       "tables": [
         {
           "database": "defaultdb",

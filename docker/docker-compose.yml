@@ -20,15 +20,15 @@ services:
       - "5432:5432"
     volumes:
       - ./init-postgres.sql:/docker-entrypoint-initdb.d/init.sql
-#  database-proxy:
-#    environment:
-#      POSTGRES_PASSWORD: admin
-#      CRB_PASSWORD:
-#    image: mcadecio/universal-database-proxy-rest:0.0.0
-#    ports:
-#      - "1234:1234"
-#      - "5433:5433"
-#      - "8000:8000"
-#      - "8010:8010"
-#    volumes:
-#      - ./config.json:/usr/database-proxy/config.json
+  database-proxy:
+    environment:
+      POSTGRES_PASSWORD: admin
+      CRB_PASSWORD:
+    image: mcadecio/universal-database-proxy-rest:0.0.1
+    ports:
+      - "1234:1234"
+      - "5433:5433"
+      - "8000:8000"
+      - "8010:8010"
+    volumes:
+      - ./config.json:/usr/database-proxy/config.json

@@ -257,7 +257,7 @@ public class PgRepository implements Repository {
 
     private String generateColumnsToUpdate(List<TableColumn> columns) {
         return IntStream.range(0, columns.size())
-                .mapToObj(i -> String.format("%s = $%d",
+                .mapToObj(i -> format("%s = $%d",
                         columns.get(i).getColumnName(),
                         i + 2))
                 .collect(Collectors.joining(", "));
