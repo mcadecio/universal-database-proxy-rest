@@ -9,6 +9,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.BodyProcessorException;
 import io.vertx.ext.web.validation.ParameterProcessorException;
+import io.vertx.json.schema.ValidationException;
 import io.vertx.pgclient.PgException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -39,7 +40,7 @@ public class FailureHandler implements Handler<RoutingContext> {
     @Override
     public void handle(RoutingContext event) {
 
-        log.error("Error: {}", event.failure().getMessage(), event.failure());
+        log.error("Error: {}", event.failure().getMessage());
 
         var error = exceptionMapper.getOrDefault(event.failure().getClass(), this::handleException)
                 .apply(event.failure(), event.request());
@@ -51,6 +52,23 @@ public class FailureHandler implements Handler<RoutingContext> {
     }
 
     ErrorResponse handleBodyProcessorException(Throwable throwable, HttpServerRequest request) {
+        if (throwable.getCause() instanceof ValidationException) {
+            var validationException = (ValidationException) throwable.getCause();
+
+            if ("nullable".equals(validationException.keyword())) {
+                var property = validationException.inputScope().toString().replace("/", "");
+                var message = validationException.getMessage().replace("input", property);
+                return errorFactory.createErrorResponse(_400.getCode(), request.uri(), message);
+            } else if ("type".equals(validationException.keyword())) {
+                var property = validationException.inputScope().toString().replace("/", "");
+                String replacement = String.format("property '%s' with value \"%s\" is not a valid",
+                        property,
+                        validationException.input()
+                );
+                var message = validationException.getMessage().replace("input don't match type", replacement);
+                return errorFactory.createErrorResponse(_400.getCode(), request.uri(), message);
+            }
+        }
         return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
     }
 
@@ -63,6 +81,7 @@ public class FailureHandler implements Handler<RoutingContext> {
     }
 
     ErrorResponse handleException(Throwable throwable, HttpServerRequest request) {
+        log.error(throwable);
         return errorFactory.createErrorResponse(_500.getCode(), request.uri(), _500.getLabel());
     }
 

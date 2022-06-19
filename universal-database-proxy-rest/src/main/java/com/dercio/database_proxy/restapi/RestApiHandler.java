@@ -4,6 +4,7 @@ import com.dercio.database_proxy.common.database.Repository;
 import com.dercio.database_proxy.common.database.TableRequest;
 import com.dercio.database_proxy.common.mapper.Mapper;
 import com.google.inject.Inject;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.extern.log4j.Log4j2;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.simplaex.http.StatusCode._201;
 import static com.simplaex.http.StatusCode._204;
 import static com.simplaex.http.StatusCode._404;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
@@ -74,7 +76,17 @@ public class RestApiHandler {
         var body = event.body().asJsonObject();
 
         repository.createData(tableOption, body)
-                .onSuccess(unused -> event.response().setStatusCode(_204.getCode()).end())
+                .map(id -> {
+                    var baseUrl = event.request().absoluteURI();
+                    if (!baseUrl.endsWith("/")) {
+                        baseUrl = baseUrl + "/";
+                    }
+                    return baseUrl + id;
+                })
+                .onSuccess(uri -> event.response()
+                        .setStatusCode(_201.getCode())
+                        .putHeader(HttpHeaders.LOCATION, uri)
+                        .end())
                 .onFailure(event::fail);
     }
 

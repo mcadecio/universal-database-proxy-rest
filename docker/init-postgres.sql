@@ -11,7 +11,7 @@ CREATE TABLE money.budgets
     rent          numeric                                                           not null,
     savings       numeric                                                           not null,
     discretionary numeric                                                           not null,
-    user_id       varchar(35) default '62486028383b0e006fbd161d'::character varying not null
+    user_id       varchar(35) default '62486028383b0e006fbd161d'::character varying
 );
 
 INSERT INTO money.budgets (id, year, month, income, food, rent, savings, discretionary, user_id)

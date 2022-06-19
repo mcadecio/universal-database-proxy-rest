@@ -118,7 +118,8 @@ public class PgRepository implements Repository {
                         .findFirst());
     }
 
-    public Future<Void> createData(TableRequest tableOption, JsonObject data) {
+    @Override
+    public Future<Object> createData(TableRequest tableOption, JsonObject data) {
         var client = sqlClientMap.get(tableOption.getDatabase());
 
         log.info("Inserting data into {} | {} | {} ",
@@ -129,8 +130,11 @@ public class PgRepository implements Repository {
 
         return getTableInfo(tableOption)
                 .compose(table -> client.preparedQuery(generateInsertQuery(table))
-                        .execute(generateTupeForInsert(table, data)))
-                .mapEmpty();
+                        .execute(generateTupleForInsert(table, data)))
+                .map(rows -> StreamSupport.stream(rows.spliterator(), false)
+                        .map(row -> row.getValue(0))
+                        .findFirst()
+                        .orElseThrow());
     }
 
     public Future<Void> updateData(
@@ -153,7 +157,7 @@ public class PgRepository implements Repository {
         return getTableInfo(tableOption)
                 .compose(tableInfo -> validaUpdateRequest(tableInfo, data, pathParams))
                 .compose(table -> client.preparedQuery(generateUpdateQuery(table))
-                        .execute(generateTupeForInsert(table, data)))
+                        .execute(generateTupleForInsert(table, data)))
                 .mapEmpty();
     }
 
@@ -239,7 +243,7 @@ public class PgRepository implements Repository {
                 IntStream.rangeClosed(1, table.getColumns().size())
                         .mapToObj(i -> String.format("$%d", i))
                         .collect(Collectors.joining(",")) +
-                ")";
+                ") RETURNING " + table.getPkColumnName();
 
         var finalQuery = baseQuery + valuePlaceholders;
 
@@ -248,7 +252,7 @@ public class PgRepository implements Repository {
         return finalQuery;
     }
 
-    private Tuple generateTupeForInsert(Table table, JsonObject body) {
+    private Tuple generateTupleForInsert(Table table, JsonObject body) {
         return Tuple.from(table.getColumns()
                 .stream()
                 .map(column -> body.getValue(column.getColumnName()))

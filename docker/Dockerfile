@@ -1,6 +1,6 @@
 FROM openjdk:11-jre-slim-buster
 
-ENV VERTICLE_FILE=universal-database-proxy-rest-0.0.1-fat.jar
+ENV VERTICLE_FILE=universal-database-proxy-rest-0.0.2-fat.jar
 
 RUN echo "$VERTICLE_FILE"
 
