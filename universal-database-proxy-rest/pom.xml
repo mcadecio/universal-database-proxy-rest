@@ -18,6 +18,12 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.dercio.universal-database-proxy-rest-parent</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
+
         <!-- Vertx -->
         <dependency>
             <groupId>io.vertx</groupId>

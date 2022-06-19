@@ -8,6 +8,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.BodyProcessorException;
+import io.vertx.ext.web.validation.ParameterProcessorException;
 import io.vertx.pgclient.PgException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -30,6 +31,7 @@ public class FailureHandler implements Handler<RoutingContext> {
     private final Map<Class<? extends Throwable>, BiFunction<Throwable, HttpServerRequest, ErrorResponse>>
             exceptionMapper = Map.of(
             BodyProcessorException.class, this::handleBodyProcessorException,
+            ParameterProcessorException.class, this::handleParameterProcessorException,
             PgException.class, this::handlePgException
     );
 
@@ -41,7 +43,6 @@ public class FailureHandler implements Handler<RoutingContext> {
 
         var error = exceptionMapper.getOrDefault(event.failure().getClass(), this::handleException)
                 .apply(event.failure(), event.request());
-        // TODO: Standardise error responses based on exception
 
         event.response()
                 .setStatusCode(error.getCode())
@@ -51,7 +52,10 @@ public class FailureHandler implements Handler<RoutingContext> {
 
     ErrorResponse handleBodyProcessorException(Throwable throwable, HttpServerRequest request) {
         return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
+    }
 
+    ErrorResponse handleParameterProcessorException(Throwable throwable, HttpServerRequest request) {
+        return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
     }
 
     ErrorResponse handlePgException(Throwable throwable, HttpServerRequest request) {
@@ -61,4 +65,5 @@ public class FailureHandler implements Handler<RoutingContext> {
     ErrorResponse handleException(Throwable throwable, HttpServerRequest request) {
         return errorFactory.createErrorResponse(_500.getCode(), request.uri(), _500.getLabel());
     }
+
 }

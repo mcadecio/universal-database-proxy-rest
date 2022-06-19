@@ -11,10 +11,12 @@
     <modules>
         <module>component-tests</module>
         <module>universal-database-proxy-rest</module>
+        <module>common</module>
     </modules>
     <name>Universal Database Proxy Rest Parent</name>
 
     <properties>
+        <cucumber-junit.version>7.3.4</cucumber-junit.version>
         <http-status-codes.version>1.1.0</http-status-codes.version>
         <log4j.version>2.17.2</log4j.version>
         <lombok.version>1.18.20</lombok.version>
@@ -31,9 +33,13 @@
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
         <maven-shade-plugin.version>3.3.0</maven-shade-plugin.version>
         <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
+        <mybatis.version>3.5.10</mybatis.version>
+        <mybatis-guice.version>3.17</mybatis-guice.version>
         <netty.version>4.1.74.Final</netty.version>
         <ongres.scram.version>2.1</ongres.scram.version>
+        <postgresql.version>42.4.0</postgresql.version>
         <reflections.version>0.10.2</reflections.version>
+        <rest-assured.version>5.1.1</rest-assured.version>
         <vertx.version>4.3.1</vertx.version>
         <swagger.version>2.2.0</swagger.version>
     </properties>
@@ -84,10 +90,23 @@
                 <version>${netty.version}</version>
             </dependency>
 
+            <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.ongres.scram</groupId>
                 <artifactId>common</artifactId>
                 <version>${ongres.scram.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.dercio.universal-database-proxy-rest-parent</groupId>
+                <artifactId>common</artifactId>
+                <version>${version}</version>
             </dependency>
 
             <dependency>
@@ -101,6 +120,12 @@
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
                 <version>${guice.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis-guice</artifactId>
+                <version>${mybatis-guice.version}</version>
             </dependency>
 
             <!-- https://mvnrepository.com/artifact/org.reflections/reflections -->
@@ -117,6 +142,7 @@
                 <version>${http-status-codes.version}</version>
             </dependency>
 
+            <!--  JACKSON MAPPER  -->
             <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -172,6 +198,40 @@
                 <scope>test</scope>
             </dependency>
 
+            <dependency>
+                <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-junit</artifactId>
+                <version>${cucumber-junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-java</artifactId>
+                <version>${cucumber-junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-guice</artifactId>
+                <version>${cucumber-junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>${rest-assured.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
