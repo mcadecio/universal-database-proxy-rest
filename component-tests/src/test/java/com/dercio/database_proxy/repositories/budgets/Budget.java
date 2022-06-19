@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 public class Budget {
     private Long id;
     private Integer year;
-    private Integer month;
+    private Object month;
     private BigDecimal income;
     private BigDecimal food;
     private BigDecimal rent;

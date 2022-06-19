@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -21,6 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.simplaex.http.StatusCode._200;
+import static com.simplaex.http.StatusCode._201;
 import static com.simplaex.http.StatusCode._204;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 
@@ -259,12 +261,16 @@ public class OpenApiCreator {
 
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setDescription("A new " + table.getTableName() + " has been created.");
+        Header locationHeader = new Header()
+                .description("The URI of the resource created.")
+                .schema(new StringSchema());
+        apiResponse.addHeaderObject("Location", locationHeader);
 
         // TODO: Add bad request response
 
 
         ApiResponses apiResponses = new ApiResponses();
-        apiResponses.addApiResponse(String.valueOf(_204.getCode()), apiResponse);
+        apiResponses.addApiResponse(String.valueOf(_201.getCode()), apiResponse);
 
         postOperation.setRequestBody(requestBody);
         postOperation.setResponses(apiResponses);

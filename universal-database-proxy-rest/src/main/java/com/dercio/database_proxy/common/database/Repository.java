@@ -17,7 +17,7 @@ public interface Repository {
             Map<String, String> pathParams
     );
 
-    Future<Void> createData(TableRequest tableOption, JsonObject data);
+    Future<Object> createData(TableRequest tableOption, JsonObject data);
 
     Future<Void> updateData(
             TableRequest tableOption,
