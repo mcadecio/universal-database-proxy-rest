@@ -1,35 +1,39 @@
 package com.dercio.database_proxy.steps.budgets;
 
 import com.dercio.database_proxy.common.DatabaseProxyService;
-import com.dercio.database_proxy.common.mapper.Mapper;
+import com.dercio.database_proxy.common.ScenarioContext;
 import com.dercio.database_proxy.repositories.budgets.Budget;
 import com.dercio.database_proxy.repositories.budgets.BudgetsRepository;
 import com.google.inject.Inject;
 import io.cucumber.guice.ScenarioScoped;
-import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.response.Response;
-import lombok.RequiredArgsConstructor;
-import org.mybatis.guice.transactional.Transactional;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-import static org.hamcrest.Matchers.*;
+import static com.dercio.database_proxy.steps.budgets.BudgetsFactory.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ScenarioScoped
-@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CreateBudgetsSteps {
 
-    private final List<Budget> budgets = new ArrayList<>();
+    private final List<Budget> budgets;
     private final BudgetsRepository budgetsRepository;
     private final DatabaseProxyService databaseProxyService;
     private Response response;
+
+    @Inject
+    public CreateBudgetsSteps(ScenarioContext scenarioContext,
+                              BudgetsRepository budgetsRepository,
+                              DatabaseProxyService databaseProxyService) {
+        this.budgetsRepository = budgetsRepository;
+        this.databaseProxyService = databaseProxyService;
+        this.budgets = scenarioContext.getBudgets();
+    }
 
     @When("I create a budget with all the fields")
     public void iCreateABudgetWithAllTheFields() {
@@ -80,68 +84,6 @@ public class CreateBudgetsSteps {
         var budget = createOptionalBudget();
         budgets.add(budget);
         response = databaseProxyService.createBudget(budget);
-    }
-
-    @Transactional
-    @After("@postgres")
-    public void afterScenario() {
-        budgets.forEach(budget -> budgetsRepository.deleteById(budget.getId()));
-    }
-
-    private Budget createJanuaryBudget() {
-        return new Budget(
-                2_000L,
-                2022,
-                1,
-                BigDecimal.valueOf(400),
-                BigDecimal.valueOf(100),
-                BigDecimal.valueOf(300),
-                BigDecimal.valueOf(0),
-                BigDecimal.valueOf(10),
-                UUID.randomUUID().toString().substring(0, 15)
-        );
-    }
-
-    private Budget createOptionalBudget() {
-        return new Budget(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                UUID.randomUUID().toString().substring(0, 15)
-        );
-    }
-
-    private Budget createRequiredBudget() {
-        return new Budget(
-                3_000L,
-                2022,
-                2,
-                BigDecimal.valueOf(600),
-                BigDecimal.valueOf(700),
-                BigDecimal.valueOf(800),
-                BigDecimal.valueOf(1),
-                BigDecimal.valueOf(0),
-                UUID.randomUUID().toString().substring(0, 15)
-        );
-    }
-
-    private Budget createBudgetWithInvalidFieldType() {
-        return new Budget(
-                3_000L,
-                2022,
-                "November",
-                BigDecimal.valueOf(600),
-                BigDecimal.valueOf(700),
-                BigDecimal.valueOf(800),
-                BigDecimal.valueOf(1),
-                BigDecimal.valueOf(0),
-                UUID.randomUUID().toString().substring(0, 15)
-        );
     }
 
     @Then("I should get a the following validation error message: {string}")

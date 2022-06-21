@@ -25,5 +25,5 @@ public interface Repository {
             Map<String, String> pathParams
     );
 
-    Future<Void> deleteData(TableRequest tableOption, Map<String, String> pathParams);
+    Future<Integer> deleteData(TableRequest tableOption, Map<String, String> pathParams);
 }

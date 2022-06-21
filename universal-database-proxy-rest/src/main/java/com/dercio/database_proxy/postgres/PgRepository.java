@@ -9,6 +9,7 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.SqlClient;
+import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -161,7 +162,8 @@ public class PgRepository implements Repository {
                 .mapEmpty();
     }
 
-    public Future<Void> deleteData(TableRequest tableOption, Map<String, String> pathParams) {
+    @Override
+    public Future<Integer> deleteData(TableRequest tableOption, Map<String, String> pathParams) {
         var client = sqlClientMap.get(tableOption.getDatabase());
 
         log.info("Deleting item from {} | {} | {} ",
@@ -173,7 +175,7 @@ public class PgRepository implements Repository {
         return getTableInfo(tableOption)
                 .compose(table -> client.preparedQuery(generateDeleteQuery(table))
                         .execute(Tuple.of(findPkValue(table, pathParams))))
-                .mapEmpty();
+                .map(SqlResult::rowCount);
     }
 
     private Future<Table> validaUpdateRequest(Table table, JsonObject data, Map<String, String> pathParams) {
@@ -217,9 +219,10 @@ public class PgRepository implements Repository {
     private String generateDeleteQuery(Table table) {
 
         var query = format(
-                "DELETE FROM %s.%s WHERE %s = $1",
+                "DELETE FROM %s.%s WHERE %s = $1 RETURNING %s",
                 table.getSchemaName(),
                 table.getTableName(),
+                table.getPkColumnName(),
                 table.getPkColumnName()
         );
 

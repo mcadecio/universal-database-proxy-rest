@@ -105,7 +105,23 @@ public class RestApiHandler {
         var pathParams = event.pathParams();
 
         repository.deleteData(tableOption, pathParams)
-                .onSuccess(data -> event.response().setStatusCode(_204.getCode()).end())
+                .onSuccess(data -> {
+                    var response = event.response();
+                    if (data > 0) {
+                        event.response().setStatusCode(_204.getCode()).end();
+                    } else {
+                        var error = com.dercio.database_proxy.common.error.ErrorResponse.builder()
+                                .path(event.normalizedPath())
+                                .code(_404.getCode())
+                                .message(_404.getLabel())
+                                .build();
+
+                        response.setStatusCode(error.getCode())
+                                .setChunked(true)
+                                .putHeader(CONTENT_TYPE, APPLICATION_JSON)
+                                .end(mapper.encode(error));
+                    }
+                })
                 .onFailure(event::fail);
     }
 

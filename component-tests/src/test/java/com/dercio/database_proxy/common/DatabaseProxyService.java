@@ -56,4 +56,13 @@ public class DatabaseProxyService {
                 .post(BUDGETS)
                 .prettyPeek();
     }
+
+    public Response deleteBudget(Long id) {
+        return given()
+                .baseUri(BASE_URI)
+                .log()
+                .all(true)
+                .delete(BUDGETS + id)
+                .prettyPeek();
+    }
 }
