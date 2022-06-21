@@ -65,4 +65,15 @@ public class DatabaseProxyService {
                 .delete(BUDGETS + id)
                 .prettyPeek();
     }
+
+    public Response updateBudget(Long originalId, Budget budget) {
+        return given()
+                .baseUri(BASE_URI)
+                .contentType(ContentType.JSON)
+                .body(mapper.encode(budget))
+                .log()
+                .all(true)
+                .put(BUDGETS + originalId)
+                .prettyPeek();
+    }
 }

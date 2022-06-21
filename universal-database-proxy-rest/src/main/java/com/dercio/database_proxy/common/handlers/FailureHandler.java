@@ -3,6 +3,7 @@ package com.dercio.database_proxy.common.handlers;
 import com.dercio.database_proxy.common.error.ErrorFactory;
 import com.dercio.database_proxy.common.error.ErrorResponse;
 import com.dercio.database_proxy.common.mapper.Mapper;
+import com.dercio.database_proxy.postgres.InconsistentStateException;
 import com.google.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
@@ -33,7 +34,8 @@ public class FailureHandler implements Handler<RoutingContext> {
             exceptionMapper = Map.of(
             BodyProcessorException.class, this::handleBodyProcessorException,
             ParameterProcessorException.class, this::handleParameterProcessorException,
-            PgException.class, this::handlePgException
+            PgException.class, this::handlePgException,
+            InconsistentStateException.class, this::handleInconsistentStateException
     );
 
     @SneakyThrows
@@ -49,6 +51,11 @@ public class FailureHandler implements Handler<RoutingContext> {
                 .setStatusCode(error.getCode())
                 .putHeader(CONTENT_TYPE, APPLICATION_JSON)
                 .end(mapper.encode(error));
+    }
+
+    private ErrorResponse handleInconsistentStateException(Throwable throwable,
+                                                           HttpServerRequest httpServerRequest) {
+        return errorFactory.createErrorResponse(400, httpServerRequest.uri(), throwable.getMessage());
     }
 
     ErrorResponse handleBodyProcessorException(Throwable throwable, HttpServerRequest request) {

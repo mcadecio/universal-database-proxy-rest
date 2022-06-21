@@ -52,7 +52,7 @@ public class PgRepository implements Repository {
     private final Map<String, Table> tableInfoCache = new ConcurrentHashMap<>();
     private final Map<String, SqlClient> sqlClientMap;
 
-
+    @Override
     public Future<Table> getTableInfo(TableRequest tableOption) {
         var database = tableOption.getDatabase();
         var schema = tableOption.getSchema();
@@ -82,6 +82,7 @@ public class PgRepository implements Repository {
                 .onSuccess(tableInfo -> tableInfoCache.put(tableInfo.getTableName(), tableInfo));
     }
 
+    @Override
     public Future<List<JsonObject>> getData(TableRequest tableOption) {
         log.info("Retrieving rows for {} | {} | {} ",
                 tableOption.getDatabase(),
@@ -101,6 +102,7 @@ public class PgRepository implements Repository {
                 .onSuccess(items -> log.info("Retrieved [{}] rows", items.size()));
     }
 
+    @Override
     public Future<Optional<JsonObject>> getDataById(TableRequest tableOption, Map<String, String> pathParams) {
         log.info("Retrieving row for {} | {} | {}",
                 tableOption.getDatabase(),
@@ -138,7 +140,8 @@ public class PgRepository implements Repository {
                         .orElseThrow());
     }
 
-    public Future<Void> updateData(
+    @Override
+    public Future<Integer> updateData(
             TableRequest tableOption,
             JsonObject data,
             Map<String, String> pathParams) {
@@ -159,7 +162,8 @@ public class PgRepository implements Repository {
                 .compose(tableInfo -> validaUpdateRequest(tableInfo, data, pathParams))
                 .compose(table -> client.preparedQuery(generateUpdateQuery(table))
                         .execute(generateTupleForInsert(table, data)))
-                .mapEmpty();
+                .map(SqlResult::rowCount)
+                .onSuccess(count -> log.info("Rows updated [{}]", count));
     }
 
     @Override
@@ -175,7 +179,8 @@ public class PgRepository implements Repository {
         return getTableInfo(tableOption)
                 .compose(table -> client.preparedQuery(generateDeleteQuery(table))
                         .execute(Tuple.of(findPkValue(table, pathParams))))
-                .map(SqlResult::rowCount);
+                .map(SqlResult::rowCount)
+                .onSuccess(count -> log.info("Rows deleted [{}]", count));
     }
 
     private Future<Table> validaUpdateRequest(Table table, JsonObject data, Map<String, String> pathParams) {
@@ -186,7 +191,7 @@ public class PgRepository implements Repository {
             return Future.succeededFuture(table);
         }
 
-        return Future.failedFuture(new IllegalStateException("Inconsistent Ids"));
+        return Future.failedFuture(new InconsistentStateException());
     }
 
     private Object findPkValue(Table table, Map<String, String> pathParams) {
@@ -279,10 +284,11 @@ public class PgRepository implements Repository {
         );
 
         var query = format(
-                "UPDATE %s.%s SET %s WHERE %s = $1", // TODO: Find a way to keep the order of the columns always the same
+                "UPDATE %s.%s SET %s WHERE %s = $1 RETURNING %s", // TODO: Find a way to keep the order of the columns always the same
                 table.getSchemaName(),
                 table.getTableName(),
                 values,
+                table.getPkColumnName(),
                 table.getPkColumnName()
         );
 

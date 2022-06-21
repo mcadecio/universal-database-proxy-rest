@@ -2,6 +2,7 @@ package com.dercio.database_proxy.restapi;
 
 import com.dercio.database_proxy.common.database.Repository;
 import com.dercio.database_proxy.common.database.TableRequest;
+import com.dercio.database_proxy.common.error.ErrorResponse;
 import com.dercio.database_proxy.common.mapper.Mapper;
 import com.google.inject.Inject;
 import io.vertx.core.http.HttpHeaders;
@@ -96,7 +97,18 @@ public class RestApiHandler {
         var data = event.body().asJsonObject();
 
         repository.updateData(tableOption, data, pathParams)
-                .onSuccess(unused -> event.response().setStatusCode(_204.getCode()).end())
+                .onSuccess(rowsUpdated -> {
+                    var response = event.response();
+                    if (rowsUpdated > 0) {
+                        event.response().setStatusCode(_204.getCode()).end();
+                    } else {
+                        var error = createNotFoundResponse(event.normalizedPath());
+                        response.setStatusCode(error.getCode())
+                                .setChunked(true)
+                                .putHeader(CONTENT_TYPE, APPLICATION_JSON)
+                                .end(mapper.encode(error));
+                    }
+                })
                 .onFailure(event::fail);
     }
 
@@ -105,16 +117,12 @@ public class RestApiHandler {
         var pathParams = event.pathParams();
 
         repository.deleteData(tableOption, pathParams)
-                .onSuccess(data -> {
+                .onSuccess(rowsDeleted -> {
                     var response = event.response();
-                    if (data > 0) {
+                    if (rowsDeleted > 0) {
                         event.response().setStatusCode(_204.getCode()).end();
                     } else {
-                        var error = com.dercio.database_proxy.common.error.ErrorResponse.builder()
-                                .path(event.normalizedPath())
-                                .code(_404.getCode())
-                                .message(_404.getLabel())
-                                .build();
+                        var error = createNotFoundResponse(event.normalizedPath());
 
                         response.setStatusCode(error.getCode())
                                 .setChunked(true)
@@ -131,5 +139,13 @@ public class RestApiHandler {
                 rc.get(SCHEMA),
                 rc.get(TABLE)
         );
+    }
+
+    private ErrorResponse createNotFoundResponse(String path) {
+        return ErrorResponse.builder()
+                .path(path)
+                .code(_404.getCode())
+                .message(_404.getLabel())
+                .build();
     }
 }

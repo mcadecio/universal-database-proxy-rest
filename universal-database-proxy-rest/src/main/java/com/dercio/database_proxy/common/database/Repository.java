@@ -19,7 +19,7 @@ public interface Repository {
 
     Future<Object> createData(TableRequest tableOption, JsonObject data);
 
-    Future<Void> updateData(
+    Future<Integer> updateData(
             TableRequest tableOption,
             JsonObject data,
             Map<String, String> pathParams
