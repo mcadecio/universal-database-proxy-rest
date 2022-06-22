@@ -1,7 +1,6 @@
-package com.dercio.database_proxy.steps.budgets;
+package com.dercio.database_proxy.budgets;
 
-import com.dercio.database_proxy.common.DatabaseProxyService;
-import com.dercio.database_proxy.common.ScenarioContext;
+import com.dercio.database_proxy.repositories.budgets.BudgetsService;
 import com.dercio.database_proxy.repositories.budgets.Budget;
 import com.dercio.database_proxy.repositories.budgets.BudgetsRepository;
 import com.google.inject.Inject;
@@ -14,7 +13,7 @@ import org.mybatis.guice.transactional.Transactional;
 
 import java.util.List;
 
-import static com.dercio.database_proxy.steps.budgets.BudgetsFactory.createJanuaryBudget;
+import static com.dercio.database_proxy.budgets.BudgetsFactory.createJanuaryBudget;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,16 +22,16 @@ public class UpdateBudgetsSteps {
 
     private final List<Budget> budgets;
     private final BudgetsRepository budgetsRepository;
-    private final DatabaseProxyService databaseProxyService;
+    private final BudgetsService budgetsService;
     private Response response;
 
     @Inject
-    public UpdateBudgetsSteps(ScenarioContext scenarioContext,
+    public UpdateBudgetsSteps(BudgetsContext budgetsContext,
                               BudgetsRepository budgetsRepository,
-                              DatabaseProxyService databaseProxyService) {
+                              BudgetsService budgetsService) {
         this.budgetsRepository = budgetsRepository;
-        this.databaseProxyService = databaseProxyService;
-        this.budgets = scenarioContext.getBudgets();
+        this.budgetsService = budgetsService;
+        this.budgets = budgetsContext.getBudgets();
     }
 
     @Given("a budget exists")
@@ -51,7 +50,7 @@ public class UpdateBudgetsSteps {
         var budget = budgets.get(0);
         var originalId = budget.getId();
         budget.setId(999L);
-        response = databaseProxyService.updateBudget(originalId, budget);
+        response = budgetsService.updateBudget(originalId, budget);
     }
 
     @Then("I should be alerted that id cannot be updated")
@@ -70,7 +69,7 @@ public class UpdateBudgetsSteps {
 
         budget.setMonth(null);
 
-        response = databaseProxyService.updateBudget(budget.getId(), budget);
+        response = budgetsService.updateBudget(budget.getId(), budget);
     }
 
     @Then("I should be alerted that the month is a required field")
@@ -89,7 +88,7 @@ public class UpdateBudgetsSteps {
 
         budget.setUserId("something-else");
 
-        response = databaseProxyService.updateBudget(budget.getId(), budget);
+        response = budgetsService.updateBudget(budget.getId(), budget);
     }
 
     @Then("I should see the new user id in the budget")
@@ -109,7 +108,7 @@ public class UpdateBudgetsSteps {
 
         budget.setYear(1999);
 
-        response = databaseProxyService.updateBudget(budget.getId(), budget);
+        response = budgetsService.updateBudget(budget.getId(), budget);
     }
 
     @Then("I should see the new year in the budget")
@@ -127,7 +126,7 @@ public class UpdateBudgetsSteps {
     public void iUpdateABudgetThatDoesNotExist() {
         var januaryBudget = createJanuaryBudget();
 
-        response = databaseProxyService.updateBudget(januaryBudget.getId(), januaryBudget);
+        response = budgetsService.updateBudget(januaryBudget.getId(), januaryBudget);
     }
 
     @Then("I should notified the budget does not exist")

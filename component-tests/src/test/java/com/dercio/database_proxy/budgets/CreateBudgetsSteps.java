@@ -1,7 +1,6 @@
-package com.dercio.database_proxy.steps.budgets;
+package com.dercio.database_proxy.budgets;
 
-import com.dercio.database_proxy.common.DatabaseProxyService;
-import com.dercio.database_proxy.common.ScenarioContext;
+import com.dercio.database_proxy.repositories.budgets.BudgetsService;
 import com.dercio.database_proxy.repositories.budgets.Budget;
 import com.dercio.database_proxy.repositories.budgets.BudgetsRepository;
 import com.google.inject.Inject;
@@ -13,7 +12,7 @@ import io.restassured.response.Response;
 
 import java.util.List;
 
-import static com.dercio.database_proxy.steps.budgets.BudgetsFactory.*;
+import static com.dercio.database_proxy.budgets.BudgetsFactory.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,23 +22,23 @@ public class CreateBudgetsSteps {
 
     private final List<Budget> budgets;
     private final BudgetsRepository budgetsRepository;
-    private final DatabaseProxyService databaseProxyService;
+    private final BudgetsService budgetsService;
     private Response response;
 
     @Inject
-    public CreateBudgetsSteps(ScenarioContext scenarioContext,
+    public CreateBudgetsSteps(BudgetsContext budgetsContext,
                               BudgetsRepository budgetsRepository,
-                              DatabaseProxyService databaseProxyService) {
+                              BudgetsService budgetsService) {
         this.budgetsRepository = budgetsRepository;
-        this.databaseProxyService = databaseProxyService;
-        this.budgets = scenarioContext.getBudgets();
+        this.budgetsService = budgetsService;
+        this.budgets = budgetsContext.getBudgets();
     }
 
     @When("I create a budget with all the fields")
     public void iCreateABudgetWithAllTheFields() {
         var budget = createJanuaryBudget();
         budgets.add(budget);
-        response = databaseProxyService.createBudget(budget);
+        response = budgetsService.createBudget(budget);
     }
 
     @Then("I should get a link to the budget")
@@ -59,7 +58,7 @@ public class CreateBudgetsSteps {
 
     @When("I create the same budget")
     public void iCreateTheSameBudget() {
-        response = databaseProxyService.createBudget(budgets.get(0));
+        response = budgetsService.createBudget(budgets.get(0));
     }
 
     @Then("I should get an error message")
@@ -76,14 +75,14 @@ public class CreateBudgetsSteps {
     public void iCreateABudgetWithTheRequiredFieldsOnly() {
         var budget = createRequiredBudget();
         budgets.add(budget);
-        response = databaseProxyService.createBudget(budget);
+        response = budgetsService.createBudget(budget);
     }
 
     @When("I create a budget with the optional fields only")
     public void iCreateABudgetWithTheOptionalFieldsOnly() {
         var budget = createOptionalBudget();
         budgets.add(budget);
-        response = databaseProxyService.createBudget(budget);
+        response = budgetsService.createBudget(budget);
     }
 
     @Then("I should get a the following validation error message: {string}")
@@ -98,6 +97,6 @@ public class CreateBudgetsSteps {
 
     @When("I create a budget with an incorrect value for a field")
     public void iCreateABudgetWithAnIncorrectValueForAField() {
-        response = databaseProxyService.createBudget(createBudgetWithInvalidFieldType());
+        response = budgetsService.createBudget(createBudgetWithInvalidFieldType());
     }
 }

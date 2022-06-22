@@ -1,4 +1,4 @@
-package com.dercio.database_proxy.steps.budgets;
+package com.dercio.database_proxy.budgets;
 
 import com.dercio.database_proxy.repositories.budgets.Budget;
 

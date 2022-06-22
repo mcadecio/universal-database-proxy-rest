@@ -1,4 +1,4 @@
-package com.dercio.database_proxy.common;
+package com.dercio.database_proxy.glue;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;

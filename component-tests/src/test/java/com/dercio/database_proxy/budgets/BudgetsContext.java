@@ -1,4 +1,4 @@
-package com.dercio.database_proxy.common;
+package com.dercio.database_proxy.budgets;
 
 import com.dercio.database_proxy.repositories.budgets.Budget;
 import io.cucumber.guice.ScenarioScoped;
@@ -9,6 +9,6 @@ import java.util.List;
 
 @Getter
 @ScenarioScoped
-public class ScenarioContext {
+public class BudgetsContext {
     private final List<Budget> budgets = new ArrayList<>();
 }

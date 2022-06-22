@@ -1,7 +1,6 @@
-package com.dercio.database_proxy.common;
+package com.dercio.database_proxy.repositories.budgets;
 
 import com.dercio.database_proxy.common.mapper.Mapper;
-import com.dercio.database_proxy.repositories.budgets.Budget;
 import com.google.inject.Inject;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -10,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import static io.restassured.RestAssured.given;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class DatabaseProxyService {
+public class BudgetsService {
 
     private final Mapper mapper;
     private static final String BASE_URI = "http://localhost:8000";

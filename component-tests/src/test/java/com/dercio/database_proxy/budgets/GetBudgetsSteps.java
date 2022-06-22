@@ -1,7 +1,6 @@
-package com.dercio.database_proxy.steps.budgets;
+package com.dercio.database_proxy.budgets;
 
-import com.dercio.database_proxy.common.DatabaseProxyService;
-import com.dercio.database_proxy.common.ScenarioContext;
+import com.dercio.database_proxy.repositories.budgets.BudgetsService;
 import com.dercio.database_proxy.common.mapper.Mapper;
 import com.dercio.database_proxy.repositories.budgets.Budget;
 import com.dercio.database_proxy.repositories.budgets.BudgetsRepository;
@@ -17,8 +16,8 @@ import org.mybatis.guice.transactional.Transactional;
 import java.util.HashSet;
 import java.util.List;
 
-import static com.dercio.database_proxy.steps.budgets.BudgetsFactory.createFebBudget;
-import static com.dercio.database_proxy.steps.budgets.BudgetsFactory.createJanuaryBudget;
+import static com.dercio.database_proxy.budgets.BudgetsFactory.createFebBudget;
+import static com.dercio.database_proxy.budgets.BudgetsFactory.createJanuaryBudget;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,18 +28,18 @@ public class GetBudgetsSteps {
 
     private final List<Budget> budgets;
     private final BudgetsRepository budgetsRepository;
-    private final DatabaseProxyService databaseProxyService;
+    private final BudgetsService budgetsService;
     private final Mapper mapper;
     private Response response;
 
     @Inject
-    public GetBudgetsSteps(ScenarioContext scenarioContext,
+    public GetBudgetsSteps(BudgetsContext budgetsContext,
                            BudgetsRepository budgetsRepository,
-                           DatabaseProxyService databaseProxyService,
+                           BudgetsService budgetsService,
                            Mapper mapper) {
         this.budgetsRepository = budgetsRepository;
-        this.databaseProxyService = databaseProxyService;
-        this.budgets = scenarioContext.getBudgets();
+        this.budgetsService = budgetsService;
+        this.budgets = budgetsContext.getBudgets();
         this.mapper = mapper;
     }
 
@@ -59,7 +58,7 @@ public class GetBudgetsSteps {
 
     @When("I retrieve all the budgets")
     public void iRetrieveAllTheBudgets() {
-        response = databaseProxyService.getBudgets();
+        response = budgetsService.getBudgets();
     }
 
     @Then("I should see all the budgets")
@@ -75,7 +74,7 @@ public class GetBudgetsSteps {
 
     @When("I retrieve a budget with id {int}")
     public void iRetrieveABudgetWithId(int id) {
-        response = databaseProxyService.getBudgetById(id);
+        response = budgetsService.getBudgetById(id);
     }
 
     @Then("I should see the budget")
@@ -98,7 +97,7 @@ public class GetBudgetsSteps {
 
     @When("I retrieve a budget with an invalid id")
     public void iRetrieveABudgetWithAnInvalidId() {
-        response = databaseProxyService.getBudgetById("INVALID");
+        response = budgetsService.getBudgetById("INVALID");
     }
 
     @Then("I should get a validation error message")
