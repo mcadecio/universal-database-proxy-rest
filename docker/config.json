@@ -1,20 +1,18 @@
 {
+  "$schema": "config.schema.json",
   "proxy": {
     "enabled": true,
-    "name": "postgres-proxy",
     "httpServer": {
       "host": "0.0.0.0",
       "port": 1234
     },
     "source": {
       "host": "0.0.0.0",
-      "port": 5433,
-      "type": "SOCKS5"
+      "port": 5433
     },
     "destination": {
       "host": "postgres",
-      "port": 5432,
-      "type": "SOCKS5"
+      "port": 5432
     }
   },
   "postgresApi": {

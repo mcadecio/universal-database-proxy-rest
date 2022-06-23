@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://universal-database-proxy/config.schema.json",
+  "title": "The Main Configuration Schema",
+  "description": "This schema holds information about the fields present in the config.json file",
+  "type": "object",
+  "properties": {
+    "proxy": {
+      "type": "object",
+      "description": "The proxy is a feature that allows proxying a connection between any two servers over TCP",
+      "required": [
+        "httpServer",
+        "source",
+        "destination"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Use this to enable or disable this feature"
+        },
+        "httpServer": {
+          "type": "object",
+          "description": "The proxy has a HTTP interface that can be used to OPEN or CLOSE the underlying TCP server used to proxy the connection.",
+          "required": [
+            "host",
+            "port"
+          ],
+          "properties": {
+            "host": {
+              "type": "string",
+              "description": "The host the HTTP server should listen on",
+              "examples": [
+                "localhost",
+                "0.0.0.0"
+              ]
+            },
+            "port": {
+              "type": "integer",
+              "description": "The port the HTTP server should listen on",
+              "examples": [
+                8080
+              ]
+            }
+          }
+        },
+        "source": {
+          "type": "object",
+          "description": "The address the TCP server should be listening for connections",
+          "required": [
+            "host",
+            "port"
+          ],
+          "properties": {
+            "host": {
+              "type": "string",
+              "description": "The host the TCP server should listen on",
+              "examples": [
+                "localhost",
+                "0.0.0.0"
+              ]
+            },
+            "port": {
+              "type": "integer",
+              "description": "The port the TCP server should listen on",
+              "examples": [
+                8080
+              ]
+            }
+          }
+        },
+        "destination": {
+          "type": "object",
+          "description": "The address the TCP server should be connecting to.",
+          "required": [
+            "host",
+            "port"
+          ],
+          "properties": {
+            "host": {
+              "type": "string",
+              "description": "The host the TCP server should connect to.",
+              "examples": [
+                "localhost",
+                "0.0.0.0"
+              ]
+            },
+            "port": {
+              "type": "integer",
+              "description": "The port the TCP server should connect to.",
+              "examples": [
+                8080
+              ]
+            }
+          }
+        }
+      }
+    },
+    "postgresApi": {
+      "type": "object",
+      "$ref": "apiConfig.schema.json"
+    },
+    "cockroachApi": {
+      "type": "object",
+      "$ref": "apiConfig.schema.json"
+    }
+  },
+  "required": [
+    "proxy",
+    "postgresApi",
+    "cockroachApi"
+  ]
+}

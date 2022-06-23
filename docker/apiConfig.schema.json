@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "id": "api-config",
+  "type": "object",
+  "description": "This configuration describe the configuration for an auto generated API.",
+  "required": [
+      "enabled",
+      "host",
+      "port",
+      "openApiFilePath",
+      "database"
+  ],
+  "properties": {
+    "enabled": {
+      "type": "boolean",
+      "description": "Use this to enable or disable this feature"
+    },
+    "host": {
+      "type": "string",
+      "description": "The host the HTTP server should listen on.",
+      "examples": [
+        "localhost",
+        "0.0.0.0"
+      ]
+    },
+    "port": {
+      "type": "integer",
+      "description": "The port the TCP server should listen on.",
+      "examples": [
+        8080
+      ]
+    },
+    "openApiFilePath": {
+      "type": "string",
+      "description": "The location the OpenApi Generated should be stored.",
+      "examples": [
+        "./cfg/api.yaml",
+        "./api.yaml"
+      ]
+    },
+    "database": {
+      "type": "object",
+      "required": [
+        "host",
+        "port",
+        "username",
+        "password",
+        "tables"
+      ],
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "The host name of the database",
+          "examples": [
+            "localhost",
+            "0.0.0.0",
+            "postgres"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "description": "The port where the databse is listening for connection.",
+          "examples": [
+            8080,
+            26257,
+            5432
+          ]
+        },
+        "username": {
+          "type": "string",
+          "description": "The database username"
+        },
+        "password": {
+          "type": "string",
+          "description": "The password of the database user. The password can be put in plain text or as ENVIRONMENT VARIABLE that can be picked up at runtime.",
+          "examples": [
+            "thisisthepassword",
+            "POSTGRES_PASSWORD"
+          ]
+        },
+        "tables": {
+          "type": "array",
+          "description": "The table names to be inspected to generate an OpenAPI",
+          "required": [
+            "database",
+            "schema",
+            "table"
+          ],
+          "properties": {
+            "database": {
+              "type": "string",
+              "description": "The database name"
+            },
+            "schema": {
+              "type": "string",
+              "description": "The schema name"
+            },
+            "table": {
+              "type": "string",
+              "description": "The table name"
+            }
+          }
+        }
+      }
+    }
+  }
+}

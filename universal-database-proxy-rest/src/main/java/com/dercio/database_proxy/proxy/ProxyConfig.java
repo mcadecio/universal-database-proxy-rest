@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProxyConfig {
     private boolean enabled;
-    private String name;
     private ProxyOptions httpServer;
     private ProxyOptions source;
     private ProxyOptions destination;
