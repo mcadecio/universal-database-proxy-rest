@@ -8,4 +8,14 @@
         FROM football.national_football_teams
         WHERE name = #{name}
     </select>
+    <insert id="save"
+            parameterType="com.dercio.database_proxy.repositories.football.NationalFootballTeam">
+        INSERT INTO football.national_football_teams (name, abbreviated_name)
+        VALUES (#{name}, #{abbreviatedName})
+    </insert>
+    <delete id="deleteByName" parameterType="string">
+        DELETE
+        FROM football.national_football_teams
+        WHERE name = #{name}
+    </delete>
 </mapper>
