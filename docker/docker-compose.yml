@@ -10,6 +10,11 @@ services:
     command: start-single-node --insecure
     volumes:
       - ./init-cockroach.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: cockroach sql --insecure
+      interval: 1s
+      timeout: 3s
+      retries: 5
   postgres:
     environment:
       POSTGRES_USER: postgres
@@ -20,11 +25,21 @@ services:
       - "5432:5432"
     volumes:
       - ./init-postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: psql -U postgres
+      interval: 1s
+      timeout: 3s
+      retries: 5
 #  database-proxy:
 #    environment:
 #      POSTGRES_PASSWORD: admin
 #      CRB_PASSWORD:
-#    image: mcadecio/universal-database-proxy-rest:0.0.3
+#    image: mcadecio/universal-database-proxy-rest:0.0.3-SNAPSHOT
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#      crdb:
+#        condition: service_healthy
 #    ports:
 #      - "1234:1234"
 #      - "5433:5433"

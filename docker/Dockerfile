@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim-buster
+FROM openjdk:11.0.15-jre-slim-bullseye
 
 ENV VERTICLE_FILE=universal-database-proxy-rest-0.0.3-fat.jar
 
