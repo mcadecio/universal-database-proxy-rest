@@ -69,7 +69,7 @@ public class GetBudgetsSteps {
                 new TypeReference<List<Budget>>() {
                 }
         );
-        assertTrue(new HashSet<>(budgetsResponse).containsAll(budgets));
+        assertTrue(budgetsResponse.containsAll(budgets));
     }
 
     @When("I retrieve a budget with id {int}")

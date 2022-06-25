@@ -11,7 +11,7 @@ Feature: Create National Football Team
     Then I should get a link to the national football team
 
   @postgres
-  Scenario: A user tries to create a national football team with the id of an existing national football team
+  Scenario: A user tries to create a national football team with the name of an existing national football team
     Given the national football team I am trying to create already exists
     When I create the same national football team
     Then I should be alerted that a national football with the same name already exists

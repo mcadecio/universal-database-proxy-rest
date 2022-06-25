@@ -154,11 +154,13 @@ public class PgRepository implements Repository {
                 tableOption.getTable()
         );
 
-        if (data.size() == 1) {
-            return Future.succeededFuture();
-        }
-
         return getTableInfo(tableOption)
+                .compose(table -> {
+                    if (table.getColumns().size() == 1) {
+                        return Future.failedFuture(new IllegalStateException("Unable to update table with only one column"));
+                    }
+                    return Future.succeededFuture(table);
+                })
                 .compose(tableInfo -> validaUpdateRequest(tableInfo, data, pathParams))
                 .compose(table -> client.preparedQuery(generateUpdateQuery(table))
                         .execute(generateTupleForInsert(table, data)))

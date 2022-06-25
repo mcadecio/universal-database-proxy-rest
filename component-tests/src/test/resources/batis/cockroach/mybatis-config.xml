@@ -20,7 +20,7 @@
     </environments>
 
     <mappers>
-        <mapper resource="batis/repositories/BudgetsRepository.xml"/>
-        <mapper resource="batis/repositories/NationalFootballTeamsRepository.xml"/>
+        <mapper resource="batis/cockroach/repositories/CarsRepository.xml"/>
+        <mapper resource="batis/cockroach/repositories/WheelsRepository.xml"/>
     </mappers>
 </configuration>

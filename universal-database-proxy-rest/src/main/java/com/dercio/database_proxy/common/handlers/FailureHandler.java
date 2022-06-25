@@ -35,7 +35,8 @@ public class FailureHandler implements Handler<RoutingContext> {
             BodyProcessorException.class, this::handleBodyProcessorException,
             ParameterProcessorException.class, this::handleParameterProcessorException,
             PgException.class, this::handlePgException,
-            InconsistentStateException.class, this::handleInconsistentStateException
+            InconsistentStateException.class, this::handleInconsistentStateException,
+            IllegalStateException.class, this::handleIllegalStateException
     );
 
     @SneakyThrows
@@ -53,6 +54,10 @@ public class FailureHandler implements Handler<RoutingContext> {
                 .end(mapper.encode(error));
     }
 
+    private ErrorResponse handleIllegalStateException(Throwable throwable, HttpServerRequest httpServerRequest) {
+        return errorFactory.createErrorResponse(400, httpServerRequest.uri(), throwable.getMessage());
+    }
+
     private ErrorResponse handleInconsistentStateException(Throwable throwable,
                                                            HttpServerRequest httpServerRequest) {
         return errorFactory.createErrorResponse(400, httpServerRequest.uri(), throwable.getMessage());
@@ -64,6 +69,9 @@ public class FailureHandler implements Handler<RoutingContext> {
 
             if ("nullable".equals(validationException.keyword())) {
                 var property = validationException.inputScope().toString().replace("/", "");
+                if (property.isBlank()) {
+                    property = "body";
+                }
                 var message = validationException.getMessage().replace("input", property);
                 return errorFactory.createErrorResponse(_400.getCode(), request.uri(), message);
             } else if ("type".equals(validationException.keyword())) {
