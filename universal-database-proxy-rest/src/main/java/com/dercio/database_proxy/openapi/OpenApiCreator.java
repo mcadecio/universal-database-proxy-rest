@@ -28,6 +28,10 @@ import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 
 public class OpenApiCreator {
 
+    private static final String AUTO_GENERATED = "Auto Generated";
+    private static final String BY_ID_OPERATION = "_by_id";
+    private static final String BY_ID = " by id";
+
     private OpenApiCreator() {
     }
 
@@ -57,7 +61,11 @@ public class OpenApiCreator {
 
         ObjectSchema objectSchema = new ObjectSchema();
         objectSchema.properties(properties);
-        objectSchema.required(requiredProperties);
+
+        if (!requiredProperties.isEmpty()) {
+            objectSchema.required(requiredProperties);
+        }
+
         return objectSchema;
     }
 
@@ -130,9 +138,9 @@ public class OpenApiCreator {
 
     private static Operation generateGetByIdOperation(Table table) {
         Operation getOperation = new Operation();
-        getOperation.setSummary("Get a  " + table.getTableName() + " by id");
-        getOperation.setDescription("Auto Generated");
-        getOperation.setOperationId("get_" + table.getTableName() + "_by_id");
+        getOperation.setSummary("Get a  " + table.getTableName() + BY_ID);
+        getOperation.setDescription(AUTO_GENERATED);
+        getOperation.setOperationId("get_" + table.getTableName() + BY_ID_OPERATION);
         getOperation.setTags(Collections.singletonList(table.getTableName()));
         addOperationMetadata(getOperation, table);
 
@@ -161,9 +169,9 @@ public class OpenApiCreator {
 
     private static Operation generatePutByIdOperation(Table table) {
         Operation putOperation = new Operation();
-        putOperation.setSummary("Update a " + table.getTableName() + " by id");
-        putOperation.setDescription("Auto Generated");
-        putOperation.setOperationId("update_" + table.getTableName() + "_by_id");
+        putOperation.setSummary("Update a " + table.getTableName() + BY_ID);
+        putOperation.setDescription(AUTO_GENERATED);
+        putOperation.setOperationId("update_" + table.getTableName() + BY_ID_OPERATION);
         putOperation.setTags(Collections.singletonList(table.getTableName()));
         addOperationMetadata(putOperation, table);
 
@@ -194,9 +202,9 @@ public class OpenApiCreator {
 
     private static Operation generateDeleteOperation(Table table) {
         Operation deleteOperation = new Operation();
-        deleteOperation.setSummary("Delete " + table.getTableName() + " by id");
-        deleteOperation.setDescription("Auto Generated");
-        deleteOperation.setOperationId("delete_" + table.getTableName() + "_by_id");
+        deleteOperation.setSummary("Delete " + table.getTableName() + BY_ID);
+        deleteOperation.setDescription(AUTO_GENERATED);
+        deleteOperation.setOperationId("delete_" + table.getTableName() + BY_ID_OPERATION);
         deleteOperation.setTags(Collections.singletonList(table.getTableName()));
         addOperationMetadata(deleteOperation, table);
 
@@ -214,7 +222,7 @@ public class OpenApiCreator {
     private static Operation generateGetOperation(Table table) {
         Operation getOperation = new Operation();
         getOperation.setSummary("Returns a list of " + table.getTableName());
-        getOperation.setDescription("Auto Generated");
+        getOperation.setDescription(AUTO_GENERATED);
         getOperation.setOperationId("get_" + table.getTableName());
         getOperation.setTags(Collections.singletonList(table.getTableName()));
         addOperationMetadata(getOperation, table);
@@ -244,7 +252,7 @@ public class OpenApiCreator {
     private static Operation generatePostOperation(Table table) {
         Operation postOperation = new Operation();
         postOperation.setSummary("Creates a new " + table.getTableName());
-        postOperation.setDescription("Auto Generated");
+        postOperation.setDescription(AUTO_GENERATED);
         postOperation.setOperationId("create_" + table.getTableName());
         postOperation.setTags(Collections.singletonList(table.getTableName()));
         addOperationMetadata(postOperation, table);
