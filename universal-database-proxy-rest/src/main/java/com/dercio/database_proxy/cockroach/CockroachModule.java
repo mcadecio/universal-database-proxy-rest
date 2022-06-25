@@ -17,6 +17,7 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.SqlClient;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,10 @@ public class CockroachModule extends AbstractModule {
     }
 
     private Map<String, SqlClient> createCrbClients(Vertx vertx, CrbApiConfig apiConfig) {
+        if (!apiConfig.isEnabled()) {
+            return Collections.emptyMap();
+        }
+
         var databaseConfig = apiConfig.getDatabase();
         var password = System.getenv()
                 .getOrDefault(databaseConfig.getPassword(), databaseConfig.getPassword());

@@ -13,23 +13,34 @@ import lombok.extern.log4j.Log4j2;
 public class Application {
 
     public static void main(String[] args) {
-        // TODO: Write component tests
         var vertx = Vertx.vertx();
         ConfigRetriever.create(vertx, configRetrieverOptions())
                 .getConfig()
-                .onSuccess(config -> {
-                    var injector = Guice.createInjector(new ApplicationModule(vertx, config));
-                    injector.getInstance(VerticleDeployer.class).process(injector);
+                .map(config -> Guice.createInjector(new ApplicationModule(vertx, config)))
+                .onSuccess(injector -> injector.getInstance(VerticleDeployer.class).process(injector))
+                .onFailure(error -> {
+                    log.fatal(error);
+                    log.fatal("There was an error on the initial setup of the application.");
+                    log.fatal("The application may have failed to retrive the configuration if so.");
+                    log.fatal("Please create a file at {}", getConfigPath());
+                    log.fatal("Or configure the '-Dproject.config' property and specify the config path.");
+                    log.fatal("If it is none of the above correct your config.json and try again.");
+                    log.fatal("Shutting down...");
+                    vertx.close();
                 });
     }
 
     private static ConfigRetrieverOptions configRetrieverOptions() {
-        var configPath = System.getProperty("project.config", "cfg/config.json");
+        var configPath = getConfigPath();
         var configStore = new ConfigStoreOptions()
                 .setType("file")
                 .setConfig(new JsonObject().put("path", configPath));
 
         return new ConfigRetrieverOptions().addStore(configStore);
+    }
+
+    private static String getConfigPath() {
+        return System.getProperty("project.config", "cfg/config.json");
     }
 
 }

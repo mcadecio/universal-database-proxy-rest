@@ -16,6 +16,7 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.SqlClient;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,11 @@ public class PgModule extends AbstractModule {
     }
 
     private Map<String, SqlClient> createPgClients(Vertx vertx, PgApiConfig pgApiConfig) {
+
+        if (!pgApiConfig.isEnabled()) {
+            return Collections.emptyMap();
+        }
+
         var databaseConfig = pgApiConfig.getDatabase();
         var password = System.getenv()
                 .getOrDefault(databaseConfig.getPassword(), databaseConfig.getPassword());

@@ -4,15 +4,16 @@ import com.dercio.database_proxy.common.AnnotationProcessor;
 import com.dercio.database_proxy.common.exceptions.VerticleDisabledException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.reflections.Reflections;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Log4j2
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
@@ -24,24 +25,30 @@ public class VerticleDeployer implements AnnotationProcessor<Injector> {
     @Override
     public void process(Injector injector) {
 
-        Handler<AsyncResult<String>> handler = result -> {
-            if (result.failed()) {
-                if (!(result.cause() instanceof VerticleDisabledException))
-                    log.error(result.cause().getMessage(), result.cause());
-                else
-                    log.info(result.cause().getMessage());
-
-            }
+        Handler<Throwable> failureHandler = error -> {
+            if (error instanceof VerticleDisabledException)
+                log.info(error.getMessage());
+            else
+                log.error(error.getMessage(), error);
         };
 
-        new Reflections(basePackage())
+        var annotatedVerticles = new Reflections(basePackage())
                 .getTypesAnnotatedWith(Verticle.class)
                 .stream()
                 .map(injector::getInstance)
                 .filter(AbstractVerticle.class::isInstance)
                 .map(AbstractVerticle.class::cast)
-                .forEach(verticle -> vertx.deployVerticle(verticle, handler));
+                .collect(Collectors.toList());
 
-        verticles.forEach(verticle -> vertx.deployVerticle(verticle, handler));
+        List<Future> deploymentFutures = Stream.of(annotatedVerticles, verticles)
+                .flatMap(Collection::stream)
+                .map(vertx::deployVerticle)
+                .map(deploymentFuture -> deploymentFuture.onFailure(failureHandler))
+                .collect(Collectors.toList());
+
+        CompositeFuture.any(deploymentFutures)
+                .onSuccess(future -> log.info("Deployment is complete"))
+                .onFailure(error -> log.info("No verticles were deployed. Shutting down..."))
+                .onFailure(error -> vertx.close());
     }
 }
