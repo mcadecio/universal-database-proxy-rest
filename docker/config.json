@@ -1,7 +1,7 @@
 {
   "$schema": "config.schema.json",
   "proxy": {
-    "enabled": true,
+    "enabled": false,
     "httpServer": {
       "host": "0.0.0.0",
       "port": 1234
@@ -25,18 +25,7 @@
       "port": 5432,
       "username": "postgres",
       "password": "POSTGRES_PASSWORD",
-      "tables": [
-        {
-          "database": "database-proxy",
-          "schema": "money",
-          "table": "budgets"
-        },
-        {
-          "database": "database-proxy",
-          "schema": "football",
-          "table": "national_football_teams"
-        }
-      ]
+      "databaseName": "database-proxy"
     }
   },
   "cockroachApi": {
@@ -49,18 +38,7 @@
       "port": 26257,
       "username": "root",
       "password": "CRB_PASSWORD",
-      "tables": [
-        {
-          "database": "defaultdb",
-          "schema": "vehicles",
-          "table": "cars"
-        },
-        {
-          "database": "defaultdb",
-          "schema": "vehicles",
-          "table": "wheel"
-        }
-      ]
+      "databaseName": "defaultdb"
     }
   }
 }

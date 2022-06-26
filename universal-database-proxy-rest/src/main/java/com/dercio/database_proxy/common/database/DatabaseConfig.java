@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,5 +12,5 @@ public class DatabaseConfig {
     private Integer port;
     private String username;
     private String password;
-    private List<TableRequest> tables;
+    private String databaseName;
 }

@@ -17,8 +17,6 @@ cd universal-database-proxy-rest
 java -jar -Dproject.config=cfg/config.json target/universal-database-proxy-rest-0.0.1-fat.jar
 ```
 
-There is a working example in the `docker` folder on how to integrate in a docker-comppose file.
-
 ## Usage
 
 ### How to run against a PostgresDB
@@ -41,7 +39,7 @@ There is a working example in the `docker` folder on how to integrate in a docke
     9. Set the `password` to the database password the server should use to authenticate itself against your chosen
        database. This can be the password in plain text or an ENVIRONMENT VARIABLE. For example: `admin`
        or `POSTGRES_PASSWORD`
-    10. The `tables` property is what you currently use to define which tables should be used to generate the REST API.
+    10. Set the `databaseName` to the name of the database you want the OpenApi to be generated from.
     11. Run the steps in the Installation section and set the `-Dproject.config=` argument to the path of
         the `config.json` file you just create.
 
@@ -65,9 +63,13 @@ There is a working example in the `docker` folder on how to integrate in a docke
     9. Set the `password` to the database password the server should use to authenticate itself against your chosen
        database. This can be the password in plain text or an ENVIRONMENT VARIABLE. For example: `admin`
        or `COCKROACH_PASSWORD`
-    10. The `tables` property is what you currently use to define which tables should be used to generate the REST API.
+    10. Set the `databaseName` to the name of the database you want the OpenApi to be generated from.
     11. Run the steps in the Installation section and set the `-Dproject.config=` argument to the path of
         the `config.json` file you just create.
+
+### Docker
+
+There is a working example in the `docker` folder on how to integrate in a docker-compose file.
 
 ## Contributing
 

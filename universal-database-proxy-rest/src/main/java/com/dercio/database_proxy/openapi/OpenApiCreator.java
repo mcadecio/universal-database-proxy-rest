@@ -1,7 +1,7 @@
 package com.dercio.database_proxy.openapi;
 
-import com.dercio.database_proxy.common.database.Table;
-import com.dercio.database_proxy.common.database.TableColumn;
+import com.dercio.database_proxy.common.database.TableMetadata;
+import com.dercio.database_proxy.common.database.ColumnMetadata;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -35,18 +35,18 @@ public class OpenApiCreator {
     private OpenApiCreator() {
     }
 
-    public static OpenAPI create(List<Table> tableList) {
+    public static OpenAPI create(List<TableMetadata> tableMetadataList) {
         return new OpenAPI()
                 .info(generateInfo())
                 .servers(List.of(generateServer()))
-                .tags(tableList.stream()
-                        .map(Table::getTableName)
+                .tags(tableMetadataList.stream()
+                        .map(TableMetadata::getTableName)
                         .map(tableName -> new Tag().name(tableName))
                         .collect(Collectors.toList()))
-                .paths(generatePaths(tableList));
+                .paths(generatePaths(tableMetadataList));
     }
 
-    private static Schema createSchemaFromColumns(List<TableColumn> columns) {
+    private static Schema createSchemaFromColumns(List<ColumnMetadata> columns) {
         Map<String, Schema> properties = columns.stream()
                 .map(column -> Map.entry(column.getColumnName(), new ObjectSchema()
                         .type(column.getDataType())
@@ -56,7 +56,7 @@ public class OpenApiCreator {
         var requiredProperties = columns
                 .stream()
                 .filter(column -> !column.isNullable())
-                .map(TableColumn::getColumnName)
+                .map(ColumnMetadata::getColumnName)
                 .collect(Collectors.toList());
 
         ObjectSchema objectSchema = new ObjectSchema();
@@ -69,22 +69,22 @@ public class OpenApiCreator {
         return objectSchema;
     }
 
-    private static Paths generatePaths(List<Table> tableList) {
+    private static Paths generatePaths(List<TableMetadata> tableMetadataList) {
         Paths paths = new Paths();
 
-        tableList.forEach(table -> {
+        tableMetadataList.forEach(tableMetadata -> {
             PathItem pathItem = new PathItem();
 
-            pathItem.setGet(generateGetOperation(table));
-            pathItem.setPost(generatePostOperation(table));
+            pathItem.setGet(generateGetOperation(tableMetadata));
+            pathItem.setPost(generatePostOperation(tableMetadata));
 
             var pathItemById = new PathItem();
-            pathItemById.setGet(generateGetByIdOperation(table));
-            pathItemById.setPut(generatePutByIdOperation(table));
-            pathItemById.setDelete(generateDeleteOperation(table));
+            pathItemById.setGet(generateGetByIdOperation(tableMetadata));
+            pathItemById.setPut(generatePutByIdOperation(tableMetadata));
+            pathItemById.setDelete(generateDeleteOperation(tableMetadata));
 
-            paths.addPathItem("/" + table.getTableName(), pathItem);
-            paths.addPathItem(String.format("/%s/{%s}", table.getTableName(), table.getPkColumnName()), pathItemById);
+            paths.addPathItem("/" + tableMetadata.getTableName(), pathItem);
+            paths.addPathItem(String.format("/%s/{%s}", tableMetadata.getTableName(), tableMetadata.getPkColumnName()), pathItemById);
         });
 
         var openApiItem = new PathItem();
@@ -123,10 +123,10 @@ public class OpenApiCreator {
         return getOperation;
     }
 
-    private static Parameter createPkPathParameter(Table table) {
-        return table.getColumns()
+    private static Parameter createPkPathParameter(TableMetadata tableMetadata) {
+        return tableMetadata.getColumns()
                 .stream()
-                .filter(column -> column.getColumnName().equals(table.getPkColumnName()))
+                .filter(column -> column.getColumnName().equals(tableMetadata.getPkColumnName()))
                 .findAny()
                 .map(column -> new Parameter()
                         .name(column.getColumnName())
@@ -136,15 +136,15 @@ public class OpenApiCreator {
                 .orElseThrow(); // TODO: Throw dedicated exception
     }
 
-    private static Operation generateGetByIdOperation(Table table) {
+    private static Operation generateGetByIdOperation(TableMetadata tableMetadata) {
         Operation getOperation = new Operation();
-        getOperation.setSummary("Get a  " + table.getTableName() + BY_ID);
+        getOperation.setSummary("Get a  " + tableMetadata.getTableName() + BY_ID);
         getOperation.setDescription(AUTO_GENERATED);
-        getOperation.setOperationId("get_" + table.getTableName() + BY_ID_OPERATION);
-        getOperation.setTags(Collections.singletonList(table.getTableName()));
-        addOperationMetadata(getOperation, table);
+        getOperation.setOperationId("get_" + tableMetadata.getTableName() + BY_ID_OPERATION);
+        getOperation.setTags(Collections.singletonList(tableMetadata.getTableName()));
+        addOperationMetadata(getOperation, tableMetadata);
 
-        var objectSchema = createSchemaFromColumns(table.getColumns());
+        var objectSchema = createSchemaFromColumns(tableMetadata.getColumns());
 
         MediaType mediaType = new MediaType();
         mediaType.setSchema(objectSchema);
@@ -153,29 +153,29 @@ public class OpenApiCreator {
         content.addMediaType(APPLICATION_JSON.toString(), mediaType);
 
         ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setDescription("A JSON representing " + table.getTableName());
+        apiResponse.setDescription("A JSON representing " + tableMetadata.getTableName());
         apiResponse.setContent(content);
 
         ApiResponses apiResponses = new ApiResponses();
         apiResponses.addApiResponse(String.valueOf(_200.getCode()), apiResponse);
 
 
-        Parameter pathParameter = createPkPathParameter(table);
+        Parameter pathParameter = createPkPathParameter(tableMetadata);
         getOperation.addParametersItem(pathParameter);
         getOperation.setResponses(apiResponses);
 
         return getOperation;
     }
 
-    private static Operation generatePutByIdOperation(Table table) {
+    private static Operation generatePutByIdOperation(TableMetadata tableMetadata) {
         Operation putOperation = new Operation();
-        putOperation.setSummary("Update a " + table.getTableName() + BY_ID);
+        putOperation.setSummary("Update a " + tableMetadata.getTableName() + BY_ID);
         putOperation.setDescription(AUTO_GENERATED);
-        putOperation.setOperationId("update_" + table.getTableName() + BY_ID_OPERATION);
-        putOperation.setTags(Collections.singletonList(table.getTableName()));
-        addOperationMetadata(putOperation, table);
+        putOperation.setOperationId("update_" + tableMetadata.getTableName() + BY_ID_OPERATION);
+        putOperation.setTags(Collections.singletonList(tableMetadata.getTableName()));
+        addOperationMetadata(putOperation, tableMetadata);
 
-        var objectSchema = createSchemaFromColumns(table.getColumns());
+        var objectSchema = createSchemaFromColumns(tableMetadata.getColumns());
 
         Content requestBodycontent = new Content();
         requestBodycontent.addMediaType(APPLICATION_JSON.toString(), new MediaType().schema(objectSchema));
@@ -186,13 +186,13 @@ public class OpenApiCreator {
 
 
         ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setDescription("The " + table.getTableName() + " has been updated.");
+        apiResponse.setDescription("The " + tableMetadata.getTableName() + " has been updated.");
 
 
         ApiResponses apiResponses = new ApiResponses();
         apiResponses.addApiResponse(String.valueOf(_204.getCode()), apiResponse);
 
-        Parameter pathParameter = createPkPathParameter(table);
+        Parameter pathParameter = createPkPathParameter(tableMetadata);
         putOperation.addParametersItem(pathParameter);
         putOperation.setRequestBody(requestBody);
         putOperation.setResponses(apiResponses);
@@ -200,34 +200,34 @@ public class OpenApiCreator {
         return putOperation;
     }
 
-    private static Operation generateDeleteOperation(Table table) {
+    private static Operation generateDeleteOperation(TableMetadata tableMetadata) {
         Operation deleteOperation = new Operation();
-        deleteOperation.setSummary("Delete " + table.getTableName() + BY_ID);
+        deleteOperation.setSummary("Delete " + tableMetadata.getTableName() + BY_ID);
         deleteOperation.setDescription(AUTO_GENERATED);
-        deleteOperation.setOperationId("delete_" + table.getTableName() + BY_ID_OPERATION);
-        deleteOperation.setTags(Collections.singletonList(table.getTableName()));
-        addOperationMetadata(deleteOperation, table);
+        deleteOperation.setOperationId("delete_" + tableMetadata.getTableName() + BY_ID_OPERATION);
+        deleteOperation.setTags(Collections.singletonList(tableMetadata.getTableName()));
+        addOperationMetadata(deleteOperation, tableMetadata);
 
         ApiResponses apiResponses = new ApiResponses();
         apiResponses.addApiResponse(String.valueOf(_200.getCode()), new ApiResponse()
-                .description("Deleted " + table.getTableName() + " successfully."));
+                .description("Deleted " + tableMetadata.getTableName() + " successfully."));
 
-        Parameter pathParameter = createPkPathParameter(table);
+        Parameter pathParameter = createPkPathParameter(tableMetadata);
         deleteOperation.addParametersItem(pathParameter);
         deleteOperation.responses(apiResponses);
 
         return deleteOperation;
     }
 
-    private static Operation generateGetOperation(Table table) {
+    private static Operation generateGetOperation(TableMetadata tableMetadata) {
         Operation getOperation = new Operation();
-        getOperation.setSummary("Returns a list of " + table.getTableName());
+        getOperation.setSummary("Returns a list of " + tableMetadata.getTableName());
         getOperation.setDescription(AUTO_GENERATED);
-        getOperation.setOperationId("get_" + table.getTableName());
-        getOperation.setTags(Collections.singletonList(table.getTableName()));
-        addOperationMetadata(getOperation, table);
+        getOperation.setOperationId("get_" + tableMetadata.getTableName());
+        getOperation.setTags(Collections.singletonList(tableMetadata.getTableName()));
+        addOperationMetadata(getOperation, tableMetadata);
 
-        var objectSchema = createSchemaFromColumns(table.getColumns());
+        var objectSchema = createSchemaFromColumns(tableMetadata.getColumns());
 
         ArraySchema schema = new ArraySchema()
                 .items(objectSchema);
@@ -239,7 +239,7 @@ public class OpenApiCreator {
         content.addMediaType(APPLICATION_JSON.toString(), mediaType);
 
         ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setDescription("A JSON array of " + table.getTableName());
+        apiResponse.setDescription("A JSON array of " + tableMetadata.getTableName());
         apiResponse.setContent(content);
 
         ApiResponses apiResponses = new ApiResponses();
@@ -249,15 +249,15 @@ public class OpenApiCreator {
         return getOperation;
     }
 
-    private static Operation generatePostOperation(Table table) {
+    private static Operation generatePostOperation(TableMetadata tableMetadata) {
         Operation postOperation = new Operation();
-        postOperation.setSummary("Creates a new " + table.getTableName());
+        postOperation.setSummary("Creates a new " + tableMetadata.getTableName());
         postOperation.setDescription(AUTO_GENERATED);
-        postOperation.setOperationId("create_" + table.getTableName());
-        postOperation.setTags(Collections.singletonList(table.getTableName()));
-        addOperationMetadata(postOperation, table);
+        postOperation.setOperationId("create_" + tableMetadata.getTableName());
+        postOperation.setTags(Collections.singletonList(tableMetadata.getTableName()));
+        addOperationMetadata(postOperation, tableMetadata);
 
-        var objectSchema = createSchemaFromColumns(table.getColumns());
+        var objectSchema = createSchemaFromColumns(tableMetadata.getColumns());
 
         Content requestBodycontent = new Content();
         requestBodycontent.addMediaType(APPLICATION_JSON.toString(), new MediaType().schema(objectSchema));
@@ -268,7 +268,7 @@ public class OpenApiCreator {
 
 
         ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setDescription("A new " + table.getTableName() + " has been created.");
+        apiResponse.setDescription("A new " + tableMetadata.getTableName() + " has been created.");
         Header locationHeader = new Header()
                 .description("The URI of the resource created.")
                 .schema(new StringSchema());
@@ -300,12 +300,12 @@ public class OpenApiCreator {
         return info;
     }
 
-    private static void addOperationMetadata(Operation operation, Table table) {
+    private static void addOperationMetadata(Operation operation, TableMetadata tableMetadata) {
         operation.addExtension("x-metadata",
                 new JsonObject()
-                        .put("database", table.getDatabaseName())
-                        .put("schema", table.getSchemaName())
-                        .put("table", table.getTableName()).getMap());
+                        .put("database", tableMetadata.getDatabaseName())
+                        .put("schema", tableMetadata.getSchemaName())
+                        .put("table", tableMetadata.getTableName()).getMap());
     }
 
     private static String exampleOpenApi() {
@@ -360,6 +360,5 @@ public class OpenApiCreator {
         getOperation.setResponses(apiResponses);
         return getOperation;
     }
-
 
 }

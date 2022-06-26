@@ -5,14 +5,18 @@ import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 
 @Getter
-public class TableColumn {
+public class ColumnMetadata {
+    private final String tableSchema;
+    private final String tableName;
     private final String columnName;
     private final String dataType;
     private final Long characterMaximumLength;
     private final Object columnDefault;
     private final boolean isNullable;
 
-    public TableColumn(JsonObject jsonObject) {
+    public ColumnMetadata(JsonObject jsonObject) {
+        this.tableSchema = jsonObject.getString("table_schema");
+        this.tableName = jsonObject.getString("table_name");
         this.columnName = jsonObject.getString("column_name");
         this.dataType = PgTypeMapper.fromPgToSwagger(jsonObject.getString("data_type"));
         this.characterMaximumLength = jsonObject.getLong("character_maximum_length");

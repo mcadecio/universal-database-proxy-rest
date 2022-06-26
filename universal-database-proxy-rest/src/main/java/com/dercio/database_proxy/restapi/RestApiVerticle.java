@@ -2,7 +2,7 @@ package com.dercio.database_proxy.restapi;
 
 import com.dercio.database_proxy.common.database.ApiConfig;
 import com.dercio.database_proxy.common.database.Repository;
-import com.dercio.database_proxy.common.database.Table;
+import com.dercio.database_proxy.common.database.TableMetadata;
 import com.dercio.database_proxy.common.exceptions.VerticleDisabledException;
 import com.dercio.database_proxy.common.handlers.FailureHandler;
 import com.dercio.database_proxy.common.handlers.NotFoundHandler;
@@ -22,7 +22,6 @@ import lombok.extern.log4j.Log4j2;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
@@ -46,7 +45,7 @@ public class RestApiVerticle extends AbstractVerticle {
             return;
         }
 
-        retrieveTableInfo()
+        pgRepository.getTables(apiConfig.getDatabase().getDatabaseName())
                 .compose(this::createOpenApiFile)
                 .compose(this::createRouterAndMountHandlers)
                 .onSuccess(router -> {
@@ -69,7 +68,7 @@ public class RestApiVerticle extends AbstractVerticle {
                 .onComplete(event -> stopPromise.complete());
     }
 
-    private Future<List<Table>> createOpenApiFile(List<Table> tables) {
+    private Future<List<TableMetadata>> createOpenApiFile(List<TableMetadata> tables) {
         var openAPI = OpenApiCreator.create(tables);
         return vertx.fileSystem()
                 .writeFile(apiConfig.getOpenApiFilePath(), Buffer.buffer(Yaml.pretty(openAPI)))
@@ -78,17 +77,7 @@ public class RestApiVerticle extends AbstractVerticle {
                 .onFailure(error -> log.error("Failed to create OpenApi File: {}", error.getMessage()));
     }
 
-    private Future<List<Table>> retrieveTableInfo() {
-        List<Future> futures = apiConfig.getDatabase().getTables()
-                .stream()
-                .map(pgRepository::getTableInfo)
-                .collect(Collectors.toList());
-
-        return CompositeFuture.all(futures)
-                .map(CompositeFuture::list);
-    }
-
-    private Future<Router> createRouterAndMountHandlers(List<Table> tables) {
+    private Future<Router> createRouterAndMountHandlers(List<TableMetadata> tables) {
         return RouterBuilder.create(vertx, apiConfig.getOpenApiFilePath())
                 .map(routerBuilder -> {
                     Map<String, Handler<RoutingContext>> mappings = new HashMap<>();

@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface Repository {
-    Future<Table> getTableInfo(TableRequest tableRequest);
+    Future<List<TableMetadata>> getTables(String database);
+
+    Future<TableMetadata> getTableInfo(TableRequest tableRequest);
 
     Future<List<JsonObject>> getData(TableRequest tableOption);
 

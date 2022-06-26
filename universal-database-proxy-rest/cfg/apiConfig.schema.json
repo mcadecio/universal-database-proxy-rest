@@ -4,11 +4,11 @@
   "type": "object",
   "description": "This configuration describe the configuration for an auto generated API.",
   "required": [
-      "enabled",
-      "host",
-      "port",
-      "openApiFilePath",
-      "database"
+    "enabled",
+    "host",
+    "port",
+    "openApiFilePath",
+    "database"
   ],
   "properties": {
     "enabled": {
@@ -45,7 +45,7 @@
         "port",
         "username",
         "password",
-        "tables"
+        "databaseName"
       ],
       "properties": {
         "host": {
@@ -78,32 +78,9 @@
             "POSTGRES_PASSWORD"
           ]
         },
-        "tables": {
-          "type": "array",
-          "description": "The table names to be inspected to generate an OpenAPI",
-          "required": true,
-          "items": {
-            "type": "object",
-            "required": [
-              "database",
-              "schema",
-              "table"
-            ],
-            "properties": {
-              "database": {
-                "type": "string",
-                "description": "The database name"
-              },
-              "schema": {
-                "type": "string",
-                "description": "The schema name"
-              },
-              "table": {
-                "type": "string",
-                "description": "The table name"
-              }
-            }
-          }
+        "databaseName": {
+          "type": "string",
+          "description": "The name of the database"
         }
       }
     }

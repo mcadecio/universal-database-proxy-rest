@@ -9,8 +9,8 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class Table {
-    private final List<TableColumn> columns;
+public class TableMetadata {
+    private final List<ColumnMetadata> columns;
     private final String databaseName;
     private final String schemaName;
     private final String tableName;
