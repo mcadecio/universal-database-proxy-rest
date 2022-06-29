@@ -34,7 +34,7 @@ services:
 #    environment:
 #      POSTGRES_PASSWORD: admin
 #      CRB_PASSWORD:
-#    image: mcadecio/universal-database-proxy-rest:0.0.4
+#    image: mcadecio/universal-database-proxy-rest:0.0.5
 #    depends_on:
 #      postgres:
 #        condition: service_healthy

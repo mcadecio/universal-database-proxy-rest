@@ -1,6 +1,6 @@
-FROM openjdk:11.0.15-jre-slim-bullseye
+FROM eclipse-temurin:11-jre-alpine
 
-ENV VERTICLE_FILE=universal-database-proxy-rest-0.0.4-fat.jar
+ENV VERTICLE_FILE=universal-database-proxy-rest-0.0.5-fat.jar
 
 RUN echo "$VERTICLE_FILE"
 
