@@ -3,7 +3,9 @@ package com.dercio.database_proxy.common.database;
 import com.dercio.database_proxy.postgres.PgTypeMapper;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
+import lombok.ToString;
 
+@ToString
 @Getter
 public class ColumnMetadata {
     private final String tableSchema;

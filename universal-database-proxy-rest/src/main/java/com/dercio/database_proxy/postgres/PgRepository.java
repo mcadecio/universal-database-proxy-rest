@@ -81,7 +81,24 @@ public class PgRepository implements Repository {
                                 .flatMap(schemaEntry -> schemaEntry.getValue()
                                         .entrySet()
                                         .stream()
-                                        .map(tableEntry -> new TableMetadata(tableEntry.getValue(), database, schemaEntry.getKey(), tableEntry.getKey())))
+                                        .map(tableEntry -> {
+                                            var tableMetadata = new TableMetadata(
+                                                    tableEntry.getValue(),
+                                                    database,
+                                                    schemaEntry.getKey(),
+                                                    tableEntry.getKey()
+                                            );
+
+                                            log.info("Found table [{}] with [{}] columns named {}",
+                                                    tableMetadata.getTableName(),
+                                                    tableMetadata.getColumns().size(),
+                                                    tableMetadata.getColumns()
+                                                            .stream()
+                                                            .map(ColumnMetadata::getColumnName)
+                                                            .collect(Collectors.toList()));
+
+                                            return tableMetadata;
+                                        }))
                                 .map(tableMetadata -> findPrimaryKeyColumn(tableMetadata)
                                         .onSuccess(tableMetadata::setPkColumnName)
                                         .map(tableMetadata))
@@ -232,7 +249,7 @@ public class PgRepository implements Repository {
                     return column.getDataType().equals(INTEGER) ?
                             Long.parseLong(value) : value;
                 })
-                .orElseThrow(); // TODO: throw dedicated exception
+                .orElseThrow();
     }
 
     private String generateSelectQuery(TableMetadata tableMetadata) {
@@ -312,7 +329,7 @@ public class PgRepository implements Repository {
         );
 
         var query = format(
-                "UPDATE %s.%s SET %s WHERE %s = $1 RETURNING %s", // TODO: Find a way to keep the order of the columns always the same
+                "UPDATE %s.%s SET %s WHERE %s = $1 RETURNING %s",
                 tableMetadata.getSchemaName(),
                 tableMetadata.getTableName(),
                 values,
@@ -335,7 +352,14 @@ public class PgRepository implements Repository {
                 .map(rows -> StreamSupport.stream(rows.spliterator(), false)
                         .map(row -> row.getString("column_name"))
                         .findFirst()
-                        .orElse(tableMetadata.getColumns().get(0).getColumnName()));
+                        .orElseGet(() -> {
+                            var columnName = tableMetadata.getColumns().get(0).getColumnName();
+                            log.info("Table [{}] does not have a PK. Using [{}] column as PK",
+                                    tableMetadata.getTableName(),
+                                    columnName
+                            );
+                            return columnName;
+                        }));
     }
 
 

@@ -17,6 +17,7 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
 import io.vertx.core.json.JsonObject;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ import static com.simplaex.http.StatusCode._201;
 import static com.simplaex.http.StatusCode._204;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 
+@Log4j2
 public class OpenApiCreator {
 
     private static final String AUTO_GENERATED = "Auto Generated";
@@ -46,12 +48,16 @@ public class OpenApiCreator {
                 .paths(generatePaths(tableMetadataList));
     }
 
-    private static Schema createSchemaFromColumns(List<ColumnMetadata> columns) {
-        Map<String, Schema> properties = columns.stream()
+    private static Schema<?> createSchemaFromColumns(List<ColumnMetadata> columns) {
+        var properties = columns.stream()
                 .map(column -> Map.entry(column.getColumnName(), new ObjectSchema()
                         .type(column.getDataType())
                         .nullable(column.isNullable())))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (schema, schema2) -> schema, LinkedHashMap::new
+                ));
 
         var requiredProperties = columns
                 .stream()
@@ -133,7 +139,12 @@ public class OpenApiCreator {
                         .in("path")
                         .required(true)
                         .schema(new ObjectSchema().type(column.getDataType())))
-                .orElseThrow(); // TODO: Throw dedicated exception
+                .orElseThrow(() -> {
+                    var message = "Unable to find a column that matches the table PK column name";
+                    log.error(message);
+                    log.error("Table: {}", JsonObject.mapFrom(tableMetadata).encodePrettily());
+                    return new IllegalStateException(message);
+                });
     }
 
     private static Operation generateGetByIdOperation(TableMetadata tableMetadata) {
