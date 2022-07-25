@@ -35,7 +35,11 @@ public class PgRepository implements Repository {
             "                      AND constraint_type = 'PRIMARY KEY')" +
             "SELECT column_name " +
             "FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu, \"constraint\" " +
-            "WHERE kcu.constraint_name = \"constraint\".constraint_name";
+            "WHERE kcu.constraint_name = \"constraint\".constraint_name" +
+            " AND table_catalog = $1 " +
+            " AND table_schema = $2 " +
+            " AND table_name = $3 ";
+
     private static final String RETRIEVE_TABLE_SCHEMA_QUERY =
             "SELECT column_name," +
                     "   data_type, " +
