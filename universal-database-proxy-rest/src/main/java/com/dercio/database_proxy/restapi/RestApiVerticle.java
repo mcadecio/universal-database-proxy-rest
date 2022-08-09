@@ -44,20 +44,21 @@ public class RestApiVerticle extends AbstractVerticle {
             startPromise.fail(new VerticleDisabledException(getClass().getSimpleName()));
             return;
         }
+        vertx.setTimer(apiConfig.getStartupDelay(), timerId ->
+                pgRepository.getTables(apiConfig.getDatabase().getDatabaseName())
+                        .compose(this::createOpenApiFile)
+                        .compose(this::createRouterAndMountHandlers)
+                        .onSuccess(router -> {
+                            httpServer = vertx.createHttpServer();
+                            httpServer
+                                    .requestHandler(router)
+                                    .listen(apiConfig.getPort(), apiConfig.getHost())
+                                    .onSuccess(event -> log.info("Rest API Server Started ... {}", event.actualPort()))
+                                    .onSuccess(event -> startPromise.complete())
+                                    .onFailure(startPromise::fail);
+                        })
+                        .onFailure(startPromise::fail));
 
-        pgRepository.getTables(apiConfig.getDatabase().getDatabaseName())
-                .compose(this::createOpenApiFile)
-                .compose(this::createRouterAndMountHandlers)
-                .onSuccess(router -> {
-                    httpServer = vertx.createHttpServer();
-                    httpServer
-                            .requestHandler(router)
-                            .listen(apiConfig.getPort(), apiConfig.getHost())
-                            .onSuccess(event -> log.info("Rest API Server Started ... {}", event.actualPort()))
-                            .onSuccess(event -> startPromise.complete())
-                            .onFailure(startPromise::fail);
-                })
-                .onFailure(startPromise::fail);
     }
 
     @Override

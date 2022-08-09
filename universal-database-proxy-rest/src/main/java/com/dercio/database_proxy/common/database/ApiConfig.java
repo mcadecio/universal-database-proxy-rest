@@ -10,4 +10,6 @@ public interface ApiConfig {
     String getOpenApiFilePath();
 
     DatabaseConfig getDatabase();
+
+    long getStartupDelay();
 }

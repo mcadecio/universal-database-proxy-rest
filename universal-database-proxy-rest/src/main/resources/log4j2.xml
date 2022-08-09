@@ -6,7 +6,7 @@
             {FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=green bold, TRACE=blue}
         </Property>
         <Property name="LOG_PATTERN"
-                  value="%highlight{${LOG_LEVEL_PATTERN:-%5p}}${CLR}|%d{MMdd-HHmmss SSS}|%t|%style{%c{1}}{cyan}|%m%n"/>
+                  value="%highlight{${LOG_LEVEL_PATTERN:-%5p}}${CLR}|%d{MMdd-HH:mm:ss SSS}|%t|%style{%c{1}}{cyan}|%m%n"/>
     </Properties>
 
     <Appenders>

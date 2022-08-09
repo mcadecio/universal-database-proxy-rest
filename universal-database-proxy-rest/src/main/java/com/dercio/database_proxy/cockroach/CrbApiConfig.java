@@ -17,4 +17,5 @@ public class CrbApiConfig implements ApiConfig {
     private Integer port;
     private String openApiFilePath;
     private DatabaseConfig database;
+    private long startupDelay = 1;
 }
