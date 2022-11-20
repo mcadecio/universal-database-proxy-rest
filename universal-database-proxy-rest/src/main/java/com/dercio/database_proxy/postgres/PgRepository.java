@@ -12,6 +12,9 @@ import io.vertx.sqlclient.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,7 +62,8 @@ public class PgRepository implements Repository {
                     "       data_type, " +
                     "       character_maximum_length, " +
                     "       column_default, " +
-                    "       is_nullable " +
+                    "       is_nullable, " +
+                    "       ordinal_position " + // TODO: See if you can stop relying on this
                     "FROM INFORMATION_SCHEMA.COLUMNS " +
                     "WHERE table_catalog = $1 " +
                     "  AND NOT (table_schema IN ('pg_catalog', 'information_schema', 'crdb_internal', 'pg_extension'))";
@@ -77,6 +81,7 @@ public class PgRepository implements Repository {
         return sqlClient.preparedQuery(RETRIEVE_ALL_NON_DEFAULT_TABLES_FOR_DB)
                 .execute(Tuple.of(database))
                 .compose(rows -> CompositeFuture.all(StreamSupport.stream(rows.spliterator(), false)
+                                .sorted(Comparator.comparing(row -> row.getLong("ordinal_position")))
                                 .map(Row::toJson)
                                 .map(ColumnMetadata::new)
                                 .collect(collectBySchemaAndTableName)
@@ -246,11 +251,11 @@ public class PgRepository implements Repository {
     private Object findPkValue(TableMetadata tableMetadata, Map<String, String> pathParams) {
         return tableMetadata.getColumns()
                 .stream()
-                .filter(column -> column.getColumnName().equals(tableMetadata.getPkColumnName()))
+                .filter(column -> column.getColumnName().equals(tableMetadata.getPkColumnName())) //TODO:  Refactor to get / store primary column in table meta data
                 .findFirst()
                 .map(column -> {
                     var value = pathParams.get(column.getColumnName());
-                    return column.getDataType().equals(INTEGER) ?
+                    return column.getOpenApiType().equals(INTEGER) ?
                             Long.parseLong(value) : value;
                 })
                 .orElseThrow();
@@ -312,7 +317,20 @@ public class PgRepository implements Repository {
     private Tuple generateTupleForInsert(TableMetadata tableMetadata, JsonObject body) {
         return Tuple.from(tableMetadata.getColumns()
                 .stream()
-                .map(column -> body.getValue(column.getColumnName()))
+                .map(column -> {
+
+                    var columnName = column.getColumnName();
+
+                    if (column.getDbType().equals("timestamp without time zone")) {
+                        var rawTimestamp = body.getString(columnName);
+                        return rawTimestamp == null ? null : LocalDateTime.parse(rawTimestamp);
+                    } else if (column.getDbType().equals("timestamp with time zone")) {
+                        var rawTimestamp = body.getString(columnName);
+                        return rawTimestamp == null ? null : OffsetDateTime.parse(rawTimestamp);
+                    }
+
+                    return body.getValue(columnName);
+                })
                 .collect(Collectors.toList()));
     }
 
@@ -328,7 +346,7 @@ public class PgRepository implements Repository {
 
         var values = generateColumnsToUpdate(tableMetadata.getColumns()
                 .stream()
-                .filter(column -> !column.getColumnName().equals(tableMetadata.getPkColumnName()))
+                .filter(column -> !column.getColumnName().equals(tableMetadata.getPkColumnName())) // TODO: add method method to get all collumns apart from primary column
                 .collect(Collectors.toList())
         );
 

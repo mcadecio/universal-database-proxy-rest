@@ -10,8 +10,8 @@
     </select>
     <insert id="save"
             parameterType="com.dercio.database_proxy.repositories.cars.Car">
-        INSERT INTO vehicles.cars(car_id, manufacturer, doors)
-        VALUES (#{carId}, #{manufacturer}, #{doors})
+        INSERT INTO vehicles.cars(car_id, manufacturer, doors, last_updated)
+        VALUES (#{carId}, #{manufacturer}, #{doors}, #{lastUpdated})
     </insert>
 
     <delete id="deleteById">

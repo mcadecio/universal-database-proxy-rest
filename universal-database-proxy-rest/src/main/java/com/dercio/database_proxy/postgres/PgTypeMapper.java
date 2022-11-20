@@ -1,5 +1,6 @@
 package com.dercio.database_proxy.postgres;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -15,17 +16,18 @@ public class PgTypeMapper {
     private static final String CHARACTER_VARYING = "character varying";
     private static final String BOOLEAN = "boolean";
     private static final String NUMBER = "number";
-    private static final Map<String, String> PG_TYPE_TO_SWAGGER_TYPE = Map.of(
-            INTEGER, INTEGER,
-            NUMERIC, NUMBER,
-            BIGINT, INTEGER,
-            DATE, STRING,
-            CHARACTER_VARYING, STRING,
-            BOOLEAN, BOOLEAN,
-            "uuid", STRING,
-            "text", STRING,
-            "timestamp with time zone", STRING
-    );
+    private static final Map<String, String> PG_TYPE_TO_SWAGGER_TYPE = ImmutableMap.<String, String>builder()
+            .put(INTEGER, INTEGER)
+            .put(NUMERIC, NUMBER)
+            .put(BIGINT, INTEGER)
+            .put(DATE, STRING)
+            .put(CHARACTER_VARYING, STRING)
+            .put(BOOLEAN, BOOLEAN)
+            .put("uuid", STRING)
+            .put("text", STRING)
+            .put("timestamp without time zone", STRING)
+            .put("timestamp with time zone", STRING)
+            .build();
 
     public static String fromPgToSwagger(String pgType) {
         return PG_TYPE_TO_SWAGGER_TYPE.get(pgType);

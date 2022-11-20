@@ -1,5 +1,6 @@
 package com.dercio.database_proxy.glue;
 
+import com.dercio.database_proxy.common.mapper.MapperModule;
 import com.dercio.database_proxy.repositories.budgets.BudgetsRepository;
 import com.dercio.database_proxy.repositories.cars.CarsRepository;
 import com.dercio.database_proxy.repositories.football.NationalFootballTeamsRepository;
@@ -54,7 +55,8 @@ public class CustomInjectorSource implements InjectorSource {
                         expose(WheelsRepository.class);
                     }
                 },
-                CucumberModules.createScenarioModule()
+                CucumberModules.createScenarioModule(),
+                new MapperModule()
         );
     }
 }

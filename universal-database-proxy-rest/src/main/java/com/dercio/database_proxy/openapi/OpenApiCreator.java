@@ -51,7 +51,7 @@ public class OpenApiCreator {
     private static Schema<?> createSchemaFromColumns(List<ColumnMetadata> columns) {
         var properties = columns.stream()
                 .map(column -> Map.entry(column.getColumnName(), new ObjectSchema()
-                        .type(column.getDataType())
+                        .type(column.getOpenApiType())
                         .nullable(column.isNullable())))
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -138,7 +138,7 @@ public class OpenApiCreator {
                         .name(column.getColumnName())
                         .in("path")
                         .required(true)
-                        .schema(new ObjectSchema().type(column.getDataType())))
+                        .schema(new ObjectSchema().type(column.getOpenApiType())))
                 .orElseThrow(() -> {
                     var message = "Unable to find a column that matches the table PK column name";
                     log.error(message);

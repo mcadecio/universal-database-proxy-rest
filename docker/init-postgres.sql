@@ -4,14 +4,15 @@ CREATE TABLE money.budgets
 (
     id            bigserial
         primary key,
-    year          integer                                                           not null,
-    month         integer                                                           not null,
-    income        numeric                                                           not null,
-    food          numeric                                                           not null,
-    rent          numeric                                                           not null,
-    savings       numeric                                                           not null,
-    discretionary numeric                                                           not null,
-    user_id       varchar(35) default '62486028383b0e006fbd161d'::character varying
+    year          integer not null,
+    month         integer not null,
+    income        numeric not null,
+    food          numeric not null,
+    rent          numeric not null,
+    savings       numeric not null,
+    discretionary numeric not null,
+    user_id       varchar(35) default '62486028383b0e006fbd161d'::character varying,
+    created       timestamp   default now()
 );
 
 INSERT INTO money.budgets (id, year, month, income, food, rent, savings, discretionary, user_id)

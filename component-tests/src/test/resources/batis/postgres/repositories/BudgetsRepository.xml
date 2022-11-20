@@ -18,7 +18,8 @@
                                   rent,
                                   savings,
                                   discretionary,
-                                  user_id)
+                                  user_id,
+                                  created)
         VALUES (#{id},
                 #{year},
                 #{month},
@@ -27,11 +28,13 @@
                 #{rent},
                 #{savings},
                 #{discretionary},
-                #{userId})
+                #{userId},
+                #{created})
     </insert>
 
     <delete id="deleteById">
-        DELETE FROM money.budgets
+        DELETE
+        FROM money.budgets
         WHERE id = #{id}
     </delete>
 </mapper>

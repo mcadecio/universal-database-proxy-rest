@@ -5,7 +5,8 @@ CREATE TABLE vehicles.cars
     car_id       bigint primary key not null
         constraint cars_car_id_uindex unique,
     manufacturer varchar(50)        not null,
-    doors        bigint default 5
+    doors        bigint default 5,
+    last_updated timestamptz default now()
 );
 
 INSERT INTO vehicles.cars

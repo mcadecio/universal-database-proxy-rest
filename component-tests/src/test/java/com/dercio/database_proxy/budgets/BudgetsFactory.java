@@ -3,6 +3,7 @@ package com.dercio.database_proxy.budgets;
 import com.dercio.database_proxy.repositories.budgets.Budget;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class BudgetsFactory {
@@ -16,7 +17,8 @@ public class BudgetsFactory {
                 BigDecimal.valueOf(300),
                 BigDecimal.valueOf(0),
                 BigDecimal.valueOf(10),
-                UUID.randomUUID().toString().substring(0, 15)
+                UUID.randomUUID().toString().substring(0, 15),
+                LocalDateTime.now()
         );
     }
 
@@ -30,7 +32,8 @@ public class BudgetsFactory {
                 BigDecimal.valueOf(800),
                 BigDecimal.valueOf(1),
                 BigDecimal.valueOf(0),
-                UUID.randomUUID().toString().substring(0, 15)
+                UUID.randomUUID().toString().substring(0, 15),
+                LocalDateTime.now()
         );
     }
 
@@ -44,7 +47,8 @@ public class BudgetsFactory {
                 null,
                 null,
                 null,
-                UUID.randomUUID().toString().substring(0, 15)
+                UUID.randomUUID().toString().substring(0, 15),
+                LocalDateTime.now()
         );
     }
 
@@ -58,7 +62,8 @@ public class BudgetsFactory {
                 BigDecimal.valueOf(800),
                 BigDecimal.valueOf(1),
                 BigDecimal.valueOf(0),
-                UUID.randomUUID().toString().substring(0, 15)
+                null,
+                null
         );
     }
 
@@ -72,7 +77,8 @@ public class BudgetsFactory {
                 BigDecimal.valueOf(800),
                 BigDecimal.valueOf(1),
                 BigDecimal.valueOf(0),
-                UUID.randomUUID().toString().substring(0, 15)
+                UUID.randomUUID().toString().substring(0, 15),
+                LocalDateTime.now()
         );
     }
 }

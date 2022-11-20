@@ -13,7 +13,6 @@ import io.cucumber.java.en.When;
 import io.restassured.response.Response;
 import org.mybatis.guice.transactional.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
 
 import static com.dercio.database_proxy.budgets.BudgetsFactory.createFebBudget;
