@@ -1,6 +1,6 @@
 FROM eclipse-temurin:11-jre-alpine
 
-ENV VERTICLE_FILE=universal-database-proxy-rest-0.0.8-fat.jar
+ENV VERTICLE_FILE=universal-database-proxy-rest-0.0.9-fat.jar
 
 RUN echo "$VERTICLE_FILE"
 
