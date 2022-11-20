@@ -18,6 +18,7 @@ public class Car {
     private Object manufacturer;
     private Integer doors;
     private OffsetDateTime lastUpdated;
+    private ExtraDetails extraDetails;
 
     @Override
     public boolean equals(Object o) {
@@ -26,12 +27,13 @@ public class Car {
         Car car = (Car) o;
         return carId.equals(car.carId) &&
                 manufacturer.equals(car.manufacturer) &&
+                Objects.equals(extraDetails, car.extraDetails) &&
                 Objects.equals(doors, car.doors) &&
                 (lastUpdated != null ? lastUpdated.isEqual(car.lastUpdated) : Objects.equals(lastUpdated, car.lastUpdated));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(carId, manufacturer, doors, lastUpdated);
+        return Objects.hash(carId, manufacturer, doors, lastUpdated, extraDetails);
     }
 }

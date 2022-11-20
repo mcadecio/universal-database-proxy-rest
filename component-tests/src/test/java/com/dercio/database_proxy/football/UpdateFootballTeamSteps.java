@@ -11,6 +11,7 @@ import io.cucumber.java.en.When;
 import org.mybatis.guice.transactional.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.dercio.database_proxy.football.FootballFactory.createFranceTeam;
 import static org.hamcrest.Matchers.*;
@@ -51,7 +52,8 @@ public class UpdateFootballTeamSteps {
         var existingTeam = footballTeams.get(0);
         var updatedTeam = new NationalFootballTeam()
                 .setName("FRAN")
-                .setAbbreviatedName(existingTeam.getAbbreviatedName());
+                .setAbbreviatedName(existingTeam.getAbbreviatedName())
+                .setAdditionalInfo(existingTeam.getAdditionalInfo());
 
         footballTeamContext.setResponse(footballTeamService.updateFootballTeam(existingTeam.getName(), updatedTeam));
     }
@@ -108,7 +110,8 @@ public class UpdateFootballTeamSteps {
     public void iUpdateANationalFootballTeamThatDoesNotExist() {
         var footballTeam = new NationalFootballTeam()
                 .setName("MOROCCO")
-                .setAbbreviatedName("MOR");
+                .setAbbreviatedName("MOR")
+                .setAdditionalInfo(Map.of());
         footballTeamContext.setResponse(footballTeamService.updateFootballTeam(footballTeam.getName(), footballTeam));
     }
 }

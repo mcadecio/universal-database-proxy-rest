@@ -25,9 +25,19 @@ CREATE SCHEMA football;
 CREATE TABLE football.national_football_teams
 (
     name             varchar(50) primary key not null,
-    abbreviated_name varchar(10)             not null
+    abbreviated_name varchar(10)             not null,
+    additional_info  jsonb                   not null
 );
 
-INSERT INTO football.national_football_teams (name, abbreviated_name)
-VALUES ('PORTUGAL', 'POR'),
-       ('SWITZERLAND', 'SUI')
+INSERT INTO football.national_football_teams (name, abbreviated_name, additional_info)
+VALUES ('PORTUGAL', 'POR', '{
+  "color": [
+    "RED",
+    "GREEN",
+    "YELLOW"
+  ]
+}'),
+       ('SWITZERLAND', 'SUI', '{
+         "weather": "COLD",
+         "currency": "EURO"
+       }')

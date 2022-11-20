@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.util.Map;
+
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
@@ -13,4 +15,5 @@ import lombok.experimental.Accessors;
 public class NationalFootballTeam {
     private String name;
     private Object abbreviatedName;
+    private Map<String, Object> additionalInfo;
 }

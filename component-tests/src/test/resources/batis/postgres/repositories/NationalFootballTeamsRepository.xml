@@ -10,8 +10,8 @@
     </select>
     <insert id="save"
             parameterType="com.dercio.database_proxy.repositories.football.NationalFootballTeam">
-        INSERT INTO football.national_football_teams (name, abbreviated_name)
-        VALUES (#{name}, #{abbreviatedName})
+        INSERT INTO football.national_football_teams (name, abbreviated_name, additional_info)
+        VALUES (#{name}, #{abbreviatedName}, #{additionalInfo}::jsonb)
     </insert>
     <delete id="deleteByName" parameterType="string">
         DELETE

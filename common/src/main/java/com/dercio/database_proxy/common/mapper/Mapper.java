@@ -37,4 +37,16 @@ public class Mapper {
         return mappedValue;
     }
 
+    public <T> T decode(String value, Class<T> valueClass) {
+        T mappedValue = null;
+
+        try {
+            mappedValue = objectMapper.readValue(value, valueClass);
+        } catch (JsonProcessingException e) {
+            log.error("Error decoding value: {}", e.getMessage(), e);
+        }
+
+        return mappedValue;
+    }
+
 }

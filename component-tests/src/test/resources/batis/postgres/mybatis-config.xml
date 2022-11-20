@@ -7,6 +7,10 @@
         <setting name="mapUnderscoreToCamelCase" value="true"/>
     </settings>
 
+    <typeHandlers>
+        <typeHandler handler="com.dercio.database_proxy.repositories.cars.MapStringObjectTypeHandler"/>
+    </typeHandlers>
+
     <environments default="test">
         <environment id="test">
             <transactionManager type="JDBC"/>
