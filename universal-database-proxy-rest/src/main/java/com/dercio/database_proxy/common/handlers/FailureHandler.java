@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
+import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -36,7 +37,8 @@ public class FailureHandler implements Handler<RoutingContext> {
             ParameterProcessorException.class, this::handleParameterProcessorException,
             PgException.class, this::handlePgException,
             InconsistentStateException.class, this::handleInconsistentStateException,
-            IllegalStateException.class, this::handleIllegalStateException
+            IllegalStateException.class, this::handleIllegalStateException,
+            DateTimeParseException.class, this::handleDateTimeParseException
     );
 
     @SneakyThrows
@@ -93,6 +95,12 @@ public class FailureHandler implements Handler<RoutingContext> {
 
     ErrorResponse handlePgException(Throwable throwable, HttpServerRequest request) {
         return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
+    }
+
+    ErrorResponse handleDateTimeParseException(Throwable throwable, HttpServerRequest httpServerRequest) {
+        DateTimeParseException dateTimeParseException = ((DateTimeParseException) throwable);
+        String errorMessage = String.format("The value [%s] is not a valid date", dateTimeParseException.getParsedString());
+        return errorFactory.createErrorResponse(_400.getCode(), httpServerRequest.uri(), errorMessage);
     }
 
     ErrorResponse handleException(Throwable throwable, HttpServerRequest request) {
