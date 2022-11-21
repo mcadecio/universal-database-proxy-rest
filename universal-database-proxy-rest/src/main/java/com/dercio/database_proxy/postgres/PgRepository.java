@@ -101,10 +101,7 @@ public class PgRepository implements Repository {
                                             log.info("Found table [{}] with [{}] columns named {}",
                                                     tableMetadata.getTableName(),
                                                     tableMetadata.getColumns().size(),
-                                                    tableMetadata.getColumns()
-                                                            .stream()
-                                                            .map(ColumnMetadata::getColumnName)
-                                                            .collect(Collectors.toList()));
+                                                    tableMetadata.getColumnNames());
 
                                             return tableMetadata;
                                         }))
@@ -249,16 +246,9 @@ public class PgRepository implements Repository {
     }
 
     private Object findPkValue(TableMetadata tableMetadata, Map<String, String> pathParams) {
-        return tableMetadata.getColumns()
-                .stream()
-                .filter(column -> column.getColumnName().equals(tableMetadata.getPkColumnName())) //TODO:  Refactor to get / store primary column in table meta data
-                .findFirst()
-                .map(column -> {
-                    var value = pathParams.get(column.getColumnName());
-                    return column.getOpenApiType().equals(INTEGER) ?
-                            Long.parseLong(value) : value;
-                })
-                .orElseThrow();
+        var primaryKeyColumn = tableMetadata.getPrimaryKeyColumn();
+        var value = pathParams.get(primaryKeyColumn.getColumnName());
+        return primaryKeyColumn.getOpenApiType().equals(INTEGER) ? Long.parseLong(value) : value;
     }
 
     private String generateSelectQuery(TableMetadata tableMetadata) {
@@ -295,10 +285,7 @@ public class PgRepository implements Repository {
                 "INSERT INTO %s.%s(%s) VALUES ",
                 tableMetadata.getSchemaName(),
                 tableMetadata.getTableName(),
-                tableMetadata.getColumns()
-                        .stream()
-                        .map(ColumnMetadata::getColumnName)
-                        .collect(Collectors.joining(", "))
+                String.join(", ", tableMetadata.getColumnNames())
         );
 
         String valuePlaceholders = "(" +
@@ -344,11 +331,7 @@ public class PgRepository implements Repository {
 
     private String generateUpdateQuery(TableMetadata tableMetadata) {
 
-        var values = generateColumnsToUpdate(tableMetadata.getColumns()
-                .stream()
-                .filter(column -> !column.getColumnName().equals(tableMetadata.getPkColumnName())) // TODO: add method method to get all collumns apart from primary column
-                .collect(Collectors.toList())
-        );
+        var values = generateColumnsToUpdate(tableMetadata.getNonPrimaryKeyColumns());
 
         var query = format(
                 "UPDATE %s.%s SET %s WHERE %s = $1 RETURNING %s",

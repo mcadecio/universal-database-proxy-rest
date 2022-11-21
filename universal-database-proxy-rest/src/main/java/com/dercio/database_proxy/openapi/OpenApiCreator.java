@@ -130,21 +130,12 @@ public class OpenApiCreator {
     }
 
     private static Parameter createPkPathParameter(TableMetadata tableMetadata) {
-        return tableMetadata.getColumns()
-                .stream()
-                .filter(column -> column.getColumnName().equals(tableMetadata.getPkColumnName()))
-                .findAny()
-                .map(column -> new Parameter()
-                        .name(column.getColumnName())
+        var primaryKeyColumn = tableMetadata.getPrimaryKeyColumn();
+        return  new Parameter()
+                        .name(primaryKeyColumn.getColumnName())
                         .in("path")
                         .required(true)
-                        .schema(new ObjectSchema().type(column.getOpenApiType())))
-                .orElseThrow(() -> {
-                    var message = "Unable to find a column that matches the table PK column name";
-                    log.error(message);
-                    log.error("Table: {}", JsonObject.mapFrom(tableMetadata).encodePrettily());
-                    return new IllegalStateException(message);
-                });
+                        .schema(new ObjectSchema().type(primaryKeyColumn.getOpenApiType()));
     }
 
     private static Operation generateGetByIdOperation(TableMetadata tableMetadata) {

@@ -12,6 +12,7 @@ import io.swagger.v3.core.util.Yaml;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
@@ -49,7 +50,10 @@ public class RestApiVerticle extends AbstractVerticle {
                         .compose(this::createOpenApiFile)
                         .compose(this::createRouterAndMountHandlers)
                         .onSuccess(router -> {
-                            httpServer = vertx.createHttpServer();
+                            var httpServerOptions = new HttpServerOptions()
+                                    .setUseAlpn(true)
+                                    .setSsl(false);
+                            httpServer = vertx.createHttpServer(httpServerOptions);
                             httpServer
                                     .requestHandler(router)
                                     .listen(apiConfig.getPort(), apiConfig.getHost())
