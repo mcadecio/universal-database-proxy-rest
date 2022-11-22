@@ -16,6 +16,7 @@ public class ColumnMetadata {
     private final Long characterMaximumLength;
     private final Object columnDefault;
     private final boolean isNullable;
+    private final Integer ordinalPosition;
 
     public ColumnMetadata(JsonObject jsonObject) {
         this.tableSchema = jsonObject.getString("table_schema");
@@ -26,5 +27,6 @@ public class ColumnMetadata {
         this.characterMaximumLength = jsonObject.getLong("character_maximum_length");
         this.columnDefault = jsonObject.getValue("column_default");
         this.isNullable = "YES".equals(jsonObject.getString("is_nullable"));
+        this.ordinalPosition = jsonObject.getInteger("ordinal_position");
     }
 }

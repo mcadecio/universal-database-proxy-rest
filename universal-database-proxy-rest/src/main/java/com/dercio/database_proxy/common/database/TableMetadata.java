@@ -20,20 +20,7 @@ public class TableMetadata {
     private final String databaseName;
     private final String schemaName;
     private final String tableName;
-    private String pkColumnName;
-
-    public ColumnMetadata getPrimaryKeyColumn() {
-        return columns
-                .stream()
-                .filter(column -> column.getColumnName().equals(pkColumnName))
-                .findAny()
-                .orElseThrow(() -> {
-                    var message = "Unable to find a column that matches the table PK column name";
-                    log.error(message);
-                    log.error("Table: {}", JsonObject.mapFrom(this).encodePrettily());
-                    return new IllegalStateException(message);
-                });
-    }
+    private ColumnMetadata primaryKeyColumn;
 
     public List<String> getColumnNames() {
         return columns.stream()
@@ -44,7 +31,28 @@ public class TableMetadata {
     public List<ColumnMetadata> getNonPrimaryKeyColumns() {
         return columns
                 .stream()
-                .filter(column -> !column.getColumnName().equals(pkColumnName))
+                .filter(column -> !column.getColumnName().equals(getPkColumnName()))
                 .collect(Collectors.toList());
+    }
+
+    public String getPkColumnName() {
+        return primaryKeyColumn.getColumnName();
+    }
+
+    public int getNumberOfColumns() {
+        return columns.size();
+    }
+
+    public void setPrimaryKeyColumn(String columnName) {
+        this.primaryKeyColumn = columns
+                .stream()
+                .filter(column -> column.getColumnName().equals(columnName))
+                .findAny()
+                .orElseThrow(() -> {
+                    var message = "Unable to find a column that matches the table PK column name";
+                    log.error(message);
+                    log.error("Table: {}", JsonObject.mapFrom(this).encodePrettily());
+                    return new IllegalStateException(message);
+                });
     }
 }

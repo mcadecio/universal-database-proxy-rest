@@ -2,15 +2,15 @@ CREATE SCHEMA vehicles;
 
 CREATE TABLE vehicles.cars
 (
+    manufacturer  varchar(50)        not null,
     car_id        bigint primary key not null
         constraint cars_car_id_uindex unique,
-    manufacturer  varchar(50)        not null,
     doors         bigint      default 5,
     last_updated  timestamptz default now(),
     extra_details json        default '{}'
 );
 
-INSERT INTO vehicles.cars
+INSERT INTO vehicles.cars(car_id, manufacturer, doors)
 VALUES (1, 'BMW', 5),
        (2, 'BMW', 3),
        (3, 'MERCEDES', 5),

@@ -1,10 +1,12 @@
 package com.dercio.database_proxy.cockroach;
 
+import com.dercio.database_proxy.common.database.ApiConfig;
+import com.dercio.database_proxy.common.database.Repository;
 import com.dercio.database_proxy.common.handlers.FailureHandler;
 import com.dercio.database_proxy.common.handlers.NotFoundHandler;
 import com.dercio.database_proxy.common.mapper.Mapper;
-import com.dercio.database_proxy.common.module.Module;
-import com.dercio.database_proxy.postgres.PgRepository;
+import com.dercio.database_proxy.common.module.GuiceModule;
+import com.dercio.database_proxy.postgres.*;
 import com.dercio.database_proxy.restapi.RestApiHandler;
 import com.dercio.database_proxy.restapi.RestApiVerticle;
 import com.google.inject.AbstractModule;
@@ -16,7 +18,7 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.SqlClient;
 
-@Module
+@GuiceModule
 public class CockroachModule extends AbstractModule {
 
     @ProvidesIntoSet
@@ -28,7 +30,8 @@ public class CockroachModule extends AbstractModule {
             Mapper mapper
     ) {
 
-        var pgRepository = new PgRepository(createCrbClients(vertx, apiConfig));
+        var sqlClient = createSqlClient(vertx, apiConfig);
+        var pgRepository = pgRepository(sqlClient);
 
         return new RestApiVerticle(
                 failureHandler,
@@ -39,25 +42,39 @@ public class CockroachModule extends AbstractModule {
         );
     }
 
-    private SqlClient createCrbClients(Vertx vertx, CrbApiConfig apiConfig) {
+    Repository pgRepository(SqlClient sqlClient) {
+        return new PgRepository(
+                new PgObjectDeleter(sqlClient),
+                new PgObjectInserter(sqlClient),
+                new PgObjectFinder(sqlClient),
+                new PgTableFinder(sqlClient)
+        );
+    }
+
+    private SqlClient createSqlClient(Vertx vertx, ApiConfig apiConfig) {
         if (!apiConfig.isEnabled()) {
             return null;
         }
 
-        var databaseConfig = apiConfig.getDatabase();
+        PgConnectOptions connectOptions = pgConnectOptions(apiConfig);
+        PoolOptions poolOptions = poolOptions();
+
+        return PgPool.pool(vertx, connectOptions, poolOptions);
+    }
+
+    PgConnectOptions pgConnectOptions(ApiConfig pgApiConfig) {
+        var databaseConfig = pgApiConfig.getDatabase();
         var password = System.getenv()
                 .getOrDefault(databaseConfig.getPassword(), databaseConfig.getPassword());
-
-        PgConnectOptions connectOptions = new PgConnectOptions()
+        return new PgConnectOptions()
                 .setPort(databaseConfig.getPort())
                 .setHost(databaseConfig.getHost())
                 .setDatabase(databaseConfig.getDatabaseName())
                 .setUser(databaseConfig.getUsername())
                 .setPassword(password);
+    }
 
-        PoolOptions poolOptions = new PoolOptions()
-                .setMaxSize(5);
-
-        return PgPool.pool(vertx, connectOptions, poolOptions);
+    PoolOptions poolOptions() {
+        return new PoolOptions().setMaxSize(5);
     }
 }
