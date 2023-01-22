@@ -1,16 +1,21 @@
 package com.dercio.database_proxy.cockroach;
 
-import com.dercio.database_proxy.common.database.ApiConfig;
 import com.dercio.database_proxy.common.database.Repository;
-import com.dercio.database_proxy.common.handlers.FailureHandler;
-import com.dercio.database_proxy.common.handlers.NotFoundHandler;
 import com.dercio.database_proxy.common.mapper.Mapper;
 import com.dercio.database_proxy.common.module.GuiceModule;
-import com.dercio.database_proxy.postgres.*;
+import com.dercio.database_proxy.common.router.RouterFactory;
+import com.dercio.database_proxy.postgres.PgObjectDeleter;
+import com.dercio.database_proxy.postgres.PgObjectFinder;
+import com.dercio.database_proxy.postgres.PgObjectInserter;
+import com.dercio.database_proxy.postgres.PgRepository;
+import com.dercio.database_proxy.postgres.PgTableFinder;
 import com.dercio.database_proxy.restapi.RestApiHandler;
-import com.dercio.database_proxy.restapi.RestApiVerticle;
+import com.dercio.database_proxy.restapi.RestApiVerticleSelector;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.multibindings.ProvidesIntoSet;
+import com.google.inject.name.Named;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.pgclient.PgConnectOptions;
@@ -22,27 +27,33 @@ import io.vertx.sqlclient.SqlClient;
 public class CockroachModule extends AbstractModule {
 
     @ProvidesIntoSet
-    AbstractVerticle crbApiVerticle(
-            FailureHandler failureHandler,
-            NotFoundHandler notFoundHandler,
-            Vertx vertx,
-            CrbApiConfig apiConfig,
-            Mapper mapper
+    AbstractVerticle crApiVerticle(
+            RouterFactory routerFactory,
+            CrApiConfig apiConfig,
+            @Named("cr.rest.api.handler") RestApiHandler restApiHandler,
+            @Named("cr.repository") Repository repository,
+            RestApiVerticleSelector restApiVerticleSelector
     ) {
 
-        var sqlClient = createSqlClient(vertx, apiConfig);
-        var pgRepository = pgRepository(sqlClient);
-
-        return new RestApiVerticle(
-                failureHandler,
-                notFoundHandler,
-                new RestApiHandler(mapper, pgRepository),
-                pgRepository,
+        return restApiVerticleSelector.select(
+                routerFactory,
+                restApiHandler,
+                repository,
                 apiConfig
         );
     }
 
-    Repository pgRepository(SqlClient sqlClient) {
+    @Provides
+    @Named("cr.rest.api.handler")
+    RestApiHandler providesRestApiHandler(@Named("cr.repository") Repository repository, Mapper mapper) {
+        return new RestApiHandler(mapper, repository);
+    }
+
+    @Provides
+    @Singleton
+    @Named("cr.repository")
+    Repository providesRepository(@Named("cr.sql.client") SqlClient sqlClient) {
+
         return new PgRepository(
                 new PgObjectDeleter(sqlClient),
                 new PgObjectInserter(sqlClient),
@@ -51,18 +62,24 @@ public class CockroachModule extends AbstractModule {
         );
     }
 
-    private SqlClient createSqlClient(Vertx vertx, ApiConfig apiConfig) {
+    @Provides
+    @Named("cr.sql.client")
+    SqlClient createSqlClient(
+            Vertx vertx,
+            CrApiConfig apiConfig,
+            @Named("cr.connection.options") PgConnectOptions connectOptions,
+            @Named("cr.pool.options") PoolOptions poolOptions
+    ) {
         if (!apiConfig.isEnabled()) {
             return null;
         }
 
-        PgConnectOptions connectOptions = pgConnectOptions(apiConfig);
-        PoolOptions poolOptions = poolOptions();
-
         return PgPool.pool(vertx, connectOptions, poolOptions);
     }
 
-    PgConnectOptions pgConnectOptions(ApiConfig pgApiConfig) {
+    @Provides
+    @Named("cr.connection.options")
+    PgConnectOptions providesConnectionOptions(CrApiConfig pgApiConfig) {
         var databaseConfig = pgApiConfig.getDatabase();
         var password = System.getenv()
                 .getOrDefault(databaseConfig.getPassword(), databaseConfig.getPassword());
@@ -74,7 +91,9 @@ public class CockroachModule extends AbstractModule {
                 .setPassword(password);
     }
 
-    PoolOptions poolOptions() {
+    @Provides
+    @Named("cr.pool.options")
+    PoolOptions providesPoolOptions() {
         return new PoolOptions().setMaxSize(5);
     }
 }

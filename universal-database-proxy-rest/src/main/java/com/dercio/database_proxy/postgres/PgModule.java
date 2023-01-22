@@ -1,15 +1,16 @@
 package com.dercio.database_proxy.postgres;
 
-import com.dercio.database_proxy.common.database.ApiConfig;
 import com.dercio.database_proxy.common.database.Repository;
-import com.dercio.database_proxy.common.handlers.FailureHandler;
-import com.dercio.database_proxy.common.handlers.NotFoundHandler;
 import com.dercio.database_proxy.common.mapper.Mapper;
 import com.dercio.database_proxy.common.module.GuiceModule;
+import com.dercio.database_proxy.common.router.RouterFactory;
 import com.dercio.database_proxy.restapi.RestApiHandler;
-import com.dercio.database_proxy.restapi.RestApiVerticle;
-import com.google.inject.*;
+import com.dercio.database_proxy.restapi.RestApiVerticleSelector;
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.multibindings.ProvidesIntoSet;
+import com.google.inject.name.Named;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.pgclient.PgConnectOptions;
@@ -22,26 +23,32 @@ public class PgModule extends AbstractModule {
 
     @ProvidesIntoSet
     AbstractVerticle pgApiVerticle(
-            FailureHandler failureHandler,
-            NotFoundHandler notFoundHandler,
-            Vertx vertx,
+            RouterFactory routerFactory,
             PgApiConfig apiConfig,
-            Mapper mapper
+            @Named("pg.rest.api.handler") RestApiHandler restApiHandler,
+            @Named("pg.repository") Repository repository,
+            RestApiVerticleSelector restApiVerticleSelector
     ) {
 
-        var sqlClient = createSqlClient(vertx, apiConfig);
-        var pgRepository = pgRepository(sqlClient);
-
-        return new RestApiVerticle(
-                failureHandler,
-                notFoundHandler,
-                new RestApiHandler(mapper, pgRepository),
-                pgRepository,
+        return restApiVerticleSelector.select(
+                routerFactory,
+                restApiHandler,
+                repository,
                 apiConfig
         );
     }
 
-    Repository pgRepository(SqlClient sqlClient) {
+    @Provides
+    @Named("pg.rest.api.handler")
+    RestApiHandler providesPgRestApiHandler(@Named("pg.repository") Repository repository, Mapper mapper) {
+        return new RestApiHandler(mapper, repository);
+    }
+
+    @Provides
+    @Singleton
+    @Named("pg.repository")
+    Repository pgRepository(@Named("pg.sql.client") SqlClient sqlClient) {
+
         return new PgRepository(
                 new PgObjectDeleter(sqlClient),
                 new PgObjectInserter(sqlClient),
@@ -50,18 +57,24 @@ public class PgModule extends AbstractModule {
         );
     }
 
-    private SqlClient createSqlClient(Vertx vertx, ApiConfig apiConfig) {
+    @Provides
+    @Named("pg.sql.client")
+    SqlClient createSqlClient(
+            Vertx vertx,
+            PgApiConfig apiConfig,
+            @Named("pg.connection.options") PgConnectOptions connectOptions,
+            @Named("pg.pool.options") PoolOptions poolOptions
+    ) {
         if (!apiConfig.isEnabled()) {
             return null;
         }
 
-        PgConnectOptions connectOptions = pgConnectOptions(apiConfig);
-        PoolOptions poolOptions = poolOptions();
-
         return PgPool.pool(vertx, connectOptions, poolOptions);
     }
 
-    PgConnectOptions pgConnectOptions(ApiConfig pgApiConfig) {
+    @Provides
+    @Named("pg.connection.options")
+    PgConnectOptions pgConnectOptions(PgApiConfig pgApiConfig) {
         var databaseConfig = pgApiConfig.getDatabase();
         var password = System.getenv()
                 .getOrDefault(databaseConfig.getPassword(), databaseConfig.getPassword());
@@ -73,6 +86,8 @@ public class PgModule extends AbstractModule {
                 .setPassword(password);
     }
 
+    @Provides
+    @Named("pg.pool.options")
     PoolOptions poolOptions() {
         return new PoolOptions().setMaxSize(5);
     }

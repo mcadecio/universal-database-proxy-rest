@@ -12,4 +12,6 @@ public interface ApiConfig {
     DatabaseConfig getDatabase();
 
     long getStartupDelay();
+
+    long getReloadFrequency();
 }

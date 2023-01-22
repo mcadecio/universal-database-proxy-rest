@@ -17,5 +17,6 @@ public class PgApiConfig implements ApiConfig {
     private Integer port;
     private String openApiFilePath;
     private DatabaseConfig database;
-    private long startupDelay = 1;
+    private long startupDelay;
+    private long reloadFrequency;
 }
