@@ -38,6 +38,20 @@
         "./api.yaml"
       ]
     },
+    "startupDelay": {
+      "type": "integer",
+      "description": "The startup delay imposed on the http server in milliseconds. Cause the http server to delay its startup.",
+      "examples": [
+        5000
+      ]
+    },
+    "reloadFrequency": {
+      "type": "integer",
+      "description": "Controls how often the server should check for new db schema changes, in milliseconds.",
+      "examples": [
+        5000
+      ]
+    },
     "database": {
       "type": "object",
       "required": [

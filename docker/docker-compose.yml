@@ -30,20 +30,20 @@ services:
       interval: 1s
       timeout: 3s
       retries: 5
-#  database-proxy:
-#    environment:
-#      POSTGRES_PASSWORD: admin
-#      CRB_PASSWORD:
-#    image: mcadecio/universal-database-proxy-rest:0.0.9
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#      crdb:
-#        condition: service_healthy
-#    ports:
-#      - "1234:1234"
-#      - "5433:5433"
-#      - "8000:8000"
-#      - "8010:8010"
-#    volumes:
-#      - ./config.json:/usr/database-proxy/config.json
+  database-proxy:
+    environment:
+      POSTGRES_PASSWORD: admin
+      CRB_PASSWORD:
+    image: mcadecio/universal-database-proxy-rest:0.0.10
+    depends_on:
+      postgres:
+        condition: service_healthy
+      crdb:
+        condition: service_healthy
+    ports:
+      - "1234:1234"
+      - "5433:5433"
+      - "8000:8000"
+      - "8010:8010"
+    volumes:
+      - ./config.json:/usr/database-proxy/config.json
