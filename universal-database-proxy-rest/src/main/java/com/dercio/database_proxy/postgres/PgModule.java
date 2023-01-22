@@ -18,6 +18,8 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.SqlClient;
 
+import javax.annotation.Nullable;
+
 @GuiceModule
 public class PgModule extends AbstractModule {
 
@@ -47,7 +49,7 @@ public class PgModule extends AbstractModule {
     @Provides
     @Singleton
     @Named("pg.repository")
-    Repository pgRepository(@Named("pg.sql.client") SqlClient sqlClient) {
+    Repository pgRepository(@Nullable @Named("pg.sql.client") SqlClient sqlClient) {
 
         return new PgRepository(
                 new PgObjectDeleter(sqlClient),
@@ -62,7 +64,7 @@ public class PgModule extends AbstractModule {
     SqlClient createSqlClient(
             Vertx vertx,
             PgApiConfig apiConfig,
-            @Named("pg.connection.options") PgConnectOptions connectOptions,
+            @Nullable @Named("pg.connection.options") PgConnectOptions connectOptions,
             @Named("pg.pool.options") PoolOptions poolOptions
     ) {
         if (!apiConfig.isEnabled()) {
@@ -75,6 +77,10 @@ public class PgModule extends AbstractModule {
     @Provides
     @Named("pg.connection.options")
     PgConnectOptions pgConnectOptions(PgApiConfig pgApiConfig) {
+        if (!pgApiConfig.isEnabled()) {
+            return null;
+        }
+
         var databaseConfig = pgApiConfig.getDatabase();
         var password = System.getenv()
                 .getOrDefault(databaseConfig.getPassword(), databaseConfig.getPassword());

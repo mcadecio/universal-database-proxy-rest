@@ -23,6 +23,8 @@ import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.SqlClient;
 
+import javax.annotation.Nullable;
+
 @GuiceModule
 public class CockroachModule extends AbstractModule {
 
@@ -52,7 +54,7 @@ public class CockroachModule extends AbstractModule {
     @Provides
     @Singleton
     @Named("cr.repository")
-    Repository providesRepository(@Named("cr.sql.client") SqlClient sqlClient) {
+    Repository providesRepository(@Nullable @Named("cr.sql.client") SqlClient sqlClient) {
 
         return new PgRepository(
                 new PgObjectDeleter(sqlClient),
@@ -67,7 +69,7 @@ public class CockroachModule extends AbstractModule {
     SqlClient createSqlClient(
             Vertx vertx,
             CrApiConfig apiConfig,
-            @Named("cr.connection.options") PgConnectOptions connectOptions,
+            @Nullable @Named("cr.connection.options") PgConnectOptions connectOptions,
             @Named("cr.pool.options") PoolOptions poolOptions
     ) {
         if (!apiConfig.isEnabled()) {
@@ -79,8 +81,12 @@ public class CockroachModule extends AbstractModule {
 
     @Provides
     @Named("cr.connection.options")
-    PgConnectOptions providesConnectionOptions(CrApiConfig pgApiConfig) {
-        var databaseConfig = pgApiConfig.getDatabase();
+    PgConnectOptions providesConnectionOptions(CrApiConfig crApiConfig) {
+        if (!crApiConfig.isEnabled()) {
+            return null;
+        }
+
+        var databaseConfig = crApiConfig.getDatabase();
         var password = System.getenv()
                 .getOrDefault(databaseConfig.getPassword(), databaseConfig.getPassword());
         return new PgConnectOptions()

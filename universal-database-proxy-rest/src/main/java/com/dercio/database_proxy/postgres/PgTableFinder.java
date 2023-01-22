@@ -29,11 +29,11 @@ public class PgTableFinder {
                     "                      FROM information_schema.table_constraints " +
                     "                      WHERE constraint_type = 'PRIMARY KEY'), " +
                     "     pk_columns AS (SELECT kcu.table_catalog, kcu.table_schema, kcu.table_name, column_name " +
-                    "                    FROM information_schema.key_column_usage kcu, " +
-                    "                         \"constraint\" con " +
-                    "                    WHERE con.table_name = kcu.table_name " +
-                    "                      AND con.table_schema = kcu.table_schema " +
-                    "                      AND con.table_schema NOT IN ('pg_catalog', 'information_schema', 'crdb_internal', 'pg_extension')) " +
+                    "                    FROM information_schema.key_column_usage kcu " +
+                    "                             INNER JOIN \"constraint\" con on con.table_name = kcu.table_name " +
+                    "                        AND con.table_schema = kcu.table_schema " +
+                    "                        AND con.constraint_name = kcu.constraint_name " +
+                    "                    WHERE con.table_schema NOT IN ('pg_catalog', 'information_schema', 'crdb_internal', 'pg_extension')) " +
                     "SELECT columns.table_catalog, " +
                     "       columns.table_schema, " +
                     "       columns.table_name, " +
