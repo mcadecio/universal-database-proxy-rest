@@ -137,7 +137,8 @@ public class RestApiHandler {
         return new TableRequest(
                 rc.get(DATABASE),
                 rc.get(SCHEMA),
-                rc.get(TABLE)
+                rc.get(TABLE),
+                rc.queryParams()
         );
     }
 

@@ -1,6 +1,6 @@
 package com.dercio.database_proxy.common.database;
 
-import com.dercio.database_proxy.postgres.PgTypeMapper;
+import com.dercio.database_proxy.postgres.type.PgType;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.ToString;
@@ -17,16 +17,18 @@ public class ColumnMetadata {
     private final Object columnDefault;
     private final boolean isNullable;
     private final Integer ordinalPosition;
+    private final boolean isPrimaryKey;
 
     public ColumnMetadata(JsonObject jsonObject) {
         this.tableSchema = jsonObject.getString("table_schema");
         this.tableName = jsonObject.getString("table_name");
         this.columnName = jsonObject.getString("column_name");
         this.dbType = jsonObject.getString("data_type");
-        this.openApiType = PgTypeMapper.fromPgToSwagger(dbType);
+        this.openApiType = PgType.fromPgToOpenApiType(dbType);
         this.characterMaximumLength = jsonObject.getLong("character_maximum_length");
         this.columnDefault = jsonObject.getValue("column_default");
         this.isNullable = "YES".equals(jsonObject.getString("is_nullable"));
         this.ordinalPosition = jsonObject.getInteger("ordinal_position");
+        this.isPrimaryKey = jsonObject.getBoolean("is_primary_key");
     }
 }

@@ -1,6 +1,7 @@
 package com.dercio.database_proxy.postgres;
 
 import com.dercio.database_proxy.common.database.TableMetadata;
+import com.dercio.database_proxy.postgres.type.PgType;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.SqlClient;
@@ -11,7 +12,6 @@ import lombok.extern.log4j.Log4j2;
 
 import java.util.Map;
 
-import static com.dercio.database_proxy.postgres.PgTypeMapper.INTEGER;
 import static java.lang.String.format;
 
 @Log4j2
@@ -46,6 +46,6 @@ public class PgObjectDeleter {
     private Object findPkValue(TableMetadata tableMetadata, Map<String, String> pathParams) {
         var primaryKeyColumn = tableMetadata.getPrimaryKeyColumn();
         var value = pathParams.get(primaryKeyColumn.getColumnName());
-        return primaryKeyColumn.getOpenApiType().equals(INTEGER) ? Long.parseLong(value) : value;
+        return PgType.parse(primaryKeyColumn.getDbType(), value);
     }
 }

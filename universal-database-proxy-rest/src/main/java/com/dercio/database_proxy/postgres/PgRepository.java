@@ -40,7 +40,7 @@ public class PgRepository implements Repository {
                 tableOption.getTable()
         );
 
-        return getTableInfo(tableOption).compose(finder::find);
+        return getTableInfo(tableOption).compose(tableMetadata -> finder.find(tableMetadata, tableOption.getQueryFilters()));
     }
 
     @Override

@@ -131,11 +131,11 @@ public class OpenApiCreator {
 
     private static Parameter createPkPathParameter(TableMetadata tableMetadata) {
         var primaryKeyColumn = tableMetadata.getPrimaryKeyColumn();
-        return  new Parameter()
-                        .name(primaryKeyColumn.getColumnName())
-                        .in("path")
-                        .required(true)
-                        .schema(new ObjectSchema().type(primaryKeyColumn.getOpenApiType()));
+        return new Parameter()
+                .name(primaryKeyColumn.getColumnName())
+                .in("path")
+                .required(true)
+                .schema(new ObjectSchema().type(primaryKeyColumn.getOpenApiType()));
     }
 
     private static Operation generateGetByIdOperation(TableMetadata tableMetadata) {
@@ -228,6 +228,7 @@ public class OpenApiCreator {
         getOperation.setOperationId("get_" + tableMetadata.getTableName());
         getOperation.setTags(Collections.singletonList(tableMetadata.getTableName()));
         addOperationMetadata(getOperation, tableMetadata);
+        getOperation.parameters(generateGetOperationQueryParams(tableMetadata.getColumns()));
 
         var objectSchema = createSchemaFromColumns(tableMetadata.getColumns());
 
@@ -249,6 +250,16 @@ public class OpenApiCreator {
 
         getOperation.setResponses(apiResponses);
         return getOperation;
+    }
+
+    private static List<Parameter> generateGetOperationQueryParams(List<ColumnMetadata> columns) {
+        return columns.stream()
+                .map(column -> new Parameter()
+                        .name(column.getColumnName())
+                        .in("query")
+                        .schema(new Schema<>().type(column.getOpenApiType()))
+                )
+                .collect(Collectors.toList());
     }
 
     private static Operation generatePostOperation(TableMetadata tableMetadata) {

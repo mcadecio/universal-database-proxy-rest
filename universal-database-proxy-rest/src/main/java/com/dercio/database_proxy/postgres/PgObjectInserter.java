@@ -2,6 +2,7 @@ package com.dercio.database_proxy.postgres;
 
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
+import com.dercio.database_proxy.postgres.type.PgType;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -46,7 +47,6 @@ public class PgObjectInserter {
                 .onSuccess(count -> log.info("Rows updated [{}]", count));
     }
 
-
     private String generateInsertQuery(TableMetadata tableMetadata) {
         var baseQuery = format(
                 "INSERT INTO %s.%s(%s) VALUES ",
@@ -74,13 +74,14 @@ public class PgObjectInserter {
                 .map(column -> {
 
                     var columnName = column.getColumnName();
+                    var dbType = column.getDbType();
 
-                    if (column.getDbType().equals("timestamp without time zone")) {
+                    if (PgType.TIMESTAMP_WITHOUT_TIME_ZONE.getDbType().equals(dbType)) {
                         var rawTimestamp = body.getString(columnName);
-                        return rawTimestamp == null ? null : LocalDateTime.parse(rawTimestamp);
-                    } else if (column.getDbType().equals("timestamp with time zone")) {
+                        return PgType.TIMESTAMP_WITHOUT_TIME_ZONE.parse(rawTimestamp);
+                    } else if (PgType.TIMESTAMP_WITH_TIME_ZONE.getDbType().equals(dbType)) {
                         var rawTimestamp = body.getString(columnName);
-                        return rawTimestamp == null ? null : OffsetDateTime.parse(rawTimestamp);
+                        return PgType.TIMESTAMP_WITH_TIME_ZONE.parse(rawTimestamp);
                     }
 
                     return body.getValue(columnName);
