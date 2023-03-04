@@ -12,8 +12,6 @@ import io.vertx.sqlclient.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -106,23 +104,20 @@ public class PgObjectInserter {
     }
 
     private String generateColumnsToUpdate(List<ColumnMetadata> columns) {
-        return columns.stream()
-                .map(column -> format("%s = $%d", column.getColumnName(), column.getOrdinalPosition()))
+        return IntStream.range(0, columns.size())
+                .mapToObj(i -> format("%s = $%d", columns.get(i).getColumnName(), i + 2))
                 .collect(Collectors.joining(", "));
     }
 
     private String generateUpdateQuery(TableMetadata tableMetadata) {
-
         var values = generateColumnsToUpdate(tableMetadata.getNonPrimaryKeyColumns());
-        var primaryKeyColumn = tableMetadata.getPrimaryKeyColumn();
 
         var query = format(
-                "UPDATE %s.%s SET %s WHERE %s = $%d RETURNING %s",
+                "UPDATE %s.%s SET %s WHERE %s = $1 RETURNING %s",
                 tableMetadata.getSchemaName(),
                 tableMetadata.getTableName(),
                 values,
                 tableMetadata.getPkColumnName(),
-                primaryKeyColumn.getOrdinalPosition(),
                 tableMetadata.getPkColumnName()
         );
 

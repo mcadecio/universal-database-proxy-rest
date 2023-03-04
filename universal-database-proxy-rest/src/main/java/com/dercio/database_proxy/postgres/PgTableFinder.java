@@ -87,8 +87,8 @@ public class PgTableFinder {
     private List<ColumnMetadata> mapRowsToColumnMetadata(RowSet<Row> rows) {
         return StreamSupport.stream(rows.spliterator(), false)
                 .map(Row::toJson)
+                .sorted(Comparator.comparing(json -> json.getInteger("ordinal_position")))
                 .map(ColumnMetadata::new)
-                .sorted(Comparator.comparing(ColumnMetadata::getOrdinalPosition))
                 .collect(Collectors.toList());
     }
 
