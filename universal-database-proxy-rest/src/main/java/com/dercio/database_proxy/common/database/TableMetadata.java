@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,8 +28,15 @@ public class TableMetadata {
         setPrimaryKeyColumn();
     }
 
+    public List<ColumnMetadata> getColumns() {
+        List<ColumnMetadata> columnsCopy = new ArrayList<>(getNonPrimaryKeyColumns());
+        columnsCopy.add(0, primaryKeyColumn);
+        return columnsCopy;
+    }
+
     public List<String> getColumnNames() {
-        return columns.stream()
+        return getColumns()
+                .stream()
                 .map(ColumnMetadata::getColumnName)
                 .collect(Collectors.toList());
     }
