@@ -61,7 +61,7 @@ public class PgTableFinder {
                 .execute(Tuple.of(database))
                 .map(this::mapRowsToColumnMetadata)
                 .map(columns -> createTablesFromColumns(database, columns))
-                .onSuccess(tableInfos -> log.info("Found [{}] tables for [{}] database", tableInfos.size(), database))
+                .onSuccess(tableInfos -> log.debug("Found [{}] tables for [{}] database", tableInfos.size(), database))
                 .onSuccess(tableInfos -> tableInfos.forEach(tableMetadata -> tableInfoCache.put(tableMetadata.getTableName(), tableMetadata)));
     }
 
