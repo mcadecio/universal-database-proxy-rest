@@ -6,9 +6,11 @@ import com.dercio.database_proxy.common.database.DatabaseConfig;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Configuration(name = "postgresApi")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PgApiConfig implements ApiConfig {

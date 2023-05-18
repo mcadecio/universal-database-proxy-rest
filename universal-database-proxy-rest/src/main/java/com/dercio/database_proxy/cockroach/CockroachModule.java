@@ -24,6 +24,7 @@ import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.SqlClient;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 @GuiceModule
 public class CockroachModule extends AbstractModule {
@@ -81,19 +82,23 @@ public class CockroachModule extends AbstractModule {
 
     @Provides
     @Named("cr.connection.options")
-    PgConnectOptions providesConnectionOptions(CrApiConfig crApiConfig) {
+    PgConnectOptions providesConnectionOptions(CrApiConfig crApiConfig,
+                                               @Named("system.env.variables") Map<String, String> envVariables) {
         if (!crApiConfig.isEnabled()) {
             return null;
         }
 
         var databaseConfig = crApiConfig.getDatabase();
-        var password = System.getenv()
-                .getOrDefault(databaseConfig.getPassword(), databaseConfig.getPassword());
+        var host = envVariables.getOrDefault(databaseConfig.getHost(), databaseConfig.getHost());
+        var username = envVariables.getOrDefault(databaseConfig.getUsername(), databaseConfig.getUsername());
+        var password = envVariables.getOrDefault(databaseConfig.getPassword(), databaseConfig.getPassword());
+        var databaseName = envVariables.getOrDefault(databaseConfig.getDatabaseName(), databaseConfig.getDatabaseName());
+
         return new PgConnectOptions()
                 .setPort(databaseConfig.getPort())
-                .setHost(databaseConfig.getHost())
-                .setDatabase(databaseConfig.getDatabaseName())
-                .setUser(databaseConfig.getUsername())
+                .setHost(host)
+                .setDatabase(databaseName)
+                .setUser(username)
                 .setPassword(password);
     }
 
