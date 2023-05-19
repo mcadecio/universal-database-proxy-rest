@@ -5,12 +5,12 @@ import com.google.inject.*;
 import com.google.inject.name.Names;
 import io.vertx.core.Vertx;
 import io.vertx.pgclient.PgConnectOptions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PgModuleTest {
 

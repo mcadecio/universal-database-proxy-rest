@@ -18,6 +18,7 @@ import com.google.inject.multibindings.ProvidesIntoSet;
 import com.google.inject.name.Named;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
+import io.vertx.core.net.PemTrustOptions;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
@@ -93,8 +94,15 @@ public class CockroachModule extends AbstractModule {
         var username = envVariables.getOrDefault(databaseConfig.getUsername(), databaseConfig.getUsername());
         var password = envVariables.getOrDefault(databaseConfig.getPassword(), databaseConfig.getPassword());
         var databaseName = envVariables.getOrDefault(databaseConfig.getDatabaseName(), databaseConfig.getDatabaseName());
+        var pemTrustOptions = new PemTrustOptions();
+
+        if (databaseConfig.isSslEnabled()) {
+            pemTrustOptions.addCertPath(databaseConfig.getSslCertPath());
+        }
 
         return new PgConnectOptions()
+                .setSsl(databaseConfig.isSslEnabled())
+                .setPemTrustOptions(pemTrustOptions)
                 .setPort(databaseConfig.getPort())
                 .setHost(host)
                 .setDatabase(databaseName)
