@@ -36,6 +36,8 @@
     "database": {
       "host": "localhost",
       "port": 26257,
+      "sslEnabled": true,
+      "sslCertPath": "cfg/dummy-cert.pem",
       "username": "root",
       "password": "",
       "databaseName": "defaultdb"
