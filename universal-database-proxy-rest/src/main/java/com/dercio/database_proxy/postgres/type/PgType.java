@@ -15,15 +15,17 @@ public enum PgType {
     NUMERIC("numeric", OpenApiType.NUMBER, PgType::blankSanitizer, BigDecimal::new),
     BIGINT("bigint", OpenApiType.INTEGER, PgType::blankSanitizer, Long::parseLong),
     BOOLEAN("boolean", OpenApiType.BOOLEAN, PgType::blankSanitizer, Boolean::parseBoolean),
-    DATE("date", OpenApiType.STRING, PgType::blankSanitizer, s -> s),
-    CHARACTER_VARYING("character varying", OpenApiType.STRING, PgType::emptySanitizer, s -> s),
-    UUID("uuid", OpenApiType.STRING, PgType::blankSanitizer, s -> s),
-    TEXT("text", OpenApiType.STRING, PgType::emptySanitizer, s -> s),
-    CHARACTER("character", OpenApiType.STRING, PgType::emptySanitizer, s -> s),
+    DATE("date", OpenApiType.STRING, PgType::blankSanitizer, Function.identity()),
+    CHARACTER_VARYING("character varying", OpenApiType.STRING, PgType::emptySanitizer, Function.identity()),
+    UUID("uuid", OpenApiType.STRING, PgType::blankSanitizer, Function.identity()),
+    TEXT("text", OpenApiType.STRING, PgType::emptySanitizer, Function.identity()),
+    CHARACTER("character", OpenApiType.STRING, PgType::emptySanitizer, Function.identity()),
     TIMESTAMP_WITHOUT_TIME_ZONE("timestamp without time zone", OpenApiType.STRING, PgType::emptySanitizer, LocalDateTime::parse),
     TIMESTAMP_WITH_TIME_ZONE("timestamp with time zone", OpenApiType.STRING, PgType::emptySanitizer, OffsetDateTime::parse),
-    JSON("json", OpenApiType.OBJECT, PgType::blankSanitizer, s -> s),
-    JSONB("jsonb", OpenApiType.OBJECT, PgType::blankSanitizer, s -> s);
+    JSON("json", OpenApiType.OBJECT, PgType::blankSanitizer, Function.identity()),
+    JSONB("jsonb", OpenApiType.OBJECT, PgType::blankSanitizer, Function.identity()),
+    USER_DEFINED("USER-DEFINED", OpenApiType.ANY, PgType::blankSanitizer, Function.identity()),
+    UNKNOWN("UNKNOWN", OpenApiType.ANY, PgType::blankSanitizer, Function.identity());
 
     @Getter
     private final String dbType;
@@ -57,7 +59,9 @@ public enum PgType {
     }
 
     private static PgType from(String type) {
-        var desiredType = type.toUpperCase().replace(" ", "_");
+        var desiredType = type.toUpperCase()
+                .replace(" ", "_")
+                .replace("-", "_");
         return valueOf(desiredType);
     }
 }
