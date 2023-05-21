@@ -3,10 +3,7 @@ package com.dercio.database_proxy.openapi;
 import com.dercio.database_proxy.common.database.TableMetadata;
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import io.swagger.v3.core.util.Json;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.*;
@@ -45,14 +42,30 @@ public class OpenApiCreator {
                         .map(TableMetadata::getTableName)
                         .map(tableName -> new Tag().name(tableName))
                         .collect(Collectors.toList()))
-                .paths(generatePaths(tableMetadataList));
+                .paths(generatePaths(tableMetadataList))
+                .components(generateComponents());
+    }
+
+    private static Components generateComponents() {
+        var schema = new Schema<>()
+                .description("Can be anything: string, number, array, object, etc., including `null`");
+
+        return new Components().addSchemas("ANY", schema);
     }
 
     private static Schema<?> createSchemaFromColumns(List<ColumnMetadata> columns) {
         var properties = columns.stream()
-                .map(column -> Map.entry(column.getColumnName(), new ObjectSchema()
-                        .type(column.getOpenApiType())
-                        .nullable(column.isNullable())))
+                .map(column -> {
+                    var schema = new ObjectSchema()
+                            .type(column.getOpenApiType())
+                            .nullable(column.isNullable());
+
+                    if (OpenApiType.ANY.equals(column.getOpenApiType())) {
+                        schema.type(null).$ref(column.getOpenApiType());
+                    }
+
+                    return Map.entry(column.getColumnName(), schema);
+                })
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,
@@ -254,11 +267,18 @@ public class OpenApiCreator {
 
     private static List<Parameter> generateGetOperationQueryParams(List<ColumnMetadata> columns) {
         return columns.stream()
-                .map(column -> new Parameter()
-                        .name(column.getColumnName())
-                        .in("query")
-                        .schema(new Schema<>().type(column.getOpenApiType()))
-                )
+                .map(column -> {
+                    var parameter = new Parameter()
+                            .name(column.getColumnName())
+                            .in("query")
+                            .schema(new ObjectSchema().type(column.getOpenApiType()));
+
+                    if (OpenApiType.ANY.equals(column.getOpenApiType())) {
+                        parameter.getSchema().type(null).$ref(column.getOpenApiType());
+                    }
+
+                    return parameter;
+                })
                 .collect(Collectors.toList());
     }
 

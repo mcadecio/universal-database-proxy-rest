@@ -7,6 +7,7 @@ import com.dercio.database_proxy.postgres.InconsistentStateException;
 import com.google.inject.Inject;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.impl.NoStackTraceThrowable;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.BodyProcessorException;
 import io.vertx.ext.web.validation.ParameterProcessorException;
@@ -38,7 +39,8 @@ public class FailureHandler implements Handler<RoutingContext> {
             PgException.class, this::handlePgException,
             InconsistentStateException.class, this::handleInconsistentStateException,
             IllegalStateException.class, this::handleIllegalStateException,
-            DateTimeParseException.class, this::handleDateTimeParseException
+            DateTimeParseException.class, this::handleDateTimeParseException,
+            NoStackTraceThrowable.class, this::handleNoStackTraceThrowable
     );
 
     @SneakyThrows
@@ -101,6 +103,18 @@ public class FailureHandler implements Handler<RoutingContext> {
         DateTimeParseException dateTimeParseException = ((DateTimeParseException) throwable);
         String errorMessage = String.format("The value [%s] is not a valid date", dateTimeParseException.getParsedString());
         return errorFactory.createErrorResponse(_400.getCode(), httpServerRequest.uri(), errorMessage);
+    }
+
+    ErrorResponse handleNoStackTraceThrowable(Throwable throwable, HttpServerRequest request) {
+        NoStackTraceThrowable exception = ((NoStackTraceThrowable) throwable);
+        if (isParameterCannotBeCoercedError(exception.getMessage())) {
+            return errorFactory.createErrorResponse(_400.getCode(), request.uri(), exception.getMessage());
+        }
+        return this.handleException(throwable, request);
+    }
+
+    private boolean isParameterCannotBeCoercedError(String message) {
+        return message.contains("can not be coerced to the expected class");
     }
 
     ErrorResponse handleException(Throwable throwable, HttpServerRequest request) {
