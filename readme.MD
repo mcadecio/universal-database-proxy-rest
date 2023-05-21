@@ -31,15 +31,17 @@ java -jar -Dproject.config=cfg/config.json target/universal-database-proxy-rest-
     4. Set the `openApiFilePath` to where you want the OpenApi file generated to be stored. For
        example: `./pgOpenApi.yaml`
     5. Now the `database` object holds configuration regarding the database we are trying base of our API from.
-    6. Set the `host` to the address of the database. For example: `localhost` or `0.0.0.0` or `some.address.com`.
+    6. Set the `host` to the address of the database. For example: `localhost` or `0.0.0.0` or `some.address.com`. This
+       can be the host in plain text or the name of an ENVIRONMENT VARIABLE.
     7. Set the `port` to the port number the database is listening for connections on. This can be any valid port
        number.
     8. Set the `username` to the database username the server should use to authenticate itself against your chosen
-       database.
+       database. This can be the username in plain text or the name of an ENVIRONMENT VARIABLE.
     9. Set the `password` to the database password the server should use to authenticate itself against your chosen
        database. This can be the password in plain text or an ENVIRONMENT VARIABLE. For example: `admin`
        or `POSTGRES_PASSWORD`
-    10. Set the `databaseName` to the name of the database you want the OpenApi to be generated from.
+    10. Set the `databaseName` to the name of the database you want the OpenApi to be generated from. This can be the
+        name of the database in plain text or the name of an ENVIRONMENT VARIABLE.
     11. Run the steps in the Installation section and set the `-Dproject.config=` argument to the path of
         the `config.json` file you just create.
 
@@ -55,15 +57,17 @@ java -jar -Dproject.config=cfg/config.json target/universal-database-proxy-rest-
     4. Set the `openApiFilePath` to where you want the OpenApi file generated to be stored. For
        example: `./crbOpenApi.yaml`
     5. Now the `database` object holds configuration regarding the database we are trying base of our API from.
-    6. Set the `host` to the address of the database. For example: `localhost` or `0.0.0.0` or `some.address.com`.
+    6. Set the `host` to the address of the database. For example: `localhost` or `0.0.0.0` or `some.address.com`. This
+       can be the host in plain text or the name of an ENVIRONMENT VARIABLE.
     7. Set the `port` to the port number the database is listening for connections on. This can be any valid port
        number.
     8. Set the `username` to the database username the server should use to authenticate itself against your chosen
-       database.
+       database. This can be the username in plain text or the name of an ENVIRONMENT VARIABLE.
     9. Set the `password` to the database password the server should use to authenticate itself against your chosen
        database. This can be the password in plain text or an ENVIRONMENT VARIABLE. For example: `admin`
        or `COCKROACH_PASSWORD`
-    10. Set the `databaseName` to the name of the database you want the OpenApi to be generated from.
+    10. Set the `databaseName` to the name of the database you want the OpenApi to be generated from. This can be the
+        name of the database in plain text or the name of an ENVIRONMENT VARIABLE.
     11. Run the steps in the Installation section and set the `-Dproject.config=` argument to the path of
         the `config.json` file you just create.
 
