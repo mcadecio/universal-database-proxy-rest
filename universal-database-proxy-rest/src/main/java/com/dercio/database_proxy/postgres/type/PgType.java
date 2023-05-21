@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public enum PgType {
@@ -62,7 +63,14 @@ public enum PgType {
         var desiredType = type.toUpperCase()
                 .replace(" ", "_")
                 .replace("-", "_");
-        return valueOf(desiredType);
+        return valueOfOrUnknown(desiredType);
+    }
+
+    private static PgType valueOfOrUnknown(String desiredType) {
+        return Stream.of(values())
+                .filter(pgType -> pgType.toString().equals(desiredType))
+                .findFirst()
+                .orElse(PgType.UNKNOWN);
     }
 }
 
