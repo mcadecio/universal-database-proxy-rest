@@ -105,7 +105,7 @@ public class CockroachModule extends AbstractModule {
 
         if (databaseConfig.isSslEnabled()) {
             ObjectUtils.requireNonEmpty(databaseConfig.getSslCertPath(),
-                    "To create an ssl connection with the Postgres Server a valid ssl certificate needs to be provided");
+                    "To create an ssl connection with the Cockroach Server a valid ssl certificate needs to be provided");
             pemTrustOptions.addCertPath(databaseConfig.getSslCertPath());
         }
 
