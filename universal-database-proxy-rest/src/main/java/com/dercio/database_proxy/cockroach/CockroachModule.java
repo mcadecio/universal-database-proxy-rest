@@ -12,16 +12,19 @@ import com.dercio.database_proxy.postgres.PgTableFinder;
 import com.dercio.database_proxy.restapi.RestApiHandler;
 import com.dercio.database_proxy.restapi.RestApiVerticleSelector;
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.ProvidesIntoSet;
 import com.google.inject.name.Named;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
+import io.vertx.core.net.PemTrustOptions;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.SqlClient;
+import org.apache.commons.lang3.ObjectUtils;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -29,6 +32,7 @@ import java.util.Map;
 @GuiceModule
 public class CockroachModule extends AbstractModule {
 
+    @Inject
     @ProvidesIntoSet
     AbstractVerticle crApiVerticle(
             RouterFactory routerFactory,
@@ -46,12 +50,14 @@ public class CockroachModule extends AbstractModule {
         );
     }
 
+    @Inject
     @Provides
     @Named("cr.rest.api.handler")
     RestApiHandler providesRestApiHandler(@Named("cr.repository") Repository repository, Mapper mapper) {
         return new RestApiHandler(mapper, repository);
     }
 
+    @Inject
     @Provides
     @Singleton
     @Named("cr.repository")
@@ -65,6 +71,7 @@ public class CockroachModule extends AbstractModule {
         );
     }
 
+    @Inject
     @Provides
     @Named("cr.sql.client")
     SqlClient createSqlClient(
@@ -80,6 +87,7 @@ public class CockroachModule extends AbstractModule {
         return PgPool.pool(vertx, connectOptions, poolOptions);
     }
 
+    @Inject
     @Provides
     @Named("cr.connection.options")
     PgConnectOptions providesConnectionOptions(CrApiConfig crApiConfig,
@@ -93,8 +101,17 @@ public class CockroachModule extends AbstractModule {
         var username = envVariables.getOrDefault(databaseConfig.getUsername(), databaseConfig.getUsername());
         var password = envVariables.getOrDefault(databaseConfig.getPassword(), databaseConfig.getPassword());
         var databaseName = envVariables.getOrDefault(databaseConfig.getDatabaseName(), databaseConfig.getDatabaseName());
+        var pemTrustOptions = new PemTrustOptions();
+
+        if (databaseConfig.isSslEnabled()) {
+            ObjectUtils.requireNonEmpty(databaseConfig.getSslCertPath(),
+                    "To create an ssl connection with the Cockroach Server a valid ssl certificate needs to be provided");
+            pemTrustOptions.addCertPath(databaseConfig.getSslCertPath());
+        }
 
         return new PgConnectOptions()
+                .setSsl(databaseConfig.isSslEnabled())
+                .setPemTrustOptions(pemTrustOptions)
                 .setPort(databaseConfig.getPort())
                 .setHost(host)
                 .setDatabase(databaseName)

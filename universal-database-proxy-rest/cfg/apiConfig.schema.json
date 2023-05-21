@@ -95,6 +95,14 @@
         "databaseName": {
           "type": "string",
           "description": "The name of the database"
+        },
+        "sslEnabled": {
+          "type": "boolean",
+          "description": "Set to true to establish an SSL connection"
+        },
+        "sslCertPath": {
+          "type": "string",
+          "description": "The path of the ssl certificate to use for ssl connections. Required when 'sslEnabled' is set to true"
         }
       }
     }

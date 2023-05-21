@@ -2,6 +2,7 @@ package com.dercio.database_proxy;
 
 import com.dercio.database_proxy.common.verticle.VerticleDeployer;
 import com.google.inject.Guice;
+import com.google.inject.ProvisionException;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -14,6 +15,13 @@ public class Application {
 
     public static void main(String[] args) {
         var vertx = Vertx.vertx();
+        vertx.exceptionHandler(error -> {
+            if (error instanceof ProvisionException) {
+                ProvisionException provisionException = (ProvisionException) error;
+                log.error(provisionException.getCause().getMessage());
+                vertx.close();
+            }
+        });
         ConfigRetriever.create(vertx, configRetrieverOptions())
                 .getConfig()
                 .map(config -> Guice.createInjector(new ApplicationModule(vertx, config)))
