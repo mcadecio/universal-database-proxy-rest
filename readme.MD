@@ -14,7 +14,7 @@ Currently, it supports the following databases:
 ```shell
 mvn clean package
 cd universal-database-proxy-rest
-java -jar -Dproject.config=cfg/config.json target/universal-database-proxy-rest-1.0.0-fat.jar
+java -jar -Dproject.config=cfg/config.json target/universal-database-proxy-rest-1.0.1-fat.jar
 ```
 
 ## Usage
