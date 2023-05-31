@@ -2,14 +2,14 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dercio.database_proxy.repositories.football.NationalFootballTeamsRepository">
-    <select id="findTeamByName" resultType="com.dercio.database_proxy.repositories.football.NationalFootballTeam">
+<mapper namespace="com.dercio.database_proxy.football.NationalFootballTeamsRepository">
+    <select id="findTeamByName" resultType="com.dercio.database_proxy.football.NationalFootballTeam">
         SELECT *
         FROM football.national_football_teams
         WHERE name = #{name}
     </select>
     <insert id="save"
-            parameterType="com.dercio.database_proxy.repositories.football.NationalFootballTeam">
+            parameterType="com.dercio.database_proxy.football.NationalFootballTeam">
         INSERT INTO football.national_football_teams (name, abbreviated_name, additional_info)
         VALUES (#{name}, #{abbreviatedName}, #{additionalInfo}::jsonb)
     </insert>

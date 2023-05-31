@@ -1,9 +1,9 @@
 package com.dercio.database_proxy.glue;
 
-import com.dercio.database_proxy.budgets.BudgetsContext;
-import com.dercio.database_proxy.football.FootballTeamContext;
-import com.dercio.database_proxy.repositories.budgets.BudgetsRepository;
-import com.dercio.database_proxy.repositories.football.NationalFootballTeamsRepository;
+import com.dercio.database_proxy.budgets.steps.BudgetsContext;
+import com.dercio.database_proxy.football.steps.FootballTeamContext;
+import com.dercio.database_proxy.budgets.BudgetsRepository;
+import com.dercio.database_proxy.football.NationalFootballTeamsRepository;
 import com.google.inject.Inject;
 import io.cucumber.java.After;
 import lombok.RequiredArgsConstructor;

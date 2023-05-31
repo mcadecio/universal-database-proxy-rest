@@ -1,13 +1,11 @@
 package com.dercio.database_proxy.budgets;
 
-import com.dercio.database_proxy.repositories.budgets.Budget;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class BudgetsFactory {
-    static Budget createJanuaryBudget() {
+    public static Budget createJanuaryBudget() {
         return new Budget(
                 2_000L,
                 2022,
@@ -22,7 +20,7 @@ public class BudgetsFactory {
         );
     }
 
-    static Budget createFebBudget() {
+    public static Budget createFebBudget() {
         return new Budget(
                 3_000L,
                 2022,
@@ -37,7 +35,7 @@ public class BudgetsFactory {
         );
     }
 
-    static Budget createOptionalBudget() {
+    public static Budget createOptionalBudget() {
         return new Budget(
                 null,
                 null,
@@ -52,7 +50,7 @@ public class BudgetsFactory {
         );
     }
 
-    static Budget createRequiredBudget() {
+    public static Budget createRequiredBudget() {
         return new Budget(
                 3_000L,
                 2022,
@@ -67,7 +65,7 @@ public class BudgetsFactory {
         );
     }
 
-    static Budget createBudgetWithInvalidFieldType() {
+    public static Budget createBudgetWithInvalidFieldType() {
         return new Budget(
                 3_000L,
                 2022,

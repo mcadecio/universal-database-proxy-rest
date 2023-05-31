@@ -1,10 +1,10 @@
 package com.dercio.database_proxy.glue;
 
 import com.dercio.database_proxy.common.mapper.MapperModule;
-import com.dercio.database_proxy.repositories.budgets.BudgetsRepository;
-import com.dercio.database_proxy.repositories.cars.CarsRepository;
-import com.dercio.database_proxy.repositories.football.NationalFootballTeamsRepository;
-import com.dercio.database_proxy.repositories.wheel.WheelsRepository;
+import com.dercio.database_proxy.budgets.BudgetsRepository;
+import com.dercio.database_proxy.cars.CarsRepository;
+import com.dercio.database_proxy.football.NationalFootballTeamsRepository;
+import com.dercio.database_proxy.wheel.WheelsRepository;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.PrivateModule;
