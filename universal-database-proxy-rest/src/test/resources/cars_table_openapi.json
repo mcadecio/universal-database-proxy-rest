@@ -1,0 +1,328 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Auto Generated Open API",
+    "description" : "Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.",
+    "version" : "1.0.1"
+  },
+  "servers" : [ {
+    "url" : "/",
+    "description" : "Optional server description, e.g. Main (production) server"
+  } ],
+  "tags" : [ {
+    "name" : "cars"
+  } ],
+  "paths" : {
+    "/cars" : {
+      "get" : {
+        "tags" : [ "cars" ],
+        "summary" : "Returns a list of cars",
+        "description" : "Auto Generated",
+        "operationId" : "get_cars",
+        "parameters" : [ {
+          "name" : "car_id",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "nullable" : false
+          }
+        }, {
+          "name" : "manufacturer",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "nullable" : false
+          }
+        }, {
+          "name" : "doors",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "nullable" : true
+          }
+        }, {
+          "name" : "last_updated",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "nullable" : true
+          }
+        }, {
+          "name" : "extra_details",
+          "in" : "query",
+          "schema" : {
+            "type" : "object",
+            "nullable" : true
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON array of cars",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "required" : [ "car_id", "manufacturer" ],
+                    "type" : "object",
+                    "properties" : {
+                      "car_id" : {
+                        "type" : "integer",
+                        "nullable" : false
+                      },
+                      "manufacturer" : {
+                        "type" : "string",
+                        "nullable" : false
+                      },
+                      "doors" : {
+                        "type" : "integer",
+                        "nullable" : true
+                      },
+                      "last_updated" : {
+                        "type" : "string",
+                        "nullable" : true
+                      },
+                      "extra_details" : {
+                        "type" : "object",
+                        "nullable" : true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "vehicles",
+          "table" : "cars"
+        }
+      },
+      "post" : {
+        "tags" : [ "cars" ],
+        "summary" : "Creates a new cars",
+        "description" : "Auto Generated",
+        "operationId" : "create_cars",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "required" : [ "car_id", "manufacturer" ],
+                "type" : "object",
+                "properties" : {
+                  "car_id" : {
+                    "type" : "integer",
+                    "nullable" : false
+                  },
+                  "manufacturer" : {
+                    "type" : "string",
+                    "nullable" : false
+                  },
+                  "doors" : {
+                    "type" : "integer",
+                    "nullable" : true
+                  },
+                  "last_updated" : {
+                    "type" : "string",
+                    "nullable" : true
+                  },
+                  "extra_details" : {
+                    "type" : "object",
+                    "nullable" : true
+                  }
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "A new cars has been created.",
+            "headers" : {
+              "Location" : {
+                "description" : "The URI of the resource created.",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "vehicles",
+          "table" : "cars"
+        }
+      }
+    },
+    "/cars/{car_id}" : {
+      "get" : {
+        "tags" : [ "cars" ],
+        "summary" : "Get a cars by id",
+        "description" : "Auto Generated",
+        "operationId" : "get_cars_by_id",
+        "parameters" : [ {
+          "name" : "car_id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON representing cars",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "required" : [ "car_id", "manufacturer" ],
+                  "type" : "object",
+                  "properties" : {
+                    "car_id" : {
+                      "type" : "integer",
+                      "nullable" : false
+                    },
+                    "manufacturer" : {
+                      "type" : "string",
+                      "nullable" : false
+                    },
+                    "doors" : {
+                      "type" : "integer",
+                      "nullable" : true
+                    },
+                    "last_updated" : {
+                      "type" : "string",
+                      "nullable" : true
+                    },
+                    "extra_details" : {
+                      "type" : "object",
+                      "nullable" : true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "vehicles",
+          "table" : "cars"
+        }
+      },
+      "put" : {
+        "tags" : [ "cars" ],
+        "summary" : "Update a cars by id",
+        "description" : "Auto Generated",
+        "operationId" : "update_cars_by_id",
+        "parameters" : [ {
+          "name" : "car_id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "required" : [ "car_id", "manufacturer" ],
+                "type" : "object",
+                "properties" : {
+                  "car_id" : {
+                    "type" : "integer",
+                    "nullable" : false
+                  },
+                  "manufacturer" : {
+                    "type" : "string",
+                    "nullable" : false
+                  },
+                  "doors" : {
+                    "type" : "integer",
+                    "nullable" : true
+                  },
+                  "last_updated" : {
+                    "type" : "string",
+                    "nullable" : true
+                  },
+                  "extra_details" : {
+                    "type" : "object",
+                    "nullable" : true
+                  }
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "The cars has been updated."
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "vehicles",
+          "table" : "cars"
+        }
+      },
+      "delete" : {
+        "tags" : [ "cars" ],
+        "summary" : "Delete cars by id",
+        "description" : "Auto Generated",
+        "operationId" : "delete_cars_by_id",
+        "parameters" : [ {
+          "name" : "car_id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Deleted cars successfully."
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "vehicles",
+          "table" : "cars"
+        }
+      }
+    },
+    "/openapi" : {
+      "get" : {
+        "tags" : [ "Open API" ],
+        "summary" : "Get OpenAPI",
+        "description" : "Auto Generated Open API",
+        "operationId" : "getOpenApi",
+        "responses" : {
+          "200" : {
+            "description" : "The Open API Spec",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "example" : "{\n  \"openapi\" : \"3.0.1\",\n  \"info\" : {\n    \"title\" : \"Auto Generated Open API\",\n    \"description\" : \"Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.\",\n    \"version\" : \"1.0.1\"\n  },\n  \"servers\" : [ {\n    \"url\" : \"/\",\n    \"description\" : \"Optional server description, e.g. Main (production) server\"\n  } ],\n  \"paths\" : {\n    \"/cars\" : {\n      \"get\" : {\n        \"summary\" : \"Returns a list of cars\",\n        \"operationId\" : \"get_cars\",\n        \"responses\" : {\n          \"200\" : {\n            \"description\" : \"A JSON array of cars\",\n            \"content\" : {\n              \"application/json\" : {\n                \"schema\" : {\n                  \"type\" : \"array\",\n                  \"items\" : {\n                    \"required\" : [ \"id\", \"name\", \"doors\" ],\n                    \"type\" : \"object\",\n                    \"properties\" : {\n                      \"id\" : {\n                        \"type\" : \"integer\",\n                        \"example\" : \"1\"\n                      },\n                      \"name\" : {\n                        \"type\" : \"string\",\n                        \"example\" : \"Ferrari\"\n                      },\n                      \"doors\" : {\n                        \"type\" : \"integer\",\n                        \"example\" : \"5\"\n                      }\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+                }
+              }
+            }
+          }
+        },
+        "x-metadata" : { }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "ANY" : {
+        "description" : "Can be anything: string, number, array, object, etc., including `null`"
+      }
+    }
+  }
+}

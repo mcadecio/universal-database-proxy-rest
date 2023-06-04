@@ -1,0 +1,300 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Auto Generated Open API",
+    "description" : "Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.",
+    "version" : "1.0.1"
+  },
+  "servers" : [ {
+    "url" : "/",
+    "description" : "Optional server description, e.g. Main (production) server"
+  } ],
+  "tags" : [ {
+    "name" : "bug"
+  } ],
+  "paths" : {
+    "/bug" : {
+      "get" : {
+        "tags" : [ "bug" ],
+        "summary" : "Returns a list of bug",
+        "description" : "Auto Generated",
+        "operationId" : "get_bug",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "nullable" : false
+          }
+        }, {
+          "name" : "description",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "nullable" : true
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "schema" : {
+            "$ref" : "#/components/schemas/ANY"
+          }
+        }, {
+          "name" : "rowid",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "nullable" : false
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON array of bug",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "required" : [ "id", "rowid" ],
+                    "type" : "object",
+                    "properties" : {
+                      "id" : {
+                        "type" : "integer",
+                        "nullable" : false
+                      },
+                      "description" : {
+                        "type" : "string",
+                        "nullable" : true
+                      },
+                      "status" : {
+                        "$ref" : "#/components/schemas/ANY"
+                      },
+                      "rowid" : {
+                        "type" : "integer",
+                        "nullable" : false
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "public",
+          "table" : "bug"
+        }
+      },
+      "post" : {
+        "tags" : [ "bug" ],
+        "summary" : "Creates a new bug",
+        "description" : "Auto Generated",
+        "operationId" : "create_bug",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "required" : [ "id", "rowid" ],
+                "type" : "object",
+                "properties" : {
+                  "id" : {
+                    "type" : "integer",
+                    "nullable" : false
+                  },
+                  "description" : {
+                    "type" : "string",
+                    "nullable" : true
+                  },
+                  "status" : {
+                    "$ref" : "#/components/schemas/ANY"
+                  },
+                  "rowid" : {
+                    "type" : "integer",
+                    "nullable" : false
+                  }
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "A new bug has been created.",
+            "headers" : {
+              "Location" : {
+                "description" : "The URI of the resource created.",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "public",
+          "table" : "bug"
+        }
+      }
+    },
+    "/bug/{id}" : {
+      "get" : {
+        "tags" : [ "bug" ],
+        "summary" : "Get a bug by id",
+        "description" : "Auto Generated",
+        "operationId" : "get_bug_by_id",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON representing bug",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "required" : [ "id", "rowid" ],
+                  "type" : "object",
+                  "properties" : {
+                    "id" : {
+                      "type" : "integer",
+                      "nullable" : false
+                    },
+                    "description" : {
+                      "type" : "string",
+                      "nullable" : true
+                    },
+                    "status" : {
+                      "$ref" : "#/components/schemas/ANY"
+                    },
+                    "rowid" : {
+                      "type" : "integer",
+                      "nullable" : false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "public",
+          "table" : "bug"
+        }
+      },
+      "put" : {
+        "tags" : [ "bug" ],
+        "summary" : "Update a bug by id",
+        "description" : "Auto Generated",
+        "operationId" : "update_bug_by_id",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "required" : [ "id", "rowid" ],
+                "type" : "object",
+                "properties" : {
+                  "id" : {
+                    "type" : "integer",
+                    "nullable" : false
+                  },
+                  "description" : {
+                    "type" : "string",
+                    "nullable" : true
+                  },
+                  "status" : {
+                    "$ref" : "#/components/schemas/ANY"
+                  },
+                  "rowid" : {
+                    "type" : "integer",
+                    "nullable" : false
+                  }
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "The bug has been updated."
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "public",
+          "table" : "bug"
+        }
+      },
+      "delete" : {
+        "tags" : [ "bug" ],
+        "summary" : "Delete bug by id",
+        "description" : "Auto Generated",
+        "operationId" : "delete_bug_by_id",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Deleted bug successfully."
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "public",
+          "table" : "bug"
+        }
+      }
+    },
+    "/openapi" : {
+      "get" : {
+        "tags" : [ "Open API" ],
+        "summary" : "Get OpenAPI",
+        "description" : "Auto Generated Open API",
+        "operationId" : "getOpenApi",
+        "responses" : {
+          "200" : {
+            "description" : "The Open API Spec",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "example" : "{\n  \"openapi\" : \"3.0.1\",\n  \"info\" : {\n    \"title\" : \"Auto Generated Open API\",\n    \"description\" : \"Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.\",\n    \"version\" : \"1.0.1\"\n  },\n  \"servers\" : [ {\n    \"url\" : \"/\",\n    \"description\" : \"Optional server description, e.g. Main (production) server\"\n  } ],\n  \"paths\" : {\n    \"/cars\" : {\n      \"get\" : {\n        \"summary\" : \"Returns a list of cars\",\n        \"operationId\" : \"get_cars\",\n        \"responses\" : {\n          \"200\" : {\n            \"description\" : \"A JSON array of cars\",\n            \"content\" : {\n              \"application/json\" : {\n                \"schema\" : {\n                  \"type\" : \"array\",\n                  \"items\" : {\n                    \"required\" : [ \"id\", \"name\", \"doors\" ],\n                    \"type\" : \"object\",\n                    \"properties\" : {\n                      \"id\" : {\n                        \"type\" : \"integer\",\n                        \"example\" : \"1\"\n                      },\n                      \"name\" : {\n                        \"type\" : \"string\",\n                        \"example\" : \"Ferrari\"\n                      },\n                      \"doors\" : {\n                        \"type\" : \"integer\",\n                        \"example\" : \"5\"\n                      }\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+                }
+              }
+            }
+          }
+        },
+        "x-metadata" : { }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "ANY" : {
+        "description" : "Can be anything: string, number, array, object, etc., including `null`"
+      }
+    }
+  }
+}
