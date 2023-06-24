@@ -40,6 +40,7 @@ public class RouterFactory {
     private final Vertx vertx;
     private final FailureHandler defaultFailureHandler;
     private final NotFoundHandler defaultNotFoundHandler;
+    private final OpenApiCreator openApiCreator;
 
     public Future<Router> createRouter(List<TableMetadata> tables, RouterOptions options) {
         return createOpenApiFile(tables, options.getOpenApiFilePath())
@@ -53,7 +54,7 @@ public class RouterFactory {
     }
 
     private Future<Void> createOpenApiFile(List<TableMetadata> tables, String openApiFilePath) {
-        var openAPI = OpenApiCreator.create(tables);
+        var openAPI = openApiCreator.create(tables);
 
         return vertx.fileSystem()
                 .writeFile(openApiFilePath, Buffer.buffer(Yaml.pretty(openAPI)))

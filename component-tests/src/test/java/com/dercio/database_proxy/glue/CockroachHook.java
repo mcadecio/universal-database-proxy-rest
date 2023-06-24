@@ -1,9 +1,9 @@
 package com.dercio.database_proxy.glue;
 
-import com.dercio.database_proxy.cars.CarsContext;
-import com.dercio.database_proxy.repositories.cars.CarsRepository;
-import com.dercio.database_proxy.repositories.wheel.WheelsRepository;
-import com.dercio.database_proxy.wheel.WheelsContext;
+import com.dercio.database_proxy.cars.steps.CarsContext;
+import com.dercio.database_proxy.cars.CarsRepository;
+import com.dercio.database_proxy.wheel.WheelsRepository;
+import com.dercio.database_proxy.wheel.steps.WheelsContext;
 import com.google.inject.Inject;
 import io.cucumber.java.After;
 import lombok.RequiredArgsConstructor;

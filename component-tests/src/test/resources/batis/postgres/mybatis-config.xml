@@ -8,7 +8,7 @@
     </settings>
 
     <typeHandlers>
-        <typeHandler handler="com.dercio.database_proxy.repositories.cars.MapStringObjectTypeHandler"/>
+        <typeHandler handler="com.dercio.database_proxy.common.type.handlers.MapStringObjectTypeHandler"/>
     </typeHandlers>
 
     <environments default="test">

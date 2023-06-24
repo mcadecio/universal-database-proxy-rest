@@ -1,0 +1,57 @@
+{
+  "databaseName": "defaultdb",
+  "schemaName": "vehicles",
+  "tableName": "cars",
+  "columns": [
+    {
+      "table_schema": "vehicles",
+      "table_name": "cars",
+      "column_name": "manufacturer",
+      "data_type": "character varying",
+      "character_maximum_length": 50,
+      "column_default": null,
+      "is_nullable": "NO",
+      "is_primary_key": false
+    },
+    {
+      "table_schema": "vehicles",
+      "table_name": "cars",
+      "column_name": "car_id",
+      "data_type": "bigint",
+      "character_maximum_length": null,
+      "column_default": null,
+      "is_nullable": "NO",
+      "is_primary_key": true
+    },
+    {
+      "table_schema": "vehicles",
+      "table_name": "cars",
+      "column_name": "doors",
+      "data_type": "bigint",
+      "character_maximum_length": null,
+      "column_default": "5:::INT8",
+      "is_nullable": "YES",
+      "is_primary_key": false
+    },
+    {
+      "table_schema": "vehicles",
+      "table_name": "cars",
+      "column_name": "last_updated",
+      "data_type": "timestamp with time zone",
+      "character_maximum_length": null,
+      "column_default": "now():::TIMESTAMPTZ",
+      "is_nullable": "YES",
+      "is_primary_key": false
+    },
+    {
+      "table_schema": "vehicles",
+      "table_name": "cars",
+      "column_name": "extra_details",
+      "data_type": "jsonb",
+      "character_maximum_length": null,
+      "column_default": "'{}':::JSONB",
+      "is_nullable": "YES",
+      "is_primary_key": false
+    }
+  ]
+}

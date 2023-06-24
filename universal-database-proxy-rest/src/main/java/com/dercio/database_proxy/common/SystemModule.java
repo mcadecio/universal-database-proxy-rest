@@ -5,6 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
 
+import java.time.Clock;
 import java.util.Map;
 
 @GuiceModule
@@ -14,5 +15,10 @@ public class SystemModule extends AbstractModule {
     @Named("system.env.variables")
     public Map<String, String> providesEnvVariables() {
         return System.getenv();
+    }
+
+    @Provides
+    public Clock providesClock() {
+        return Clock.systemDefaultZone();
     }
 }

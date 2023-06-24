@@ -1,0 +1,47 @@
+{
+  "databaseName": "defaultdb",
+  "schemaName": "public",
+  "tableName": "bug",
+  "columns": [
+    {
+      "table_schema": "public",
+      "table_name": "bug",
+      "column_name": "id",
+      "data_type": "bigint",
+      "character_maximum_length": null,
+      "column_default": "unique_rowid()",
+      "is_nullable": "NO",
+      "is_primary_key": false
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bug",
+      "column_name": "description",
+      "data_type": "text",
+      "character_maximum_length": null,
+      "column_default": null,
+      "is_nullable": "YES",
+      "is_primary_key": false
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bug",
+      "column_name": "status",
+      "data_type": "USER-DEFINED",
+      "character_maximum_length": null,
+      "column_default": null,
+      "is_nullable": "YES",
+      "is_primary_key": false
+    },
+    {
+      "table_schema": "public",
+      "table_name": "bug",
+      "column_name": "rowid",
+      "data_type": "bigint",
+      "character_maximum_length": null,
+      "column_default": "unique_rowid()",
+      "is_nullable": "NO",
+      "is_primary_key": false
+    }
+  ]
+}

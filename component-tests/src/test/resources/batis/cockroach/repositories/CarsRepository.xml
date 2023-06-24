@@ -2,14 +2,14 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dercio.database_proxy.repositories.cars.CarsRepository">
-    <select id="findById" resultType="com.dercio.database_proxy.repositories.cars.Car">
+<mapper namespace="com.dercio.database_proxy.cars.CarsRepository">
+    <select id="findById" resultType="com.dercio.database_proxy.cars.Car">
         SELECT *
         FROM vehicles.cars
         WHERE car_id = #{id}
     </select>
     <insert id="save"
-            parameterType="com.dercio.database_proxy.repositories.cars.Car">
+            parameterType="com.dercio.database_proxy.cars.Car">
         INSERT INTO vehicles.cars(car_id, manufacturer, doors, last_updated, extra_details)
         VALUES (#{carId}, #{manufacturer}, #{doors}, #{lastUpdated}, #{extraDetails})
     </insert>
