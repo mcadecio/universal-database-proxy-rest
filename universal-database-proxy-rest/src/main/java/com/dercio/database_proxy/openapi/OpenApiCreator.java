@@ -43,10 +43,24 @@ public class OpenApiCreator {
     }
 
     private Components generateComponents() {
-        var schema = new Schema<>()
-                .description("Can be anything: string, number, array, object, etc., including `null`");
+        var schema = new Schema<>();
+        schema.description("Can be anything: string, number, array, object, etc., including `null`");
 
-        return new Components().addSchemas("ANY", schema);
+        var errorResponse = new ObjectSchema();
+        errorResponse.addProperty("timestamp", new StringSchema().example("2023-06-11T12:11:25"))
+                .addProperty("path", new StringSchema()
+                        .description("The url path of the error")
+                        .example("/cars/1"))
+                .addProperty("message", new StringSchema()
+                        .description("The error message")
+                        .example("Not found"))
+                .addProperty("code", new IntegerSchema()
+                        .description("The HTTP status code")
+                        .example(404));
+
+        return new Components()
+                .addSchemas("ANY", schema)
+                .addSchemas("ErrorResponse", errorResponse);
     }
 
     private Server generateServer() {

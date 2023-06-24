@@ -2,6 +2,7 @@ package com.dercio.database_proxy.openapi.operation;
 
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
+import com.dercio.database_proxy.common.error.ErrorResponse;
 import com.dercio.database_proxy.openapi.OpenApiType;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Content;
@@ -10,18 +11,30 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.vertx.core.json.JsonObject;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.simplaex.http.StatusCode.*;
+import static com.simplaex.http.StatusCode._500;
+
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class OpenApiOperation {
 
     private static final String AUTO_GENERATED = "Auto Generated";
+    private static final String ERROR_RESPONSE_SCHEMA_REF = "ErrorResponse";
+
+    protected final Clock clock;
 
     public Operation createOperation(TableMetadata tableMetadata) {
         Operation operation = new Operation();
@@ -43,7 +56,14 @@ public abstract class OpenApiOperation {
 
     protected abstract String operationId(TableMetadata tableMetadata);
 
-    protected abstract ApiResponses operationApiResponses(TableMetadata tableMetadata);
+    protected ApiResponses operationApiResponses(TableMetadata tableMetadata) {
+        ApiResponses apiResponses = new ApiResponses();
+        String errorUrl = "/" + tableMetadata.getTableName();
+        apiResponses.addApiResponse(String.valueOf(_400.getCode()), badRequestApiResponse(errorUrl));
+        apiResponses.addApiResponse(String.valueOf(_404.getCode()), notFoundApiResponse());
+        apiResponses.addApiResponse(String.valueOf(_500.getCode()), internalServerErrorApiResponse(errorUrl));
+        return apiResponses;
+    }
 
     protected List<Parameter> operationParameters(TableMetadata tableMetadata) {
         return Collections.emptyList();
@@ -96,4 +116,49 @@ public abstract class OpenApiOperation {
         return new Content().addMediaType("application/json", new MediaType().schema(schema));
     }
 
+    protected Content jsonContent(Schema<Object> schema, Object example) {
+        return new Content().addMediaType("application/json", new MediaType().example(example).schema(schema));
+    }
+
+    private ApiResponse notFoundApiResponse() {
+        var schema = new Schema<>();
+        schema.$ref(ERROR_RESPONSE_SCHEMA_REF);
+        var example = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now(clock))
+                .code(404)
+                .message("Not Found")
+                .path("/chairs")
+                .build();
+        return new ApiResponse()
+                .description("The resource/operation you tried to access/perform does not exist.")
+                .content(jsonContent(schema, example));
+    }
+
+    private ApiResponse badRequestApiResponse(String path) {
+        var schema = new Schema<>();
+        schema.$ref(ERROR_RESPONSE_SCHEMA_REF);
+        var example = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now(clock))
+                .code(400)
+                .message("Bad Request")
+                .path(path)
+                .build();
+        return new ApiResponse()
+                .description("The request submitted is not valid. This might be due because the request does not pass the API validation.")
+                .content(jsonContent(schema, example));
+    }
+
+    private ApiResponse internalServerErrorApiResponse(String path) {
+        var schema = new Schema<>();
+        schema.$ref(ERROR_RESPONSE_SCHEMA_REF);
+        var example = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now(clock))
+                .code(500)
+                .message("Internal Server Error")
+                .path(path)
+                .build();
+        return new ApiResponse()
+                .description("An internal error occurred in the server.")
+                .content(jsonContent(schema, example));
+    }
 }

@@ -36,6 +36,11 @@ public class ErrorResponse {
             return this;
         }
 
+        public Builder timestamp(LocalDateTime timestamp) {
+            errorResponse.setTimestamp(timestamp);
+            return this;
+        }
+
         public Builder code(int code) {
             errorResponse.setCode(code);
             return this;

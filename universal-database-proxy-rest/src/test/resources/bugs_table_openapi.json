@@ -48,6 +48,57 @@
           }
         } ],
         "responses" : {
+          "400" : {
+            "description" : "The request submitted is not valid. This might be due because the request does not pass the API validation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/bug",
+                  "message" : "Bad Request",
+                  "code" : 400,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The resource/operation you tried to access/perform does not exist.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/chairs",
+                  "message" : "Not Found",
+                  "code" : 404,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "An internal error occurred in the server.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/bug",
+                  "message" : "Internal Server Error",
+                  "code" : 500,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
           "200" : {
             "description" : "A JSON array of bug",
             "content" : {
@@ -121,6 +172,57 @@
           "required" : true
         },
         "responses" : {
+          "400" : {
+            "description" : "The request submitted is not valid. This might be due because the request does not pass the API validation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/bug",
+                  "message" : "Bad Request",
+                  "code" : 400,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The resource/operation you tried to access/perform does not exist.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/chairs",
+                  "message" : "Not Found",
+                  "code" : 404,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "An internal error occurred in the server.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/bug",
+                  "message" : "Internal Server Error",
+                  "code" : 500,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
           "201" : {
             "description" : "A new bug has been created.",
             "headers" : {
@@ -155,6 +257,57 @@
           }
         } ],
         "responses" : {
+          "400" : {
+            "description" : "The request submitted is not valid. This might be due because the request does not pass the API validation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/bug",
+                  "message" : "Bad Request",
+                  "code" : 400,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The resource/operation you tried to access/perform does not exist.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/chairs",
+                  "message" : "Not Found",
+                  "code" : 404,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "An internal error occurred in the server.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/bug",
+                  "message" : "Internal Server Error",
+                  "code" : 500,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
           "200" : {
             "description" : "A JSON representing bug",
             "content" : {
@@ -232,6 +385,57 @@
           "required" : true
         },
         "responses" : {
+          "400" : {
+            "description" : "The request submitted is not valid. This might be due because the request does not pass the API validation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/bug",
+                  "message" : "Bad Request",
+                  "code" : 400,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The resource/operation you tried to access/perform does not exist.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/chairs",
+                  "message" : "Not Found",
+                  "code" : 404,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "An internal error occurred in the server.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/bug",
+                  "message" : "Internal Server Error",
+                  "code" : 500,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
           "204" : {
             "description" : "The bug has been updated."
           }
@@ -256,6 +460,57 @@
           }
         } ],
         "responses" : {
+          "400" : {
+            "description" : "The request submitted is not valid. This might be due because the request does not pass the API validation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/bug",
+                  "message" : "Bad Request",
+                  "code" : 400,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The resource/operation you tried to access/perform does not exist.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/chairs",
+                  "message" : "Not Found",
+                  "code" : 404,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "An internal error occurred in the server.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/bug",
+                  "message" : "Internal Server Error",
+                  "code" : 500,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
           "200" : {
             "description" : "Deleted bug successfully."
           }
@@ -294,6 +549,31 @@
     "schemas" : {
       "ANY" : {
         "description" : "Can be anything: string, number, array, object, etc., including `null`"
+      },
+      "ErrorResponse" : {
+        "type" : "object",
+        "properties" : {
+          "timestamp" : {
+            "type" : "string",
+            "example" : "2023-06-11T12:11:25"
+          },
+          "path" : {
+            "type" : "string",
+            "description" : "The url path of the error",
+            "example" : "/cars/1"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "The error message",
+            "example" : "Not found"
+          },
+          "code" : {
+            "type" : "integer",
+            "description" : "The HTTP status code",
+            "format" : "int32",
+            "example" : 404
+          }
+        }
       }
     }
   }

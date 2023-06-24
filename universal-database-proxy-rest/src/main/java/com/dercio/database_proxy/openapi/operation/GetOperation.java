@@ -2,17 +2,24 @@ package com.dercio.database_proxy.openapi.operation;
 
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
+import com.google.inject.Inject;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.simplaex.http.StatusCode._200;
+import static com.simplaex.http.StatusCode.*;
 
 public class GetOperation extends OpenApiOperation {
+
+    @Inject
+    public GetOperation(Clock clock) {
+        super(clock);
+    }
 
     @Override
     protected String operationSummary(TableMetadata tableMetadata) {
@@ -33,9 +40,8 @@ public class GetOperation extends OpenApiOperation {
         apiResponse.setDescription("A JSON array of " + tableMetadata.getTableName());
         apiResponse.setContent(jsonContent(schema));
 
-        ApiResponses apiResponses = new ApiResponses();
+        ApiResponses apiResponses = super.operationApiResponses(tableMetadata);
         apiResponses.addApiResponse(String.valueOf(_200.getCode()), apiResponse);
-
         return apiResponses;
     }
 
