@@ -1,6 +1,7 @@
 package com.dercio.database_proxy.cars;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class CarFactory {
 
@@ -9,7 +10,7 @@ public class CarFactory {
                 .setCarId(2001)
                 .setDoors(5)
                 .setManufacturer("FIAT")
-                .setLastUpdated(OffsetDateTime.now())
+                .setLastUpdated(OffsetDateTime.now().truncatedTo(ChronoUnit.MILLIS))
                 .setExtraDetails(new ExtraDetails().setColor("white"));
     }
 
@@ -18,7 +19,7 @@ public class CarFactory {
                 .setCarId(1997)
                 .setDoors(3)
                 .setManufacturer("FERRARI")
-                .setLastUpdated(OffsetDateTime.now())
+                .setLastUpdated(OffsetDateTime.now().truncatedTo(ChronoUnit.MILLIS))
                 .setExtraDetails(new ExtraDetails().setColor("red"));
     }
 
@@ -31,7 +32,7 @@ public class CarFactory {
     public static Car createOptionalFieldsCar() {
         return new Car()
                 .setDoors(3)
-                .setLastUpdated(OffsetDateTime.now())
+                .setLastUpdated(OffsetDateTime.now().truncatedTo(ChronoUnit.MILLIS))
                 .setExtraDetails(new ExtraDetails().setRating("bad"));
     }
 

@@ -12,11 +12,6 @@
     <groupId>com.dercio.universal-database-proxy-rest-parent</groupId>
     <artifactId>universal-database-proxy-rest</artifactId>
 
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-    </properties>
-
     <dependencies>
 
         <dependency>

@@ -2,6 +2,7 @@ package com.dercio.database_proxy.budgets;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 public class BudgetsFactory {
@@ -16,7 +17,7 @@ public class BudgetsFactory {
                 BigDecimal.valueOf(0),
                 BigDecimal.valueOf(10),
                 UUID.randomUUID().toString().substring(0, 15),
-                LocalDateTime.now()
+                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         );
     }
 
@@ -31,7 +32,8 @@ public class BudgetsFactory {
                 BigDecimal.valueOf(1),
                 BigDecimal.valueOf(0),
                 UUID.randomUUID().toString().substring(0, 15),
-                LocalDateTime.now()
+                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+
         );
     }
 
@@ -46,7 +48,8 @@ public class BudgetsFactory {
                 null,
                 null,
                 UUID.randomUUID().toString().substring(0, 15),
-                LocalDateTime.now()
+                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+
         );
     }
 
@@ -76,7 +79,8 @@ public class BudgetsFactory {
                 BigDecimal.valueOf(1),
                 BigDecimal.valueOf(0),
                 UUID.randomUUID().toString().substring(0, 15),
-                LocalDateTime.now()
+                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+
         );
     }
 }
