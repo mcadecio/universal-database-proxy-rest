@@ -50,12 +50,6 @@
             <artifactId>swagger-core</artifactId>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/io.netty/netty-codec-haproxy -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec-haproxy</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>com.ongres.scram</groupId>
             <artifactId>common</artifactId>
