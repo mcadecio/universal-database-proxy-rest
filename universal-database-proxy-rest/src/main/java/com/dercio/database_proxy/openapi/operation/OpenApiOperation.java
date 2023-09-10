@@ -89,7 +89,7 @@ public abstract class OpenApiOperation {
                 .stream()
                 .filter(column -> !column.isNullable())
                 .map(ColumnMetadata::getColumnName)
-                .collect(Collectors.toList());
+                .toList();
 
         ObjectSchema objectSchema = new ObjectSchema();
         objectSchema.properties(properties);

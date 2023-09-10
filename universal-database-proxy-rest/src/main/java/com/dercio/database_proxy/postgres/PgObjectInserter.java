@@ -84,7 +84,7 @@ public class PgObjectInserter {
 
                     return body.getValue(columnName);
                 })
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     private Future<Void> validaUpdateRequest(TableMetadata tableMetadata, JsonObject data, Map<String, String> pathParams) {

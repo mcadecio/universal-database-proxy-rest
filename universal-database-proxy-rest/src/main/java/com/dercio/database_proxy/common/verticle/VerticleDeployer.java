@@ -38,15 +38,15 @@ public class VerticleDeployer implements AnnotationProcessor<Injector> {
                 .map(injector::getInstance)
                 .filter(AbstractVerticle.class::isInstance)
                 .map(AbstractVerticle.class::cast)
-                .collect(Collectors.toList());
+                .toList();
 
-        List<Future> deploymentFutures = Stream.of(annotatedVerticles, verticles)
+        List<Future<String>> deploymentFutures = Stream.of(annotatedVerticles, verticles)
                 .flatMap(Collection::stream)
                 .map(vertx::deployVerticle)
                 .map(deploymentFuture -> deploymentFuture.onFailure(failureHandler))
-                .collect(Collectors.toList());
+                .toList();
 
-        CompositeFuture.any(deploymentFutures)
+        Future.any(deploymentFutures)
                 .onSuccess(future -> log.info("Deployment is complete"))
                 .onFailure(error -> log.info("No verticles were deployed. Shutting down..."))
                 .onFailure(error -> vertx.close());

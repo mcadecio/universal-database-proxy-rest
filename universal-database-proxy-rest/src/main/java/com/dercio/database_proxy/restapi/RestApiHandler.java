@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.simplaex.http.StatusCode._201;
 import static com.simplaex.http.StatusCode._204;
@@ -37,7 +36,7 @@ public class RestApiHandler {
         repository.getData(tableOption)
                 .map(items -> items.stream()
                         .map(JsonObject::encode)
-                        .collect(Collectors.toList())
+                        .toList()
                         .toString())
                 .onSuccess(rows -> event.response()
                         .setChunked(true)

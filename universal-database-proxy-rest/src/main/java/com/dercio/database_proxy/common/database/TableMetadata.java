@@ -38,14 +38,14 @@ public class TableMetadata {
         return getColumns()
                 .stream()
                 .map(ColumnMetadata::getColumnName)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<ColumnMetadata> getNonPrimaryKeyColumns() {
         return columns
                 .stream()
                 .filter(column -> !column.getColumnName().equals(getPkColumnName()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public String getPkColumnName() {

@@ -6,7 +6,6 @@ import com.dercio.database_proxy.common.handlers.NotFoundHandler;
 import com.dercio.database_proxy.common.verticle.Verticle;
 import com.google.inject.Inject;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
@@ -40,14 +39,14 @@ public class ProxyVerticle extends AbstractVerticle {
         httpServer = vertx.createHttpServer();
         netServer = vertx.createNetServer().connectHandler(proxyHandler);
 
-        CompositeFuture.all(startHttpServer(), openNetServer())
+        Future.all(startHttpServer(), openNetServer())
                 .onSuccess(event -> startPromise.complete())
                 .onFailure(startPromise::fail);
     }
 
     @Override
     public void stop(Promise<Void> stopPromise) {
-        CompositeFuture.all(stopHttpServer(), closeNetServer())
+        Future.all(stopHttpServer(), closeNetServer())
                 .onSuccess(event -> stopPromise.complete())
                 .onFailure(stopPromise::fail);
     }

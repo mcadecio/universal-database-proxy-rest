@@ -68,9 +68,7 @@ public class FailureHandler implements Handler<RoutingContext> {
     }
 
     ErrorResponse handleBodyProcessorException(Throwable throwable, HttpServerRequest request) {
-        if (throwable.getCause() instanceof ValidationException) {
-            var validationException = (ValidationException) throwable.getCause();
-
+        if (throwable.getCause() instanceof ValidationException validationException) {
             if ("nullable".equals(validationException.keyword())) {
                 var property = validationException.inputScope().toString().replace("/", "");
                 if (property.isBlank()) {

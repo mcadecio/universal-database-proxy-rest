@@ -33,7 +33,7 @@ public class PgObjectFinder {
                 .execute(generateTupleForSelect(tableMetadata, queryFilters))
                 .map(rows -> StreamSupport.stream(rows.spliterator(), false)
                         .map(Row::toJson)
-                        .collect(Collectors.toList()))
+                        .toList())
                 .onSuccess(items -> log.info("Retrieved [{}] rows", items.size()));
     }
 
@@ -80,7 +80,7 @@ public class PgObjectFinder {
                 .stream()
                 .map(ColumnMetadata::getColumnName)
                 .filter(queryFilters::contains)
-                .collect(Collectors.toList());
+                .toList();
 
         String wherePredicates = IntStream.range(0, columnsToFilterBy.size())
                 .mapToObj(i -> format("%s = $%d", columnsToFilterBy.get(i), i + 1))
@@ -101,7 +101,7 @@ public class PgObjectFinder {
         List<ColumnMetadata> columnsToFilterBy = tableMetadata.getColumns()
                 .stream()
                 .filter(column -> queryFilters.contains(column.getColumnName()))
-                .collect(Collectors.toList());
+                .toList();
 
         return Tuple.from(columnsToFilterBy
                 .stream()
@@ -110,7 +110,7 @@ public class PgObjectFinder {
                     var value = queryFilters.get(columnName);
                     return PgType.parse(column.getDbType(), value);
                 })
-                .collect(Collectors.toList()));
+                .toList());
     }
 
 }
