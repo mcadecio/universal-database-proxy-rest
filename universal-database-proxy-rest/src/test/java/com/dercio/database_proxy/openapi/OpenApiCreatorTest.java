@@ -80,7 +80,7 @@ class OpenApiCreatorTest {
                 .stream()
                 .map(JsonObject.class::cast)
                 .map(ColumnMetadata::new)
-                .collect(Collectors.toList());
+                .toList();
         return new TableMetadata(
                 rawMetadata.getString("databaseName"),
                 rawMetadata.getString("schemaName"),

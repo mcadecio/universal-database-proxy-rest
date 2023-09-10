@@ -16,8 +16,7 @@ public class Application {
     public static void main(String[] args) {
         var vertx = Vertx.vertx();
         vertx.exceptionHandler(error -> {
-            if (error instanceof ProvisionException) {
-                ProvisionException provisionException = (ProvisionException) error;
+            if (error instanceof ProvisionException provisionException) {
                 log.error(provisionException.getCause().getMessage());
                 vertx.close();
             }

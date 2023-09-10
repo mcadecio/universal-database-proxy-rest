@@ -10,7 +10,6 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.simplaex.http.StatusCode.*;
 
@@ -50,7 +49,7 @@ public class GetOperation extends OpenApiOperation {
         return tableMetadata.getColumns()
                 .stream()
                 .map(this::columnToQueryParameter)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Parameter columnToQueryParameter(ColumnMetadata column) {

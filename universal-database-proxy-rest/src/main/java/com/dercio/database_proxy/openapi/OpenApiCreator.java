@@ -37,7 +37,7 @@ public class OpenApiCreator {
                 .tags(tableMetadataList.stream()
                         .map(TableMetadata::getTableName)
                         .map(tableName -> new Tag().name(tableName))
-                        .collect(Collectors.toList()))
+                        .toList())
                 .paths(paths)
                 .components(generateComponents());
     }
