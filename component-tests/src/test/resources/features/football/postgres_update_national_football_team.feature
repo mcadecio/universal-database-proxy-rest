@@ -1,12 +1,6 @@
 Feature: Update a National Football Team
 
   @postgres
-  Scenario: A user updates a national football team
-    Given a national football team exists
-    When I update the name of the national football team
-    Then I should be alerted that name cannot be updated
-
-  @postgres
   Scenario: A user updates a national football team and misses a required field
     Given a national football team exists
     When I update the abbreviated name to no value

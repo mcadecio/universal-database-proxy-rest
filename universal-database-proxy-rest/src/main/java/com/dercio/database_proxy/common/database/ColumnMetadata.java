@@ -3,6 +3,7 @@ package com.dercio.database_proxy.common.database;
 import com.dercio.database_proxy.postgres.type.PgType;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 @ToString
@@ -16,7 +17,8 @@ public class ColumnMetadata {
     private final Long characterMaximumLength;
     private final Object columnDefault;
     private final boolean isNullable;
-    private final boolean isPrimaryKey;
+    @Setter
+    private boolean isPrimaryKey;
 
     public ColumnMetadata(JsonObject jsonObject) {
         this.tableSchema = jsonObject.getString("table_schema");

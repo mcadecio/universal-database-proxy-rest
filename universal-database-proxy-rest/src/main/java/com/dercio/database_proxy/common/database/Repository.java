@@ -4,7 +4,6 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface Repository {
@@ -12,20 +11,13 @@ public interface Repository {
 
     Future<TableMetadata> getTableInfo(TableRequest tableRequest);
 
-    Future<List<JsonObject>> getData(TableRequest tableOption);
+    Future<List<JsonObject>> getData(TableRequest tableRequest);
 
-    Future<Optional<JsonObject>> getDataById(
-           TableRequest tableOption,
-            Map<String, String> pathParams
-    );
+    Future<Optional<JsonObject>> getDataById(TableRequest tableOption);
 
-    Future<Object> createData(TableRequest tableOption, JsonObject data);
+    Future<Object> createData(TableRequest tableOption);
 
-    Future<Integer> updateData(
-            TableRequest tableOption,
-            JsonObject data,
-            Map<String, String> pathParams
-    );
+    Future<Integer> updateData(TableRequest tableOption);
 
-    Future<Integer> deleteData(TableRequest tableOption, Map<String, String> pathParams);
+    Future<Integer> deleteData(TableRequest tableOption);
 }

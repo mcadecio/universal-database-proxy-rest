@@ -56,6 +56,19 @@ public class TableMetadata {
         return columns.size();
     }
 
+    public List<ColumnMetadata> getPrimaryKeyColumns() {
+        return columns.stream()
+                .filter(ColumnMetadata::isPrimaryKey)
+                .toList();
+    }
+
+    public List<String> getPrimaryKeyColumnNames() {
+        return columns.stream()
+                .filter(ColumnMetadata::isPrimaryKey)
+                .map(ColumnMetadata::getColumnName)
+                .toList();
+    }
+
     private void setPrimaryKeyColumn() {
         this.primaryKeyColumn = columns
                 .stream()
@@ -63,6 +76,7 @@ public class TableMetadata {
                 .findFirst()
                 .orElseGet(() -> {
                     var column = columns.get(0);
+                    column.setPrimaryKey(true);
 
                     log.debug("Table [{}] does not have a PK. Using [{}] column as PK",
                             tableName,

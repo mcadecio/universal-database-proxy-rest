@@ -1,0 +1,37 @@
+{
+  "databaseName": "defaultdb",
+  "schemaName": "public",
+  "tableName": "students",
+  "columns": [
+    {
+      "table_schema": "public",
+      "table_name": "students",
+      "column_name": "name",
+      "data_type": "character varying",
+      "character_maximum_length": 20,
+      "column_default": null,
+      "is_nullable": "NO",
+      "is_primary_key": true
+    },
+    {
+      "table_schema": "public",
+      "table_name": "students",
+      "column_name": "age",
+      "data_type": "bigint",
+      "character_maximum_length": null,
+      "column_default": null,
+      "is_nullable": "NO",
+      "is_primary_key": true
+    },
+    {
+      "table_schema": "public",
+      "table_name": "students",
+      "column_name": "phone",
+      "data_type": "character varying",
+      "character_maximum_length": 10,
+      "column_default": null,
+      "is_nullable": "NO",
+      "is_primary_key": false
+    }
+  ]
+}

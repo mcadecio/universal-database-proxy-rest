@@ -40,24 +40,6 @@ public class UpdateWheelSteps {
         wheelsRepository.save(wheel);
     }
 
-    @When("I update the type of the wheel")
-    public void iUpdateTheTypeOfTheWheel() {
-        var existingWheel = wheels.get(0);
-        var updatedWheel = new Wheel().setWheelType("OTHER");
-
-        wheelsContext.setResponse(wheelsService.updateWheel(existingWheel.getWheelType().toString(), updatedWheel));
-    }
-
-    @Then("I should be alerted that tables with only one column cannot be updated")
-    public void iShouldBeAlertedThatTablesWithOnlyOneColumnCannotBeUpdated() {
-        wheelsContext.getResponse().then()
-                .statusCode(400)
-                .body("timestamp", notNullValue())
-                .body("path", equalTo("/wheel/" + wheels.get(0).getWheelType()))
-                .body("message", containsString("Unable to update table with only one column"))
-                .body("code", equalTo(400));
-    }
-
     @When("I update the wheel with no value")
     public void iUpdateTheWheelWithNoValue() {
         var existingWheel = wheels.get(0);

@@ -1,0 +1,583 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Auto Generated Open API",
+    "description" : "Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.",
+    "version" : "1.0.1"
+  },
+  "servers" : [ {
+    "url" : "/",
+    "description" : "Optional server description, e.g. Main (production) server"
+  } ],
+  "tags" : [ {
+    "name" : "students"
+  } ],
+  "paths" : {
+    "/students" : {
+      "get" : {
+        "tags" : [ "students" ],
+        "summary" : "Returns a list of students",
+        "description" : "Auto Generated",
+        "operationId" : "get_students",
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "nullable" : false
+          }
+        }, {
+          "name" : "age",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "nullable" : false
+          }
+        }, {
+          "name" : "phone",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "nullable" : false
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "The request submitted is not valid. This might be due because the request does not pass the API validation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/students",
+                  "message" : "Bad Request",
+                  "code" : 400,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The resource/operation you tried to access/perform does not exist.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/chairs",
+                  "message" : "Not Found",
+                  "code" : 404,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "An internal error occurred in the server.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/students",
+                  "message" : "Internal Server Error",
+                  "code" : 500,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "A JSON array of students",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "required" : [ "name", "age", "phone" ],
+                    "type" : "object",
+                    "properties" : {
+                      "name" : {
+                        "type" : "string",
+                        "nullable" : false
+                      },
+                      "age" : {
+                        "type" : "integer",
+                        "nullable" : false
+                      },
+                      "phone" : {
+                        "type" : "string",
+                        "nullable" : false
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "public",
+          "table" : "students"
+        }
+      },
+      "post" : {
+        "tags" : [ "students" ],
+        "summary" : "Creates a new students",
+        "description" : "Auto Generated",
+        "operationId" : "create_students",
+        "parameters" : [ ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "required" : [ "name", "age", "phone" ],
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string",
+                    "nullable" : false
+                  },
+                  "age" : {
+                    "type" : "integer",
+                    "nullable" : false
+                  },
+                  "phone" : {
+                    "type" : "string",
+                    "nullable" : false
+                  }
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "description" : "The request submitted is not valid. This might be due because the request does not pass the API validation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/students",
+                  "message" : "Bad Request",
+                  "code" : 400,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The resource/operation you tried to access/perform does not exist.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/chairs",
+                  "message" : "Not Found",
+                  "code" : 404,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "An internal error occurred in the server.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/students",
+                  "message" : "Internal Server Error",
+                  "code" : 500,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "A new students has been created.",
+            "headers" : {
+              "Location" : {
+                "description" : "The URI of the resource created.",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "public",
+          "table" : "students"
+        }
+      }
+    },
+    "/students/{name}:{age}" : {
+      "get" : {
+        "tags" : [ "students" ],
+        "summary" : "Get a students by id",
+        "description" : "Auto Generated",
+        "operationId" : "get_students_by_id",
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "age",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "The request submitted is not valid. This might be due because the request does not pass the API validation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/students",
+                  "message" : "Bad Request",
+                  "code" : 400,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The resource/operation you tried to access/perform does not exist.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/chairs",
+                  "message" : "Not Found",
+                  "code" : 404,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "An internal error occurred in the server.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/students",
+                  "message" : "Internal Server Error",
+                  "code" : 500,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "A JSON representing students",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "required" : [ "name", "age", "phone" ],
+                  "type" : "object",
+                  "properties" : {
+                    "name" : {
+                      "type" : "string",
+                      "nullable" : false
+                    },
+                    "age" : {
+                      "type" : "integer",
+                      "nullable" : false
+                    },
+                    "phone" : {
+                      "type" : "string",
+                      "nullable" : false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "public",
+          "table" : "students"
+        }
+      },
+      "put" : {
+        "tags" : [ "students" ],
+        "summary" : "Update a students by id",
+        "description" : "Auto Generated",
+        "operationId" : "update_students_by_id",
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "age",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "required" : [ "name", "age", "phone" ],
+                "type" : "object",
+                "properties" : {
+                  "name" : {
+                    "type" : "string",
+                    "nullable" : false
+                  },
+                  "age" : {
+                    "type" : "integer",
+                    "nullable" : false
+                  },
+                  "phone" : {
+                    "type" : "string",
+                    "nullable" : false
+                  }
+                }
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "description" : "The request submitted is not valid. This might be due because the request does not pass the API validation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/students",
+                  "message" : "Bad Request",
+                  "code" : 400,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The resource/operation you tried to access/perform does not exist.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/chairs",
+                  "message" : "Not Found",
+                  "code" : 404,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "An internal error occurred in the server.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/students",
+                  "message" : "Internal Server Error",
+                  "code" : 500,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "The students has been updated."
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "public",
+          "table" : "students"
+        }
+      },
+      "delete" : {
+        "tags" : [ "students" ],
+        "summary" : "Delete students by id",
+        "description" : "Auto Generated",
+        "operationId" : "delete_students_by_id",
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "age",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "The request submitted is not valid. This might be due because the request does not pass the API validation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/students",
+                  "message" : "Bad Request",
+                  "code" : 400,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The resource/operation you tried to access/perform does not exist.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/chairs",
+                  "message" : "Not Found",
+                  "code" : 404,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "An internal error occurred in the server.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/students",
+                  "message" : "Internal Server Error",
+                  "code" : 500,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Deleted students successfully."
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "public",
+          "table" : "students"
+        }
+      }
+    },
+    "/openapi" : {
+      "get" : {
+        "tags" : [ "Open API" ],
+        "summary" : "Get OpenAPI",
+        "description" : "Auto Generated Open API",
+        "operationId" : "getOpenApi",
+        "responses" : {
+          "200" : {
+            "description" : "The Open API Spec",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "example" : "{\n  \"openapi\" : \"3.0.1\",\n  \"info\" : {\n    \"title\" : \"Auto Generated Open API\",\n    \"description\" : \"Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.\",\n    \"version\" : \"1.0.1\"\n  },\n  \"servers\" : [ {\n    \"url\" : \"/\",\n    \"description\" : \"Optional server description, e.g. Main (production) server\"\n  } ],\n  \"paths\" : {\n    \"/cars\" : {\n      \"get\" : {\n        \"summary\" : \"Returns a list of cars\",\n        \"operationId\" : \"get_cars\",\n        \"responses\" : {\n          \"200\" : {\n            \"description\" : \"A JSON array of cars\",\n            \"content\" : {\n              \"application/json\" : {\n                \"schema\" : {\n                  \"type\" : \"array\",\n                  \"items\" : {\n                    \"required\" : [ \"id\", \"name\", \"doors\" ],\n                    \"type\" : \"object\",\n                    \"properties\" : {\n                      \"id\" : {\n                        \"type\" : \"integer\",\n                        \"example\" : \"1\"\n                      },\n                      \"name\" : {\n                        \"type\" : \"string\",\n                        \"example\" : \"Ferrari\"\n                      },\n                      \"doors\" : {\n                        \"type\" : \"integer\",\n                        \"example\" : \"5\"\n                      }\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+                }
+              }
+            }
+          }
+        },
+        "x-metadata" : { }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "ANY" : {
+        "description" : "Can be anything: string, number, array, object, etc., including `null`"
+      },
+      "ErrorResponse" : {
+        "type" : "object",
+        "properties" : {
+          "timestamp" : {
+            "type" : "string",
+            "example" : "2023-06-11T12:11:25"
+          },
+          "path" : {
+            "type" : "string",
+            "description" : "The url path of the error",
+            "example" : "/cars/1"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "The error message",
+            "example" : "Not found"
+          },
+          "code" : {
+            "type" : "integer",
+            "description" : "The HTTP status code",
+            "format" : "int32",
+            "example" : 404
+          }
+        }
+      }
+    }
+  }
+}

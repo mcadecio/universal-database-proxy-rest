@@ -2,6 +2,8 @@ package com.dercio.database_proxy.glue;
 
 import com.dercio.database_proxy.cars.steps.CarsContext;
 import com.dercio.database_proxy.cars.CarsRepository;
+import com.dercio.database_proxy.students.StudentRepository;
+import com.dercio.database_proxy.students.steps.StudentContext;
 import com.dercio.database_proxy.wheel.WheelsRepository;
 import com.dercio.database_proxy.wheel.steps.WheelsContext;
 import com.google.inject.Inject;
@@ -20,6 +22,9 @@ public class CockroachHook {
     private final WheelsContext wheelsContext;
     private final WheelsRepository wheelsRepository;
 
+    private final StudentContext studentContext;
+    private final StudentRepository studentRepository;
+
     @Transactional
     @After("@cockroach")
     public void afterScenario() {
@@ -30,5 +35,8 @@ public class CockroachHook {
 
         log.info("Deleting {} wheels from scenario", wheelsContext.getWheels().size());
         wheelsContext.getWheels().forEach(wheel -> wheelsRepository.deleteByType(wheel.getWheelType().toString()));
+
+        log.info("Deleting {} students from scenario", studentContext.getStudents().size());
+        studentContext.getStudents().forEach(student -> studentRepository.deleteByNameAndAge(student.name(), student.age()));
     }
 }

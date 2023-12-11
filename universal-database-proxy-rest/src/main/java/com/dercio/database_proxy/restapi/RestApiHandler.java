@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.simplaex.http.StatusCode._201;
 import static com.simplaex.http.StatusCode._204;
@@ -48,9 +49,8 @@ public class RestApiHandler {
 
     public void getResourceById(RoutingContext event) {
         var tableOption = createTableOption(event);
-        Map<String, String> pathParams = event.pathParams();
 
-        repository.getDataById(tableOption, pathParams)
+        repository.getDataById(tableOption)
                 .onSuccess(optionalJsonObject -> {
                     var response = event.response()
                             .setChunked(true)
@@ -73,9 +73,8 @@ public class RestApiHandler {
 
     public void createResource(RoutingContext event) {
         var tableOption = createTableOption(event);
-        var body = event.body().asJsonObject();
 
-        repository.createData(tableOption, body)
+        repository.createData(tableOption)
                 .map(id -> {
                     var baseUrl = event.request().absoluteURI();
                     if (!baseUrl.endsWith("/")) {
@@ -90,12 +89,11 @@ public class RestApiHandler {
                 .onFailure(event::fail);
     }
 
+
     public void updateResourceById(RoutingContext event) {
         var tableOption = createTableOption(event);
-        var pathParams = event.pathParams();
-        var data = event.body().asJsonObject();
 
-        repository.updateData(tableOption, data, pathParams)
+        repository.updateData(tableOption)
                 .onSuccess(rowsUpdated -> {
                     var response = event.response();
                     if (rowsUpdated > 0) {
@@ -113,9 +111,8 @@ public class RestApiHandler {
 
     public void deleteResourceById(RoutingContext event) {
         var tableOption = createTableOption(event);
-        var pathParams = event.pathParams();
 
-        repository.deleteData(tableOption, pathParams)
+        repository.deleteData(tableOption)
                 .onSuccess(rowsDeleted -> {
                     var response = event.response();
                     if (rowsDeleted > 0) {
@@ -133,11 +130,16 @@ public class RestApiHandler {
     }
 
     private TableRequest createTableOption(RoutingContext rc) {
+        Map<String, String> queryParams = rc.queryParams().entries()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return new TableRequest(
                 rc.get(DATABASE),
                 rc.get(SCHEMA),
                 rc.get(TABLE),
-                rc.queryParams()
+                queryParams,
+                rc.pathParams(),
+                rc.body().asJsonObject()
         );
     }
 
