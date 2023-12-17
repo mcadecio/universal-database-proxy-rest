@@ -1,6 +1,10 @@
 package com.dercio.database_proxy.budgets;
 
+import java.util.List;
+
 public interface BudgetsRepository {
+
+    List<Budget> find();
 
     Budget findById(long id);
 

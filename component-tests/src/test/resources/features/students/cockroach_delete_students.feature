@@ -10,3 +10,8 @@ Feature: Delete Students
     Given a list of students
     When I delete a student using its name and age
     Then the student should be deleted
+
+  Scenario: A user can delete all students
+    Given a list of students
+    When I delete all students
+    Then all students should be deleted

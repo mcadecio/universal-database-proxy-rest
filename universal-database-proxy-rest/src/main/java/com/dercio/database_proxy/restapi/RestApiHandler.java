@@ -112,6 +112,26 @@ public class RestApiHandler {
     public void deleteResourceById(RoutingContext event) {
         var tableOption = createTableOption(event);
 
+        repository.deleteDataById(tableOption)
+                .onSuccess(rowsDeleted -> {
+                    var response = event.response();
+                    if (rowsDeleted > 0) {
+                        event.response().setStatusCode(_204.getCode()).end();
+                    } else {
+                        var error = createNotFoundResponse(event.normalizedPath());
+
+                        response.setStatusCode(error.getCode())
+                                .setChunked(true)
+                                .putHeader(CONTENT_TYPE, APPLICATION_JSON)
+                                .end(mapper.encode(error));
+                    }
+                })
+                .onFailure(event::fail);
+    }
+
+    public void deleteResources(RoutingContext event) {
+        var tableOption = createTableOption(event);
+
         repository.deleteData(tableOption)
                 .onSuccess(rowsDeleted -> {
                     var response = event.response();

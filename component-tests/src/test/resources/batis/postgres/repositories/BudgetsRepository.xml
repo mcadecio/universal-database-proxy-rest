@@ -8,6 +8,10 @@
         FROM money.budgets
         WHERE id = #{id}
     </select>
+    <select id="find" resultType="com.dercio.database_proxy.budgets.Budget">
+        SELECT *
+        FROM money.budgets
+    </select>
     <insert id="save"
             parameterType="com.dercio.database_proxy.budgets.Budget">
         INSERT INTO money.budgets(id,

@@ -258,6 +258,109 @@
           "schema" : "vehicles",
           "table" : "cars"
         }
+      },
+      "delete" : {
+        "tags" : [ "cars" ],
+        "summary" : "Deletes cars",
+        "description" : "Auto Generated",
+        "operationId" : "delete_cars",
+        "parameters" : [ {
+          "name" : "car_id",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "nullable" : false
+          }
+        }, {
+          "name" : "manufacturer",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "nullable" : false
+          }
+        }, {
+          "name" : "doors",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "nullable" : true
+          }
+        }, {
+          "name" : "last_updated",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "nullable" : true
+          }
+        }, {
+          "name" : "extra_details",
+          "in" : "query",
+          "schema" : {
+            "type" : "object",
+            "nullable" : true
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "The request submitted is not valid. This might be due because the request does not pass the API validation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/cars",
+                  "message" : "Bad Request",
+                  "code" : 400,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The resource/operation you tried to access/perform does not exist.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/chairs",
+                  "message" : "Not Found",
+                  "code" : 404,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "An internal error occurred in the server.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/cars",
+                  "message" : "Internal Server Error",
+                  "code" : 500,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "Deleted rows from cars successfully."
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "vehicles",
+          "table" : "cars"
+        }
       }
     },
     "/cars/{car_id}" : {

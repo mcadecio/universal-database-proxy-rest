@@ -12,11 +12,13 @@ import io.restassured.response.Response;
 import org.mybatis.guice.transactional.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.dercio.database_proxy.budgets.BudgetsFactory.createJanuaryBudget;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ScenarioScoped
 public class DeleteBudgetsSteps {
@@ -47,7 +49,7 @@ public class DeleteBudgetsSteps {
 
     @When("I delete the budget")
     public void iDeleteTheBudget() {
-        response = budgetsService.deleteBudget(budgets.get(0).getId());
+        response = budgetsService.deleteById(budgets.get(0).getId());
     }
 
     @Then("the budget should be deleted")
@@ -59,7 +61,20 @@ public class DeleteBudgetsSteps {
 
     @When("I delete a budget that does not exist")
     public void iDeleteABudgetThatDoesNotExist() {
-        response = budgetsService.deleteBudget(573489L);
+        response = budgetsService.deleteById(573489L);
+    }
+
+    @When("I delete the budgets by month {int}")
+    public void iDeleteTheBudgetsByMonth(int month) {
+        response = budgetsService.delete(Map.of("month", month));
+    }
+
+    @Then("bugdgets with month {int} should not exist")
+    public void budgetsWithMonthDoNotExist(int month) {
+        boolean result = budgetsRepository.find()
+                .stream()
+                .noneMatch(budget -> budget.getMonth().equals(month));
+        assertTrue(result);
     }
 
     @Then("I should be alerted that the budget does not exist")
@@ -72,4 +87,13 @@ public class DeleteBudgetsSteps {
                 .body("code", equalTo(404));
     }
 
+    @Then("I should be alerted that no budgets exist")
+    public void iShouldBeAlertedThatNoBudgetsExist() {
+        response.then()
+                .statusCode(404)
+                .body("timestamp", notNullValue())
+                .body("path", equalTo("/budgets/"))
+                .body("message", equalTo("Not Found"))
+                .body("code", equalTo(404));
+    }
 }

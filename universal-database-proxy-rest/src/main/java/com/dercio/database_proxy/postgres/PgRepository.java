@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Log4j2
@@ -40,7 +39,9 @@ public class PgRepository implements Repository {
                 tableOption.getTable()
         );
 
-        return getTableInfo(tableOption).compose(tableMetadata -> finder.find(tableMetadata, tableOption.getQueryParams()));
+        return getTableInfo(tableOption)
+                .map(PgTableMetadata::new)
+                .compose(tableMetadata -> finder.find(tableMetadata, tableOption.getQueryParams()));
     }
 
     @Override
@@ -52,7 +53,9 @@ public class PgRepository implements Repository {
         );
 
         return getTableInfo(tableOption)
-                .compose(tableMetadata -> finder.findById(tableMetadata, tableOption.getPathParams()));
+                .map(PgTableMetadata::new)
+                .compose(tableMetadata -> finder.find(tableMetadata, tableOption.getPathParams()))
+                .map(elements -> elements.stream().findFirst());
     }
 
     @Override
@@ -81,7 +84,7 @@ public class PgRepository implements Repository {
     }
 
     @Override
-    public Future<Integer> deleteData(TableRequest tableOption) {
+    public Future<Integer> deleteDataById(TableRequest tableOption) {
         log.info("Deleting item from {} | {} | {} ",
                 tableOption.getDatabase(),
                 tableOption.getSchema(),
@@ -89,7 +92,14 @@ public class PgRepository implements Repository {
         );
 
         return getTableInfo(tableOption)
+                .map(PgTableMetadata::new)
                 .compose(tableMetadata -> deleter.deleteData(tableMetadata, tableOption.getPathParams()));
     }
 
+    @Override
+    public Future<Integer> deleteData(TableRequest tableOption) {
+        return getTableInfo(tableOption)
+                .map(PgTableMetadata::new)
+                .compose(tableMetadata -> deleter.deleteData(tableMetadata, tableOption.getQueryParams()));
+    }
 }

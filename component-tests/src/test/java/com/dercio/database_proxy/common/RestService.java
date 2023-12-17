@@ -1,6 +1,7 @@
 package com.dercio.database_proxy.common;
 
 import com.dercio.database_proxy.common.mapper.Mapper;
+import io.cucumber.java.it.Ma;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
@@ -72,6 +73,16 @@ public class RestService {
                 .prettyPeek();
     }
 
+    public Response delete(Map<String, Object> filters) {
+        return given()
+                .baseUri(baseUri)
+                .log()
+                .all(true)
+                .queryParams(filters)
+                .delete(path)
+                .prettyPeek();
+    }
+
     public Response deleteById(int id) {
         return given()
                 .baseUri(baseUri)
@@ -101,7 +112,7 @@ public class RestService {
                 .prettyPeek();
     }
 
-    public Response update(int id, Object resorce) {
+    public Response update(long id, Object resorce) {
         return given()
                 .baseUri(baseUri)
                 .contentType(ContentType.JSON)
