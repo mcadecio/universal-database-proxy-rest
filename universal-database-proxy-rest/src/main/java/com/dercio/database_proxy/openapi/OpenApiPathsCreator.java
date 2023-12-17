@@ -1,5 +1,6 @@
 package com.dercio.database_proxy.openapi;
 
+import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
 import com.dercio.database_proxy.openapi.operation.*;
 import com.google.inject.Inject;
@@ -18,6 +19,7 @@ public class OpenApiPathsCreator {
     private final GetByIdOperation getByIdOperation;
     private final PutByIdOperation putByIdOperation;
     private final DeleteByIdOperation deleteByIdOperation;
+    private final DeleteOperation deleteOperation;
 
     public Paths createPaths(List<TableMetadata> tables) {
         Paths paths = new Paths();
@@ -25,7 +27,8 @@ public class OpenApiPathsCreator {
         tables.forEach(tableMetadata -> {
             PathItem pathItem = new PathItem()
                     .get(getOperation.createOperation(tableMetadata))
-                    .post(postOperation.createOperation(tableMetadata));
+                    .post(postOperation.createOperation(tableMetadata))
+                    .delete(deleteOperation.createOperation(tableMetadata));
 
             PathItem pathItemById = new PathItem()
                     .get(getByIdOperation.createOperation(tableMetadata))
@@ -36,7 +39,7 @@ public class OpenApiPathsCreator {
 
             String idParams = tableMetadata.getColumns()
                     .stream()
-                    .filter(column -> column.isPrimaryKey())
+                    .filter(ColumnMetadata::isPrimaryKey)
                     .map(column -> "{" + column.getColumnName() + "}")
                     .collect(Collectors.joining(":"));
             paths.addPathItem(String.format("/%s/%s", tableMetadata.getTableName(), idParams), pathItemById);

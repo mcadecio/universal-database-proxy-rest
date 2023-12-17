@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.lang.String.format;
+
 @Log4j2
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class RouterFactory {
@@ -36,6 +38,7 @@ public class RouterFactory {
     private static final String GET_RESOURCE_BY_ID_OPERATION_ID_FORMAT = "get_%s_by_id";
     private static final String UPDATE_RESOURCE_BY_ID_OPERATION_ID_FORMAT = "update_%s_by_id";
     private static final String DELETE_RESOURCE_BY_ID_OPERATION_ID_FORMAT = "delete_%s_by_id";
+    private static final String DELETE_RESOURCE_OPERATION_ID_FORMAT = "delete_%s";
 
     private final Vertx vertx;
     private final FailureHandler defaultFailureHandler;
@@ -131,21 +134,14 @@ public class RouterFactory {
             String tableName,
             RestApiHandler restApiHandler
     ) {
-        Map<String, Handler<RoutingContext>> operationIdHandlerMap = new HashMap<>();
-
-        var getOperationName = String.format(GET_RESOURCE_OPERATION_ID_FORMAT, tableName);
-        var createOperationName = String.format(CREATE_RESOURCE_OPERATION_ID_FORMAT, tableName);
-        var getByIdOperationName = String.format(GET_RESOURCE_BY_ID_OPERATION_ID_FORMAT, tableName);
-        var updateByIdOperationName = String.format(UPDATE_RESOURCE_BY_ID_OPERATION_ID_FORMAT, tableName);
-        var deleteByIdOperationName = String.format(DELETE_RESOURCE_BY_ID_OPERATION_ID_FORMAT, tableName);
-
-        operationIdHandlerMap.put(getOperationName, restApiHandler::getResources);
-        operationIdHandlerMap.put(createOperationName, restApiHandler::createResource);
-        operationIdHandlerMap.put(getByIdOperationName, restApiHandler::getResourceById);
-        operationIdHandlerMap.put(updateByIdOperationName, restApiHandler::updateResourceById);
-        operationIdHandlerMap.put(deleteByIdOperationName, restApiHandler::deleteResourceById);
-
-        return operationIdHandlerMap;
+        return Map.of(
+                format(GET_RESOURCE_OPERATION_ID_FORMAT, tableName), restApiHandler::getResources,
+                format(CREATE_RESOURCE_OPERATION_ID_FORMAT, tableName), restApiHandler::createResource,
+                format(GET_RESOURCE_BY_ID_OPERATION_ID_FORMAT, tableName), restApiHandler::getResourceById,
+                format(UPDATE_RESOURCE_BY_ID_OPERATION_ID_FORMAT, tableName), restApiHandler::updateResourceById,
+                format(DELETE_RESOURCE_BY_ID_OPERATION_ID_FORMAT, tableName), restApiHandler::deleteResourceById,
+                format(DELETE_RESOURCE_OPERATION_ID_FORMAT, tableName), restApiHandler::deleteResources
+        );
     }
 
 }

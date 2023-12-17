@@ -19,5 +19,7 @@ public interface Repository {
 
     Future<Integer> updateData(TableRequest tableOption);
 
+    Future<Integer> deleteDataById(TableRequest tableOption);
+
     Future<Integer> deleteData(TableRequest tableOption);
 }

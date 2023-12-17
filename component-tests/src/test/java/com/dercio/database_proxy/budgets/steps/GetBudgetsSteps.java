@@ -57,7 +57,7 @@ public class GetBudgetsSteps {
 
     @When("I retrieve all the budgets")
     public void iRetrieveAllTheBudgets() {
-        response = budgetsService.getBudgets();
+        response = budgetsService.getAll();
     }
 
     @Then("I should see all the budgets")
@@ -73,7 +73,7 @@ public class GetBudgetsSteps {
 
     @When("I retrieve a budget with id {int}")
     public void iRetrieveABudgetWithId(int id) {
-        response = budgetsService.getBudgetById(id);
+        response = budgetsService.getById(id);
     }
 
     @Then("I should see the budget")
@@ -96,7 +96,7 @@ public class GetBudgetsSteps {
 
     @When("I retrieve a budget with an invalid id")
     public void iRetrieveABudgetWithAnInvalidId() {
-        response = budgetsService.getBudgetById("INVALID");
+        response = budgetsService.getById("INVALID");
     }
 
     @Then("I should get a validation error message")

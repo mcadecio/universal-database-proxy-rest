@@ -50,7 +50,7 @@ public class UpdateBudgetsSteps {
 
         budget.setMonth(null);
 
-        response = budgetsService.updateBudget(budget.getId(), budget);
+        response = budgetsService.update(budget.getId(), budget);
     }
 
     @Then("I should be alerted that the month is a required field")
@@ -69,7 +69,7 @@ public class UpdateBudgetsSteps {
 
         budget.setUserId("something-else");
 
-        response = budgetsService.updateBudget(budget.getId(), budget);
+        response = budgetsService.update(budget.getId(), budget);
     }
 
     @Then("I should see the new user id in the budget")
@@ -89,7 +89,7 @@ public class UpdateBudgetsSteps {
 
         budget.setYear(1999);
 
-        response = budgetsService.updateBudget(budget.getId(), budget);
+        response = budgetsService.update(budget.getId(), budget);
     }
 
     @Then("I should see the new year in the budget")
@@ -107,7 +107,7 @@ public class UpdateBudgetsSteps {
     public void iUpdateABudgetThatDoesNotExist() {
         var januaryBudget = createJanuaryBudget();
 
-        response = budgetsService.updateBudget(januaryBudget.getId(), januaryBudget);
+        response = budgetsService.update(januaryBudget.getId(), januaryBudget);
     }
 
     @Then("I should notified the budget does not exist")
