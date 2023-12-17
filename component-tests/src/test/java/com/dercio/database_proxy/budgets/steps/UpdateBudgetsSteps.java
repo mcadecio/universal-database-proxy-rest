@@ -44,25 +44,6 @@ public class UpdateBudgetsSteps {
         budgetsRepository.save(januaryBudget);
     }
 
-    @When("I update the id of the budget")
-    public void iUpdateTheIdOfTheBudget() {
-        budgets.add(createJanuaryBudget());
-        var budget = budgets.get(0);
-        var originalId = budget.getId();
-        budget.setId(999L);
-        response = budgetsService.updateBudget(originalId, budget);
-    }
-
-    @Then("I should be alerted that id cannot be updated")
-    public void iShouldBeAlertedThatIdCannotBeUpdated() {
-        response.then()
-                .statusCode(400)
-                .body("timestamp", notNullValue())
-                .body("path", equalTo("/budgets/2000"))
-                .body("message", containsString("inconsistent primary key values"))
-                .body("code", equalTo(400));
-    }
-
     @When("I update the month to no value")
     public void iUpdateTheMonthToNoValue() {
         var budget = budgets.get(0);

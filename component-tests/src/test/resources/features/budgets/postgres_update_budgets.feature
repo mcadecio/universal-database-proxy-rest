@@ -1,12 +1,6 @@
 Feature: Update Budgets
 
   @postgres
-  Scenario: A user updates a budget
-    Given a budget exists
-    When I update the id of the budget
-    Then I should be alerted that id cannot be updated
-
-  @postgres
   Scenario: A user updates a budget and misses a required field
     Given a budget exists
     When I update the month to no value

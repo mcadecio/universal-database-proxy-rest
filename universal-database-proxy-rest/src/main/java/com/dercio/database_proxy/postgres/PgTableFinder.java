@@ -24,33 +24,34 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
 public class PgTableFinder {
 
-    private static final String RETRIEVE_ALL_NON_DEFAULT_TABLES_FOR_DB =
-            "WITH \"constraint\" AS (SELECT table_catalog, table_schema, table_name, constraint_name " +
-                    "                      FROM information_schema.table_constraints " +
-                    "                      WHERE constraint_type = 'PRIMARY KEY'), " +
-                    "     pk_columns AS (SELECT kcu.table_catalog, kcu.table_schema, kcu.table_name, column_name " +
-                    "                    FROM information_schema.key_column_usage kcu " +
-                    "                             INNER JOIN \"constraint\" con on con.table_name = kcu.table_name " +
-                    "                        AND con.table_schema = kcu.table_schema " +
-                    "                        AND con.constraint_name = kcu.constraint_name " +
-                    "                    WHERE con.table_schema NOT IN ('pg_catalog', 'information_schema', 'crdb_internal', 'pg_extension')) " +
-                    "SELECT columns.table_catalog, " +
-                    "       columns.table_schema, " +
-                    "       columns.table_name, " +
-                    "       columns.column_name, " +
-                    "       ordinal_position, " +
-                    "       column_default, " +
-                    "       is_nullable, " +
-                    "       data_type, " +
-                    "       character_maximum_length, " +
-                    "       exists(SELECT 1 WHERE columns.column_name = pk_columns.column_name) AS is_primary_key " +
-                    "FROM information_schema.columns " +
-                    "         FULL OUTER JOIN pk_columns ON " +
-                    "            columns.table_catalog = pk_columns.table_catalog AND " +
-                    "            columns.table_schema = pk_columns.table_schema AND " +
-                    "            columns.table_name = pk_columns.table_name " +
-                    "WHERE columns.table_catalog = $1 " +
-                    "AND columns.table_schema NOT IN ('pg_catalog', 'information_schema', 'crdb_internal', 'pg_extension')";
+    private static final String RETRIEVE_ALL_NON_DEFAULT_TABLES_FOR_DB = """
+            WITH "constraint" AS (SELECT table_catalog, table_schema, table_name, constraint_name
+                                  FROM information_schema.table_constraints
+                                  WHERE constraint_type = 'PRIMARY KEY'),
+                 pk_columns AS (SELECT kcu.table_catalog, kcu.table_schema, kcu.table_name, column_name
+                                FROM information_schema.key_column_usage kcu
+                                         INNER JOIN "constraint" con
+                                                    on con.table_name = kcu.table_name AND con.table_schema = kcu.table_schema AND
+                                                       con.constraint_name = kcu.constraint_name
+                                WHERE con.table_schema NOT IN ('pg_catalog', 'information_schema', 'crdb_internal', 'pg_extension'))
+            SELECT columns.table_catalog,
+                   columns.table_schema,
+                   columns.table_name,
+                   columns.column_name,
+                   columns.ordinal_position,
+                   columns.column_default,
+                   columns.is_nullable,
+                   columns.data_type,
+                   columns.character_maximum_length,
+                   exists(SELECT 1
+                          FROM pk_columns
+                          WHERE columns.table_name = pk_columns.table_name
+                            AND columns.table_schema = pk_columns.table_schema
+                            AND columns.column_name = pk_columns.column_name) AS is_primary_key
+            FROM information_schema.columns
+            WHERE columns.table_catalog = $1
+              AND columns.table_schema NOT IN ('pg_catalog', 'information_schema', 'crdb_internal', 'pg_extension')
+            """;
 
     private final Map<String, TableMetadata> tableInfoCache = new ConcurrentHashMap<>();
     private final SqlClient sqlClient;
@@ -89,7 +90,7 @@ public class PgTableFinder {
                 .map(Row::toJson)
                 .sorted(Comparator.comparing(json -> json.getInteger("ordinal_position")))
                 .map(ColumnMetadata::new)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<TableMetadata> createTablesFromColumns(String database, List<ColumnMetadata> mixedColumns) {
@@ -103,7 +104,7 @@ public class PgTableFinder {
                     return createTablesFromSchema(database, schemaName, rawTables);
                 })
                 .flatMap(List::stream)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<TableMetadata> createTablesFromSchema(
@@ -119,7 +120,7 @@ public class PgTableFinder {
 
                     return createTableMetadata(database, schemaName, tableName, columns);
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Map<String, Map<String, List<ColumnMetadata>>> groupColumnsBySchemaAndTableName(

@@ -4,6 +4,7 @@ import com.dercio.database_proxy.common.mapper.MapperModule;
 import com.dercio.database_proxy.budgets.BudgetsRepository;
 import com.dercio.database_proxy.cars.CarsRepository;
 import com.dercio.database_proxy.football.NationalFootballTeamsRepository;
+import com.dercio.database_proxy.students.StudentRepository;
 import com.dercio.database_proxy.wheel.WheelsRepository;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -53,6 +54,7 @@ public class CustomInjectorSource implements InjectorSource {
 
                         expose(CarsRepository.class);
                         expose(WheelsRepository.class);
+                        expose(StudentRepository.class);
                     }
                 },
                 CucumberModules.createScenarioModule(),

@@ -1,78 +1,42 @@
 package com.dercio.database_proxy.cars;
 
+import com.dercio.database_proxy.common.RestService;
 import com.dercio.database_proxy.common.mapper.Mapper;
 import com.google.inject.Inject;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import lombok.RequiredArgsConstructor;
 
-import static io.restassured.RestAssured.given;
 
-@RequiredArgsConstructor(onConstructor_ = @Inject)
-public class CarsService {
+public class CarsService extends RestService {
 
-    private final Mapper mapper;
     private static final String BASE_URI = "http://localhost:8010";
     private static final String CARS = "/cars/";
 
+    @Inject
+    public CarsService(Mapper mapper) {
+        super(BASE_URI, CARS, mapper);
+    }
+
     public Response getCars() {
-        return given()
-                .baseUri(BASE_URI)
-                .accept(ContentType.JSON)
-                .log()
-                .all(true)
-                .get(CARS)
-                .prettyPeek();
+        return getAll();
     }
 
     public Response getCarById(String id) {
-        return given()
-                .baseUri(BASE_URI)
-                .accept(ContentType.JSON)
-                .log()
-                .all(true)
-                .get(CARS + id)
-                .prettyPeek();
+        return getById(id);
     }
 
     public Response getCarById(int id) {
-        return given()
-                .baseUri(BASE_URI)
-                .accept(ContentType.JSON)
-                .log()
-                .all(true)
-                .get(CARS + id)
-                .prettyPeek();
+        return getById(id);
     }
 
     public Response deleteCarById(int id) {
-        return given()
-                .baseUri(BASE_URI)
-                .log()
-                .all(true)
-                .delete(CARS + id)
-                .prettyPeek();
+        return deleteById(id);
     }
 
     public Response updateCar(int id, Car car) {
-        return given()
-                .baseUri(BASE_URI)
-                .contentType(ContentType.JSON)
-                .body(mapper.encode(car))
-                .log()
-                .all(true)
-                .put(CARS + id)
-                .prettyPeek();
+        return update(id, car);
     }
 
     public Response createCar(Car car) {
-        return given()
-                .baseUri(BASE_URI)
-                .contentType(ContentType.JSON)
-                .body(mapper.encode(car))
-                .log()
-                .all(true)
-                .post(CARS)
-                .prettyPeek();
+        return create(car);
     }
 }

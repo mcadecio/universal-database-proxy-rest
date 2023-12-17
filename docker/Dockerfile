@@ -1,4 +1,4 @@
-FROM eclipse-temurin:11-jre-alpine
+FROM eclipse-temurin:17-jre-alpine
 
 ENV VERTICLE_FILE=universal-database-proxy-rest.jar
 

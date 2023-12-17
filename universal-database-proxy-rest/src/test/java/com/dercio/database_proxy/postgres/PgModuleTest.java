@@ -7,6 +7,7 @@ import io.vertx.core.Vertx;
 import io.vertx.pgclient.PgConnectOptions;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -76,6 +77,7 @@ class PgModuleTest {
                 })
                         .annotatedWith(Names.named("system.env.variables"))
                         .toInstance(envVariables);
+                bind(Clock.class).toInstance(Clock.systemDefaultZone());
                 bind(PgApiConfig.class).toInstance(pgApiConfig);
                 bind(Vertx.class).toInstance(Vertx.vertx());
             }

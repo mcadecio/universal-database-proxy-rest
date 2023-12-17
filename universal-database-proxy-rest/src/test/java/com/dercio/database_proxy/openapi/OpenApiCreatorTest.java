@@ -68,6 +68,16 @@ class OpenApiCreatorTest {
         assertEquals(Json.pretty(expectedOpenApi), Json.pretty(openAPI));
     }
 
+    @Test
+    void shouldCreateStudentsOpenApi() throws Exception {
+        TableMetadata carsTableMetadata = loadCarsTableMetadata("students_table_metadata.json");
+        var expectedOpenApi = loadOpenApi("students_table_openapi.json").getMap();
+
+        var openAPI = openApiCreator.create(List.of(carsTableMetadata));
+
+        assertEquals(Json.pretty(expectedOpenApi), Json.pretty(openAPI));
+    }
+
     private JsonObject loadOpenApi(String file) throws URISyntaxException, IOException {
         var uri = getResource(file).toURI();
         return new JsonObject(Files.readString(Paths.get(uri)));

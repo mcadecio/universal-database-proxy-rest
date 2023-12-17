@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.Paths;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class OpenApiPathsCreator {
@@ -32,7 +33,13 @@ public class OpenApiPathsCreator {
                     .delete(deleteByIdOperation.createOperation(tableMetadata));
 
             paths.addPathItem("/" + tableMetadata.getTableName(), pathItem);
-            paths.addPathItem(String.format("/%s/{%s}", tableMetadata.getTableName(), tableMetadata.getPkColumnName()), pathItemById);
+
+            String idParams = tableMetadata.getColumns()
+                    .stream()
+                    .filter(column -> column.isPrimaryKey())
+                    .map(column -> "{" + column.getColumnName() + "}")
+                    .collect(Collectors.joining(":"));
+            paths.addPathItem(String.format("/%s/%s", tableMetadata.getTableName(), idParams), pathItemById);
         });
 
         return paths;

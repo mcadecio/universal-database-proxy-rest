@@ -1,5 +1,6 @@
 package com.dercio.database_proxy.openapi.operation;
 
+import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -15,12 +16,18 @@ public abstract class ByIdOperation extends OpenApiOperation {
 
     @Override
     protected List<Parameter> operationParameters(TableMetadata tableMetadata) {
-        var primaryKeyColumn = tableMetadata.getPrimaryKeyColumn();
-        var parameter = new Parameter()
-                .name(primaryKeyColumn.getColumnName())
-                .in("path")
+        return tableMetadata.getColumns()
+                .stream()
+                .filter(ColumnMetadata::isPrimaryKey)
+                .map(column -> createParameter(true, column.getColumnName(), column.getOpenApiType()))
+                .toList();
+    }
+
+    private Parameter createParameter(boolean isPathParameter, String name, String type) {
+        return new Parameter()
+                .name(name)
+                .in(isPathParameter ? "path" : "query")
                 .required(true)
-                .schema(new ObjectSchema().type(primaryKeyColumn.getOpenApiType()));
-        return List.of(parameter);
+                .schema(new ObjectSchema().type(type));
     }
 }

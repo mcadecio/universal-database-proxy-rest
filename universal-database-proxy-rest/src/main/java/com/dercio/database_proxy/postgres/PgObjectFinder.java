@@ -16,6 +16,7 @@ import lombok.extern.log4j.Log4j2;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -27,9 +28,8 @@ import static java.lang.String.format;
 public class PgObjectFinder {
     private final SqlClient sqlClient;
 
-    public Future<List<JsonObject>> find(TableMetadata tableMetadata, MultiMap queryFilters) {
-
-        return sqlClient.preparedQuery(generateSelectQuery(tableMetadata, queryFilters))
+    public Future<List<JsonObject>> find(TableMetadata tableMetadata, Map<String, String> queryFilters) {
+        return sqlClient.preparedQuery(generateSelectQuery(tableMetadata, queryFilters.keySet()))
                 .execute(generateTupleForSelect(tableMetadata, queryFilters))
                 .map(rows -> StreamSupport.stream(rows.spliterator(), false)
                         .map(Row::toJson)
@@ -38,48 +38,31 @@ public class PgObjectFinder {
     }
 
     public Future<Optional<JsonObject>> findById(TableMetadata tableMetadata, Map<String, String> pathParams) {
+        Set<String> columsToFilterBy = tableMetadata.getPrimaryKeyColumns()
+                .stream()
+                .map(ColumnMetadata::getColumnName)
+                .collect(Collectors.toSet());
 
-        return sqlClient.preparedQuery(generateSelectByPkQuery(tableMetadata))
-                .execute(Tuple.of(findPkValue(tableMetadata, pathParams)))
+        return sqlClient.preparedQuery(generateSelectQuery(tableMetadata, columsToFilterBy))
+                .execute(generateTupleForSelect(tableMetadata, pathParams))
                 .onSuccess(items -> log.info("Retrieved [{}] rows", items.size()))
                 .map(rows -> StreamSupport.stream(rows.spliterator(), false)
                         .map(Row::toJson)
                         .findFirst());
     }
 
-    private Object findPkValue(TableMetadata tableMetadata, Map<String, String> pathParams) {
-        var primaryKeyColumn = tableMetadata.getPrimaryKeyColumn();
-        var value = pathParams.get(primaryKeyColumn.getColumnName());
-        var dbType = primaryKeyColumn.getDbType();
-        return PgType.parse(dbType, value);
-    }
-
-    private String generateSelectByPkQuery(TableMetadata tableMetadata) {
-
-        var query = format(
-                "SELECT * FROM %s.%s WHERE %s = $1",
-                tableMetadata.getSchemaName(),
-                tableMetadata.getTableName(),
-                tableMetadata.getPkColumnName()
-        );
-
-        log.info("Generated select query [{}]", query);
-
-        return query;
-    }
-
-    private String generateSelectQuery(TableMetadata tableMetadata, MultiMap queryFilters) {
+    private String generateSelectQuery(TableMetadata tableMetadata, Set<String> filters) {
 
         String baseQuery = format("SELECT * FROM %s.%s", tableMetadata.getSchemaName(), tableMetadata.getTableName());
 
-        if (queryFilters.isEmpty()) {
+        if (filters.isEmpty()) {
             return baseQuery;
         }
 
         List<String> columnsToFilterBy = tableMetadata.getColumns()
                 .stream()
                 .map(ColumnMetadata::getColumnName)
-                .filter(queryFilters::contains)
+                .filter(filters::contains)
                 .toList();
 
         String wherePredicates = IntStream.range(0, columnsToFilterBy.size())
@@ -93,24 +76,22 @@ public class PgObjectFinder {
         return baseQuery;
     }
 
-    private Tuple generateTupleForSelect(TableMetadata tableMetadata, MultiMap queryFilters) {
+    private Tuple generateTupleForSelect(TableMetadata tableMetadata, Map<String, String> queryFilters) {
         if (queryFilters.isEmpty()) {
             return Tuple.tuple();
         }
 
-        List<ColumnMetadata> columnsToFilterBy = tableMetadata.getColumns()
+        List<Object> values = tableMetadata.getColumns()
                 .stream()
-                .filter(column -> queryFilters.contains(column.getColumnName()))
-                .toList();
-
-        return Tuple.from(columnsToFilterBy
-                .stream()
+                .filter(column -> queryFilters.containsKey(column.getColumnName()))
                 .map(column -> {
                     var columnName = column.getColumnName();
                     var value = queryFilters.get(columnName);
                     return PgType.parse(column.getDbType(), value);
                 })
-                .toList());
+                .toList();
+
+        return Tuple.from(values);
     }
 
 }

@@ -40,11 +40,11 @@ public class PgRepository implements Repository {
                 tableOption.getTable()
         );
 
-        return getTableInfo(tableOption).compose(tableMetadata -> finder.find(tableMetadata, tableOption.getQueryFilters()));
+        return getTableInfo(tableOption).compose(tableMetadata -> finder.find(tableMetadata, tableOption.getQueryParams()));
     }
 
     @Override
-    public Future<Optional<JsonObject>> getDataById(TableRequest tableOption, Map<String, String> pathParams) {
+    public Future<Optional<JsonObject>> getDataById(TableRequest tableOption) {
         log.info("Retrieving row for {} | {} | {}",
                 tableOption.getDatabase(),
                 tableOption.getSchema(),
@@ -52,11 +52,11 @@ public class PgRepository implements Repository {
         );
 
         return getTableInfo(tableOption)
-                .compose(tableMetadata -> finder.findById(tableMetadata, pathParams));
+                .compose(tableMetadata -> finder.findById(tableMetadata, tableOption.getPathParams()));
     }
 
     @Override
-    public Future<Object> createData(TableRequest tableOption, JsonObject data) {
+    public Future<Object> createData(TableRequest tableOption) {
         log.info("Inserting data into {} | {} | {} ",
                 tableOption.getDatabase(),
                 tableOption.getSchema(),
@@ -64,14 +64,11 @@ public class PgRepository implements Repository {
         );
 
         return getTableInfo(tableOption)
-                .compose(tableMetadata -> inserter.create(tableMetadata, data));
+                .compose(tableMetadata -> inserter.create(tableMetadata, tableOption.getBody()));
     }
 
     @Override
-    public Future<Integer> updateData(
-            TableRequest tableOption,
-            JsonObject data,
-            Map<String, String> pathParams) {
+    public Future<Integer> updateData(TableRequest tableOption) {
 
         log.info("Updating data in {} | {} | {} ",
                 tableOption.getDatabase(),
@@ -80,11 +77,11 @@ public class PgRepository implements Repository {
         );
 
         return getTableInfo(tableOption)
-                .compose(tableMetadata -> inserter.update(tableMetadata, data, pathParams));
+                .compose(tableMetadata -> inserter.update(tableMetadata, tableOption.getBody(), tableOption.getPathParams()));
     }
 
     @Override
-    public Future<Integer> deleteData(TableRequest tableOption, Map<String, String> pathParams) {
+    public Future<Integer> deleteData(TableRequest tableOption) {
         log.info("Deleting item from {} | {} | {} ",
                 tableOption.getDatabase(),
                 tableOption.getSchema(),
@@ -92,7 +89,7 @@ public class PgRepository implements Repository {
         );
 
         return getTableInfo(tableOption)
-                .compose(tableMetadata -> deleter.deleteData(tableMetadata, pathParams));
+                .compose(tableMetadata -> deleter.deleteData(tableMetadata, tableOption.getPathParams()));
     }
 
 }

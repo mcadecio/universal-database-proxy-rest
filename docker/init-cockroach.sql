@@ -20,3 +20,16 @@ CREATE TABLE vehicles.wheel
 (
     wheel_type varchar(50) primary key not null
 );
+
+CREATE TABLE students
+(
+    name    varchar(20),
+    age     int,
+    phone   varchar(10) not null,
+    PRIMARY KEY (name, age)
+);
+INSERT INTO students(name, age, phone)
+VALUES ('Ruben', 10, '38192731'),
+       ('Ruben', 12, '423423'),
+       ('Carlos', 85, '48239423'),
+       ('Steve', 24, '09024232');

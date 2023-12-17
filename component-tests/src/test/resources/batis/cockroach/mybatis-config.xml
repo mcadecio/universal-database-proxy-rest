@@ -27,6 +27,7 @@
     <mappers>
         <mapper resource="batis/cockroach/repositories/CarsRepository.xml"/>
         <mapper resource="batis/cockroach/repositories/WheelsRepository.xml"/>
+        <mapper resource="batis/cockroach/repositories/StudentRepository.xml"/>
     </mappers>
 
 

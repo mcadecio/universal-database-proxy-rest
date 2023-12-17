@@ -6,12 +6,14 @@ import com.dercio.database_proxy.postgres.type.PgType;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
+import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.SqlClient;
 import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,18 +31,19 @@ public class PgObjectInserter {
     public Future<Object> create(TableMetadata tableMetadata, JsonObject data) {
 
         return sqlClient.preparedQuery(generateInsertQuery(tableMetadata))
-                .execute(generateTupleForInsert(tableMetadata, data))
+                .execute(generateTupleForInsert(tableMetadata, data, Map.of()))
                 .map(rows -> StreamSupport.stream(rows.spliterator(), false)
-                        .map(row -> row.getValue(0))
-                        .findFirst()
-                        .orElseThrow());
+                        .map(Row::toJson)
+                        .map(json-> json.getMap().values())
+                        .flatMap(Collection::stream)
+                        .map(Object::toString)
+                        .collect(Collectors.joining(":")));
     }
 
     public Future<Integer> update(TableMetadata tableMetadata, JsonObject data, Map<String, String> pathParams) {
 
-        return validaUpdateRequest(tableMetadata, data, pathParams)
-                .compose(empty -> sqlClient.preparedQuery(generateUpdateQuery(tableMetadata))
-                        .execute(generateTupleForInsert(tableMetadata, data)))
+        return sqlClient.preparedQuery(generateUpdateQuery(tableMetadata))
+                        .execute(generateTupleForInsert(tableMetadata, data, pathParams))
                 .map(SqlResult::rowCount)
                 .onSuccess(count -> log.info("Rows updated [{}]", count));
     }
@@ -57,7 +60,7 @@ public class PgObjectInserter {
                 IntStream.rangeClosed(1, tableMetadata.getNumberOfColumns())
                         .mapToObj(i -> String.format("$%d", i))
                         .collect(Collectors.joining(",")) +
-                ") RETURNING " + tableMetadata.getPkColumnName();
+                ") RETURNING " + String.join(",", tableMetadata.getPrimaryKeyColumnNames());
 
         var finalQuery = baseQuery + valuePlaceholders;
 
@@ -66,8 +69,12 @@ public class PgObjectInserter {
         return finalQuery;
     }
 
-    private Tuple generateTupleForInsert(TableMetadata tableMetadata, JsonObject body) {
-        return Tuple.from(tableMetadata.getColumns()
+    private Tuple generateTupleForInsert(TableMetadata tableMetadata, JsonObject body, Map<String, String> pathParams) {
+
+        var tuples = Tuple.tuple();
+
+
+        tableMetadata.getColumns()
                 .stream()
                 .map(column -> {
 
@@ -84,40 +91,38 @@ public class PgObjectInserter {
 
                     return body.getValue(columnName);
                 })
-                .toList());
-    }
+                .forEach(tuples::addValue);
 
-    private Future<Void> validaUpdateRequest(TableMetadata tableMetadata, JsonObject data, Map<String, String> pathParams) {
+        tableMetadata.getPrimaryKeyColumns()
+                .stream()
+                .filter(column -> pathParams.containsKey(column.getColumnName()))
+                .map(column -> PgType.parse(column.getDbType(), pathParams.get(column.getColumnName())))
+                .forEach(tuples::addValue);
 
-        if (tableMetadata.getNumberOfColumns() == 1) {
-            return Future.failedFuture(new IllegalStateException("Unable to update table with only one column"));
-        }
-
-        var resourceIdInPath = pathParams.get(tableMetadata.getPkColumnName());
-        var resourceIdInBody = data.getString(tableMetadata.getPkColumnName());
-
-        if (resourceIdInBody.equals(resourceIdInPath)) {
-            return Future.succeededFuture();
-        }
-
-        return Future.failedFuture(new InconsistentStateException());
+        return tuples;
     }
 
     private String generateColumnsToUpdate(List<ColumnMetadata> columns) {
         return IntStream.range(0, columns.size())
-                .mapToObj(i -> format("%s = $%d", columns.get(i).getColumnName(), i + 2))
+                .mapToObj(i -> format("%s = $%d", columns.get(i).getColumnName(), i + 1))
                 .collect(Collectors.joining(", "));
     }
 
-    private String generateUpdateQuery(TableMetadata tableMetadata) {
-        var values = generateColumnsToUpdate(tableMetadata.getNonPrimaryKeyColumns());
+    private String generateColumnsToUpdate(int startingIndex, List<ColumnMetadata> columns) {
+        return IntStream.range(startingIndex, startingIndex + columns.size())
+                .mapToObj(i -> format("%s = $%d", columns.get(i - startingIndex).getColumnName(), i + 1))
+                .collect(Collectors.joining(" AND "));
+    }
 
-        var query = format(
-                "UPDATE %s.%s SET %s WHERE %s = $1 RETURNING %s",
+    private String generateUpdateQuery(TableMetadata tableMetadata) {
+        var allColumns = tableMetadata.getColumns();
+        var valuesPlaceholders = generateColumnsToUpdate(allColumns);
+        var wherePredicates = generateColumnsToUpdate(allColumns.size(), tableMetadata.getPrimaryKeyColumns());
+        var query = format("UPDATE %s.%s SET %s WHERE %s RETURNING %s",
                 tableMetadata.getSchemaName(),
                 tableMetadata.getTableName(),
-                values,
-                tableMetadata.getPkColumnName(),
+                valuesPlaceholders,
+                wherePredicates,
                 tableMetadata.getPkColumnName()
         );
 
