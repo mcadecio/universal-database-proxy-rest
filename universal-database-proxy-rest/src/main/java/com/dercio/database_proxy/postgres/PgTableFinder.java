@@ -43,7 +43,11 @@ public class PgTableFinder {
                    columns.is_nullable,
                    columns.data_type,
                    columns.character_maximum_length,
-                   exists(SELECT 1 FROM pk_columns WHERE columns.column_name = pk_columns.column_name) AS is_primary_key
+                   exists(SELECT 1
+                          FROM pk_columns
+                          WHERE columns.table_name = pk_columns.table_name
+                            AND columns.table_schema = pk_columns.table_schema
+                            AND columns.column_name = pk_columns.column_name) AS is_primary_key
             FROM information_schema.columns
             WHERE columns.table_catalog = $1
               AND columns.table_schema NOT IN ('pg_catalog', 'information_schema', 'crdb_internal', 'pg_extension')
