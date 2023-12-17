@@ -6,8 +6,9 @@ import com.dercio.database_proxy.openapi.operation.*;
 import io.swagger.v3.core.util.Json;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -20,7 +21,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -40,7 +40,8 @@ class OpenApiCreatorTest {
                 new PostOperation(clock),
                 new GetByIdOperation(clock),
                 new PutByIdOperation(clock),
-                new DeleteByIdOperation(clock)
+                new DeleteByIdOperation(clock),
+                new DeleteOperation(clock)
         );
         openApiCreator = new OpenApiCreator(pathCreator);
 
@@ -48,32 +49,17 @@ class OpenApiCreatorTest {
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
     }
 
-    @Test
-    void shouldCreateCarsOpenApi() throws Exception {
-        TableMetadata carsTableMetadata = loadCarsTableMetadata("cars_table_metadata.json");
-        var expectedOpenApi = loadOpenApi("cars_table_openapi.json").getMap();
+    @ParameterizedTest
+    @CsvSource(value = {
+            "cars_table_metadata.json,cars_table_openapi.json",
+            "bugs_table_metadata.json,bugs_table_openapi.json",
+            "students_table_metadata.json,students_table_openapi.json"
+    })
+    void shouldMatchExpectedOpenApi(String input, String expectedOutput) throws Exception {
+        TableMetadata tableMetadata = loadTableMetadata(input);
+        var expectedOpenApi = loadOpenApi(expectedOutput).getMap();
 
-        var openAPI = openApiCreator.create(List.of(carsTableMetadata));
-
-        assertEquals(Json.pretty(expectedOpenApi), Json.pretty(openAPI));
-    }
-
-    @Test
-    void shouldCreateBugsOpenApi() throws Exception {
-        TableMetadata carsTableMetadata = loadCarsTableMetadata("bugs_table_metadata.json");
-        var expectedOpenApi = loadOpenApi("bugs_table_openapi.json").getMap();
-
-        var openAPI = openApiCreator.create(List.of(carsTableMetadata));
-
-        assertEquals(Json.pretty(expectedOpenApi), Json.pretty(openAPI));
-    }
-
-    @Test
-    void shouldCreateStudentsOpenApi() throws Exception {
-        TableMetadata carsTableMetadata = loadCarsTableMetadata("students_table_metadata.json");
-        var expectedOpenApi = loadOpenApi("students_table_openapi.json").getMap();
-
-        var openAPI = openApiCreator.create(List.of(carsTableMetadata));
+        var openAPI = openApiCreator.create(List.of(tableMetadata));
 
         assertEquals(Json.pretty(expectedOpenApi), Json.pretty(openAPI));
     }
@@ -83,7 +69,7 @@ class OpenApiCreatorTest {
         return new JsonObject(Files.readString(Paths.get(uri)));
     }
 
-    private TableMetadata loadCarsTableMetadata(String file) throws IOException, URISyntaxException {
+    private TableMetadata loadTableMetadata(String file) throws IOException, URISyntaxException {
         var resource = getResource(file);
         var rawMetadata = new JsonObject(Files.readString(Paths.get(resource.toURI())));
         var columns = rawMetadata.getJsonArray("columns")

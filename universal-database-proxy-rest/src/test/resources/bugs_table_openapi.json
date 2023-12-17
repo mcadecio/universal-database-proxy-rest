@@ -240,6 +240,101 @@
           "schema" : "public",
           "table" : "bug"
         }
+      },
+      "delete" : {
+        "tags" : [ "bug" ],
+        "summary" : "Deletes bug",
+        "description" : "Auto Generated",
+        "operationId" : "delete_bug",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "nullable" : false
+          }
+        }, {
+          "name" : "description",
+          "in" : "query",
+          "schema" : {
+            "type" : "string",
+            "nullable" : true
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "schema" : {
+            "$ref" : "#/components/schemas/ANY"
+          }
+        }, {
+          "name" : "rowid",
+          "in" : "query",
+          "schema" : {
+            "type" : "integer",
+            "nullable" : false
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "The request submitted is not valid. This might be due because the request does not pass the API validation.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/bug",
+                  "message" : "Bad Request",
+                  "code" : 400,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "The resource/operation you tried to access/perform does not exist.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/chairs",
+                  "message" : "Not Found",
+                  "code" : 404,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "An internal error occurred in the server.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                },
+                "example" : {
+                  "timestamp" : "2023-06-24T11:12:28",
+                  "path" : "/bug",
+                  "message" : "Internal Server Error",
+                  "code" : 500,
+                  "errors" : [ ]
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "Deleted rows from bug successfully."
+          }
+        },
+        "x-metadata" : {
+          "database" : "defaultdb",
+          "schema" : "public",
+          "table" : "bug"
+        }
       }
     },
     "/bug/{id}" : {
