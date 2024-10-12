@@ -36,7 +36,7 @@
         <mybatis-guice.version>3.17</mybatis-guice.version>
         <mockito.version>5.4.0</mockito.version>
         <ongres.scram.version>2.1</ongres.scram.version>
-        <postgresql.version>42.4.0</postgresql.version>
+        <postgresql.version>42.4.4</postgresql.version>
         <reflections.version>0.10.2</reflections.version>
         <rest-assured.version>5.1.1</rest-assured.version>
         <vertx.version>4.4.5</vertx.version>
