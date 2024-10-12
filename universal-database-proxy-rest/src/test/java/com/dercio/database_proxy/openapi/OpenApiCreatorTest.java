@@ -46,7 +46,7 @@ class OpenApiCreatorTest {
         openApiCreator = new OpenApiCreator(pathCreator);
 
         when(clock.instant()).thenReturn(Instant.ofEpochSecond(1687601548L));
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        when(clock.getZone()).thenReturn(ZoneId.of("UTC+1"));
     }
 
     @ParameterizedTest
