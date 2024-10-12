@@ -34,7 +34,7 @@
         <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
         <mybatis.version>3.5.10</mybatis.version>
         <mybatis-guice.version>3.17</mybatis-guice.version>
-        <mockito.version>5.4.0</mockito.version>
+        <mockito.version>5.14.1</mockito.version>
         <ongres.scram.version>2.1</ongres.scram.version>
         <postgresql.version>42.4.0</postgresql.version>
         <reflections.version>0.10.2</reflections.version>
