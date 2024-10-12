@@ -16,7 +16,7 @@
     <name>Universal Database Proxy Rest Parent</name>
 
     <properties>
-        <cucumber-junit.version>7.3.4</cucumber-junit.version>
+        <cucumber-junit.version>7.20.1</cucumber-junit.version>
         <http-status-codes.version>1.1.0</http-status-codes.version>
         <log4j.version>2.17.2</log4j.version>
         <lombok.version>1.18.20</lombok.version>
