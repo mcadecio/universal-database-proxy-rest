@@ -32,7 +32,7 @@
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
         <maven-shade-plugin.version>3.3.0</maven-shade-plugin.version>
         <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
-        <mybatis.version>3.5.10</mybatis.version>
+        <mybatis.version>3.5.17</mybatis.version>
         <mybatis-guice.version>3.17</mybatis-guice.version>
         <mockito.version>5.14.1</mockito.version>
         <ongres.scram.version>2.1</ongres.scram.version>
