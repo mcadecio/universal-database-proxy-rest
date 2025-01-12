@@ -16,14 +16,15 @@
     <name>Universal Database Proxy Rest Parent</name>
 
     <properties>
-        <cucumber-junit.version>7.20.1</cucumber-junit.version>
+        <cucumber.version>7.20.1</cucumber.version>
         <http-status-codes.version>1.1.0</http-status-codes.version>
         <log4j.version>2.17.2</log4j.version>
-        <lombok.version>1.18.20</lombok.version>
-        <guice.version>5.1.0</guice.version>
-        <jackson.version>2.15.2</jackson.version>
+        <lombok.version>1.18.34</lombok.version>
+        <guice.version>7.0.0</guice.version>
+        <jackson.version>2.18.0</jackson.version>
         <java.version>17</java.version>
-        <junit-jupiter.version>5.6.0</junit-jupiter.version>
+        <junit-jupiter.version>5.11.2</junit-jupiter.version>
+        <junit-platform-suite.version>1.10.3</junit-platform-suite.version>
         <junit-platform-surefire-provider.version>1.1.0</junit-platform-surefire-provider.version>
         <main.verticle>com.dercio.database_proxy.Application</main.verticle>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
@@ -33,13 +34,13 @@
         <maven-shade-plugin.version>3.3.0</maven-shade-plugin.version>
         <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
         <mybatis.version>3.5.10</mybatis.version>
-        <mybatis-guice.version>3.17</mybatis-guice.version>
+        <mybatis-guice.version>4.0.0</mybatis-guice.version>
         <mockito.version>5.14.1</mockito.version>
         <ongres.scram.version>2.1</ongres.scram.version>
         <postgresql.version>42.7.4</postgresql.version>
         <reflections.version>0.10.2</reflections.version>
-        <rest-assured.version>5.1.1</rest-assured.version>
-        <vertx.version>4.4.8</vertx.version>
+        <rest-assured.version>5.5.0</rest-assured.version>
+        <vertx.version>4.5.10</vertx.version>
         <swagger.version>2.2.25</swagger.version>
     </properties>
 
@@ -184,6 +185,13 @@
             </dependency>
 
             <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-suite</artifactId>
+                <version>${junit-platform-suite.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>io.vertx</groupId>
                 <artifactId>vertx-junit5</artifactId>
                 <version>${vertx.version}</version>
@@ -192,22 +200,22 @@
 
             <dependency>
                 <groupId>io.cucumber</groupId>
-                <artifactId>cucumber-junit</artifactId>
-                <version>${cucumber-junit.version}</version>
+                <artifactId>cucumber-java</artifactId>
+                <version>${cucumber.version}</version>
                 <scope>test</scope>
             </dependency>
 
             <dependency>
                 <groupId>io.cucumber</groupId>
-                <artifactId>cucumber-java</artifactId>
-                <version>${cucumber-junit.version}</version>
+                <artifactId>cucumber-junit-platform-engine</artifactId>
+                <version>${cucumber.version}</version>
                 <scope>test</scope>
             </dependency>
 
             <dependency>
                 <groupId>io.cucumber</groupId>
                 <artifactId>cucumber-guice</artifactId>
-                <version>${cucumber-junit.version}</version>
+                <version>${cucumber.version}</version>
                 <scope>test</scope>
             </dependency>
 
@@ -299,6 +307,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/TestRunner.java</exclude>
+                    </excludes>
+                </configuration>
                 <dependencies>
                     <dependency>
                         <groupId>org.junit.platform</groupId>
