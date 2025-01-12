@@ -77,9 +77,10 @@ public class ProxyHandler implements Handler<NetSocket> {
 
     private void logInfo(String socketId, String message, Object... params) {
         log.info(
-                "{}|" + message,
+                "{}|{}{}",
                 socketId.replace(VERTX_NET, ""),
-                params
+                params,
+                message
         );
     }
 
