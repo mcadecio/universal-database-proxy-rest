@@ -40,7 +40,7 @@
         <postgresql.version>42.7.4</postgresql.version>
         <reflections.version>0.10.2</reflections.version>
         <rest-assured.version>5.5.0</rest-assured.version>
-        <vertx.version>4.5.10</vertx.version>
+        <vertx.version>4.5.11</vertx.version>
         <swagger.version>2.2.25</swagger.version>
     </properties>
 
