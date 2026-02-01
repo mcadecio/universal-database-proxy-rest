@@ -13,7 +13,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class Application {
 
-    public static void main(String[] args) {
+    void main() {
         var vertx = Vertx.vertx();
         vertx.exceptionHandler(error -> {
             if (error instanceof ProvisionException provisionException) {

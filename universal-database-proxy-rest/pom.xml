@@ -52,12 +52,12 @@
 
         <dependency>
             <groupId>com.ongres.scram</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>scram-common</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.ongres.scram</groupId>
-            <artifactId>client</artifactId>
+            <artifactId>scram-client</artifactId>
         </dependency>
 
         <!-- GUICE-->
