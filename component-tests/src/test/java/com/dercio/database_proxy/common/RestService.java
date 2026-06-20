@@ -1,7 +1,6 @@
 package com.dercio.database_proxy.common;
 
 import com.dercio.database_proxy.common.mapper.Mapper;
-import io.cucumber.java.it.Ma;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 

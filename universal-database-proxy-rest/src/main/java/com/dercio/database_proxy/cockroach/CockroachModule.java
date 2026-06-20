@@ -4,11 +4,7 @@ import com.dercio.database_proxy.common.database.Repository;
 import com.dercio.database_proxy.common.mapper.Mapper;
 import com.dercio.database_proxy.common.module.GuiceModule;
 import com.dercio.database_proxy.common.router.RouterFactory;
-import com.dercio.database_proxy.postgres.PgObjectDeleter;
-import com.dercio.database_proxy.postgres.PgObjectFinder;
-import com.dercio.database_proxy.postgres.PgObjectInserter;
-import com.dercio.database_proxy.postgres.PgRepository;
-import com.dercio.database_proxy.postgres.PgTableFinder;
+import com.dercio.database_proxy.postgres.*;
 import com.dercio.database_proxy.restapi.RestApiHandler;
 import com.dercio.database_proxy.restapi.RestApiVerticleSelector;
 import com.google.inject.AbstractModule;
@@ -21,7 +17,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.net.PemTrustOptions;
 import io.vertx.pgclient.PgConnectOptions;
-import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.SqlClient;
 import org.apache.commons.lang3.ObjectUtils;
@@ -84,7 +80,7 @@ public class CockroachModule extends AbstractModule {
             return null;
         }
 
-        return PgPool.pool(vertx, connectOptions, poolOptions);
+        return Pool.pool(vertx, connectOptions, poolOptions);
     }
 
     @Inject

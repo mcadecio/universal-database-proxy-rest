@@ -16,12 +16,12 @@
     <name>Universal Database Proxy Rest Parent</name>
 
     <properties>
-        <cucumber.version>7.33.0</cucumber.version>
+        <cucumber.version>7.34.3</cucumber.version>
         <http-status-codes.version>1.1.0</http-status-codes.version>
-        <log4j.version>2.25.3</log4j.version>
-        <lombok.version>1.18.42</lombok.version>
+        <log4j.version>2.26.0</log4j.version>
+        <lombok.version>1.18.46</lombok.version>
         <guice.version>7.0.0</guice.version>
-        <jackson.version>2.20.1</jackson.version>
+        <jackson.version>2.22.0</jackson.version>
         <java.version>25</java.version>
         <junit-jupiter.version>5.13.4</junit-jupiter.version>
         <junit-platform-suite.version>1.14.2</junit-platform-suite.version>
@@ -29,18 +29,18 @@
         <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <maven-dependency-plugin.version>3.9.0</maven-dependency-plugin.version>
-        <maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
+        <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
+        <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
         <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
         <mybatis.version>3.5.19</mybatis.version>
         <mybatis-guice.version>4.1.0</mybatis-guice.version>
-        <mockito.version>5.21.0</mockito.version>
-        <ongres.scram.version>3.2</ongres.scram.version>
-        <postgresql.version>42.7.5</postgresql.version>
+        <mockito.version>5.23.0</mockito.version>
+        <ongres.scram.version>3.4</ongres.scram.version>
+        <postgresql.version>42.7.11</postgresql.version>
         <reflections.version>0.10.2</reflections.version>
         <rest-assured.version>6.0.0</rest-assured.version>
-        <vertx.version>4.5.24</vertx.version>
-        <swagger.version>2.2.42</swagger.version>
+        <vertx.version>4.5.28</vertx.version>
+        <swagger.version>2.2.51</swagger.version>
     </properties>
 
     <dependencyManagement>
