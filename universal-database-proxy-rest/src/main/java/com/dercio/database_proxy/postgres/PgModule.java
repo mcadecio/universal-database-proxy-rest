@@ -16,7 +16,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.net.PemTrustOptions;
 import io.vertx.pgclient.PgConnectOptions;
-import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.SqlClient;
 import org.apache.commons.lang3.ObjectUtils;
@@ -79,7 +79,7 @@ public class PgModule extends AbstractModule {
             return null;
         }
 
-        return PgPool.pool(vertx, connectOptions, poolOptions);
+        return Pool.pool(vertx, connectOptions, poolOptions);
     }
 
     @Inject

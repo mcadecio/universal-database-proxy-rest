@@ -3,11 +3,7 @@ package com.dercio.database_proxy.budgets;
 import com.dercio.database_proxy.common.RestService;
 import com.dercio.database_proxy.common.mapper.Mapper;
 import com.google.inject.Inject;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import lombok.RequiredArgsConstructor;
-
-import static io.restassured.RestAssured.given;
 
 public class BudgetsService extends RestService {
 

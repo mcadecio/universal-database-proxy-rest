@@ -1,13 +1,13 @@
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
-ENV VERTICLE_FILE=universal-database-proxy-rest.jar
+ENV JAR=universal-database-proxy-rest.jar
 
-RUN echo "$VERTICLE_FILE"
+RUN echo "$JAR"
 
-ENV VERTICLE_HOME /usr/database-proxy
+ENV JAR_HOME=/usr/database-proxy
 
-COPY universal-database-proxy-rest/target/universal-database-proxy-rest-*.*.*-fat.jar $VERTICLE_HOME/$VERTICLE_FILE
+COPY universal-database-proxy-rest/target/universal-database-proxy-rest-*.*.*-fat.jar $JAR_HOME/$JAR
 
-WORKDIR $VERTICLE_HOME
+WORKDIR $JAR_HOME
 ENTRYPOINT ["sh", "-c"]
-CMD ["exec java -Dproject.config=./config.json -jar $VERTICLE_FILE"]
+CMD ["exec java -Dproject.config=./config.json -jar $JAR"]

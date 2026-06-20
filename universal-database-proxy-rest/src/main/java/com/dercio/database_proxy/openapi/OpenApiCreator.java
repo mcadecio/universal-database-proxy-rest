@@ -13,8 +13,10 @@ import io.swagger.v3.oas.models.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import static com.simplaex.http.StatusCode._200;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
@@ -22,143 +24,130 @@ import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 @Log4j2
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class OpenApiCreator {
+    private static final String OPEN_API_TAG = "Open API";
+    private static final String OPEN_API_PATH = "/openapi";
+    private static final String API_TITLE = "Auto Generated Open API";
+    private static final String API_VERSION = "1.0.1";
+    private static final String SUCCESS_CODE = String.valueOf(_200.getCode());
 
     private final OpenApiPathsCreator pathCreator;
 
     public OpenAPI create(List<TableMetadata> tableMetadataList) {
         var paths = pathCreator.createPaths(tableMetadataList);
         var openApiItem = new PathItem();
-        openApiItem.setGet(generateOpenApiGetOperation());
-        paths.addPathItem("/openapi", openApiItem);
+        openApiItem.setGet(createOpenApiGetOperation());
+        paths.addPathItem(OPEN_API_PATH, openApiItem);
 
         return new OpenAPI()
-                .info(generateInfo())
-                .servers(List.of(generateServer()))
-                .tags(tableMetadataList.stream()
-                        .map(TableMetadata::getTableName)
-                        .map(tableName -> new Tag().name(tableName))
-                        .toList())
+                .info(createApiInfo())
+                .servers(List.of(createDefaultServer()))
+                .tags(createTags(tableMetadataList))
                 .paths(paths)
-                .components(generateComponents());
+                .components(createComponents());
     }
 
-    private Components generateComponents() {
-        var schema = new Schema<>();
-        schema.description("Can be anything: string, number, array, object, etc., including `null`");
+    private List<Tag> createTags(List<TableMetadata> tableMetadataList) {
+        return tableMetadataList.stream()
+                .map(TableMetadata::getTableName)
+                .map(tableName -> new Tag().name(tableName))
+                .toList();
+    }
 
-        var errorResponse = new ObjectSchema();
-        errorResponse.addProperty("timestamp", new StringSchema().example("2023-06-11T12:11:25"))
-                .addProperty("path", new StringSchema()
-                        .description("The url path of the error")
-                        .example("/cars/1"))
-                .addProperty("message", new StringSchema()
-                        .description("The error message")
-                        .example("Not found"))
-                .addProperty("code", new IntegerSchema()
-                        .description("The HTTP status code")
-                        .example(404));
+    private Components createComponents() {
+        var anySchema = new Schema<>();
+        anySchema.description("Can be anything: string, number, array, object, etc., including `null`");
+
+        var errorResponse = createErrorResponseSchema();
 
         return new Components()
-                .addSchemas("ANY", schema)
+                .addSchemas("ANY", anySchema)
                 .addSchemas("ErrorResponse", errorResponse);
     }
 
-    private Server generateServer() {
-        Server server = new Server();
-        server.setUrl("/");
-        server.setDescription("Optional server description, e.g. Main (production) server");
-        return server;
+    private ObjectSchema createErrorResponseSchema() {
+        var schema = new ObjectSchema();
+        schema.addProperty("timestamp", new StringSchema().example("2023-06-11T12:11:25"));
+        schema.addProperty("path", new StringSchema().description("The url path of the error").example("/cars/1"));
+        schema.addProperty("message", new StringSchema().description("The error message").example("Not found"));
+        schema.addProperty("code", new IntegerSchema().description("The HTTP status code").example(404));
+        return schema;
     }
 
-    private Info generateInfo() {
-        Info info = new Info();
-        info.setTitle("Auto Generated Open API");
-        info.setDescription("Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.");
-        info.setVersion("1.0.1");
-        return info;
+    private Server createDefaultServer() {
+        return new Server()
+                .url("/")
+                .description("Optional server description, e.g. Main (production) server");
     }
 
-    private Operation generateOpenApiGetOperation() {
-        Operation operation = new Operation();
-        operation.setSummary("Get OpenAPI");
-        operation.setDescription("Auto Generated Open API");
-        operation.setOperationId("getOpenApi");
-        operation.setTags(Collections.singletonList("Open API"));
+    private Info createApiInfo() {
+        return new Info()
+                .title(API_TITLE)
+                .description("Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.")
+                .version(API_VERSION);
+    }
+
+    private Operation createOpenApiGetOperation() {
+        var operation = new Operation()
+                .summary("Get OpenAPI")
+                .description(API_TITLE)
+                .operationId("getOpenApi")
+                .tags(Collections.singletonList(OPEN_API_TAG));
         operation.addExtension("x-metadata", Collections.emptyMap());
 
-        ObjectSchema objectSchema = new ObjectSchema();
-        objectSchema.example(exampleOpenApi());
-
-        MediaType mediaType = new MediaType();
-        mediaType.setSchema(objectSchema);
-
-        Content content = new Content();
-        content.addMediaType(APPLICATION_JSON.toString(), mediaType);
-
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setDescription("The Open API Spec");
-        apiResponse.setContent(content);
-
-        ApiResponses apiResponses = new ApiResponses();
-        apiResponses.addApiResponse(String.valueOf(_200.getCode()), apiResponse);
-
-        operation.setResponses(apiResponses);
+        var objectSchema = new ObjectSchema().example(createExampleOpenApiJson());
+        var apiResponse = createJsonResponse("The Open API Spec", objectSchema);
+        operation.setResponses(createSuccessResponses(apiResponse));
 
         return operation;
     }
 
-    private String exampleOpenApi() {
-        OpenAPI openAPI = new OpenAPI();
-        openAPI.setInfo(generateInfo());
-        openAPI.setServers(List.of(generateServer()));
-        openAPI.setPaths(generateExamplePaths());
+    private String createExampleOpenApiJson() {
+        var openAPI = new OpenAPI()
+                .info(createApiInfo())
+                .servers(List.of(createDefaultServer()))
+                .paths(createExamplePaths());
         return Json.pretty(openAPI);
     }
 
-
-    private Paths generateExamplePaths() {
-        Paths paths = new Paths();
-        PathItem pathItem = new PathItem();
-
-        pathItem.setGet(generateExampleGetOperation());
-
+    private Paths createExamplePaths() {
+        var paths = new Paths();
+        var pathItem = new PathItem().get(createExampleGetOperation());
         paths.addPathItem("/cars", pathItem);
         return paths;
     }
 
-    private Operation generateExampleGetOperation() {
-        Operation getOperation = new Operation();
-        getOperation.setSummary("Returns a list of cars");
-        getOperation.setOperationId("get_cars");
+    private Operation createExampleGetOperation() {
+        var getOperation = new Operation()
+                .summary("Returns a list of cars")
+                .operationId("get_cars");
 
+        var carSchema = createExampleCarSchema();
+        var arraySchema = new ArraySchema().items(carSchema);
+        var apiResponse = createJsonResponse("A JSON array of cars", arraySchema);
+        getOperation.setResponses(createSuccessResponses(apiResponse));
+
+        return getOperation;
+    }
+
+    private ObjectSchema createExampleCarSchema() {
         var properties = new LinkedHashMap<String, Schema>();
-
         properties.put("id", new ObjectSchema().type("integer").example(1));
         properties.put("name", new ObjectSchema().type("string").example("Ferrari"));
         properties.put("doors", new ObjectSchema().type("integer").example(5));
 
-        ObjectSchema objectSchema = new ObjectSchema();
-        objectSchema.properties(properties);
-        objectSchema.required(new ArrayList<>(properties.keySet()));
-
-        ArraySchema schema = new ArraySchema()
-                .items(objectSchema);
-
-        MediaType mediaType = new MediaType();
-        mediaType.setSchema(schema);
-
-        Content content = new Content();
-        content.addMediaType(APPLICATION_JSON.toString(), mediaType);
-
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setDescription("A JSON array of cars");
-        apiResponse.setContent(content);
-
-        ApiResponses apiResponses = new ApiResponses();
-        apiResponses.addApiResponse(String.valueOf(_200.getCode()), apiResponse);
-
-        getOperation.setResponses(apiResponses);
-        return getOperation;
+        ObjectSchema schema = new ObjectSchema();
+        schema.properties(properties);
+        schema.required(new ArrayList<>(properties.keySet()));
+        return schema;
     }
 
+    private ApiResponse createJsonResponse(String description, Schema<?> schema) {
+        var mediaType = new MediaType().schema(schema);
+        var content = new Content().addMediaType(APPLICATION_JSON.toString(), mediaType);
+        return new ApiResponse().description(description).content(content);
+    }
+
+    private ApiResponses createSuccessResponses(ApiResponse apiResponse) {
+        return new ApiResponses().addApiResponse(SUCCESS_CODE, apiResponse);
+    }
 }
