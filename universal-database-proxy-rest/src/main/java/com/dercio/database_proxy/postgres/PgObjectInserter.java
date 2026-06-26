@@ -57,8 +57,8 @@ public class PgObjectInserter {
         );
 
         String valuePlaceholders = "(" +
-                IntStream.rangeClosed(1, tableMetadata.getNumberOfColumns())
-                        .mapToObj(i -> String.format("$%d", i))
+                IntStream.range(0, tableMetadata.getNumberOfColumns())
+                        .mapToObj(i -> placeHolder(tableMetadata.getColumns().get(i)))
                         .collect(Collectors.joining(",")) +
                 ") RETURNING " + String.join(",", tableMetadata.getPrimaryKeyColumnNames());
 
@@ -81,12 +81,16 @@ public class PgObjectInserter {
                     var columnName = column.getColumnName();
                     var dbType = column.getDbType();
 
+                    // TODO: cleanup
                     if (PgType.TIMESTAMP_WITHOUT_TIME_ZONE.getDbType().equals(dbType)) {
                         var rawTimestamp = body.getString(columnName);
                         return PgType.TIMESTAMP_WITHOUT_TIME_ZONE.parse(rawTimestamp);
                     } else if (PgType.TIMESTAMP_WITH_TIME_ZONE.getDbType().equals(dbType)) {
                         var rawTimestamp = body.getString(columnName);
                         return PgType.TIMESTAMP_WITH_TIME_ZONE.parse(rawTimestamp);
+                    } else if (PgType.JSON.getDbType().equals(dbType) || PgType.JSONB.getDbType().equals(dbType)) {
+                        JsonObject jsonObject = body.getJsonObject(columnName);
+                        return jsonObject != null ? jsonObject.encode() : null;
                     }
 
                     return body.getValue(columnName);
@@ -103,14 +107,14 @@ public class PgObjectInserter {
     }
 
     private String generateColumnsToUpdate(List<ColumnMetadata> columns) {
-        return IntStream.range(0, columns.size())
-                .mapToObj(i -> format("%s = $%d", columns.get(i).getColumnName(), i + 1))
+        return columns.stream()
+                .map(column -> format("%s = %s", column.getColumnName(), placeHolder(column)))
                 .collect(Collectors.joining(", "));
     }
 
     private String generateColumnsToUpdate(int startingIndex, List<ColumnMetadata> columns) {
         return IntStream.range(startingIndex, startingIndex + columns.size())
-                .mapToObj(i -> format("%s = $%d", columns.get(i - startingIndex).getColumnName(), i + 1))
+                .mapToObj(i -> format("%s = ?", columns.get(i - startingIndex).getColumnName()))
                 .collect(Collectors.joining(" AND "));
     }
 
@@ -118,16 +122,23 @@ public class PgObjectInserter {
         var allColumns = tableMetadata.getColumns();
         var valuesPlaceholders = generateColumnsToUpdate(allColumns);
         var wherePredicates = generateColumnsToUpdate(allColumns.size(), tableMetadata.getPrimaryKeyColumns());
-        var query = format("UPDATE %s.%s SET %s WHERE %s RETURNING %s",
+        var query = format("UPDATE %s.%s SET %s WHERE %s",
                 tableMetadata.getSchemaName(),
                 tableMetadata.getTableName(),
                 valuesPlaceholders,
-                wherePredicates,
-                tableMetadata.getPkColumnName()
+                wherePredicates
         );
 
         log.info("Generated update query {}", query);
 
         return query;
+    }
+
+    private String placeHolder(ColumnMetadata column) {
+        return switch (column.getDbType()) {
+            case "json" -> "?::json";
+            case "jsonb" -> "?::jsonb";
+            default -> "?";
+        };
     }
 }

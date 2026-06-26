@@ -15,6 +15,8 @@ public class DatabaseConfig {
     private String username;
     private String password;
     private String databaseName;
+    private String jdbcUrl;
+    private String targetServerType;
     private boolean sslEnabled;
     private String sslCertPath;
 }

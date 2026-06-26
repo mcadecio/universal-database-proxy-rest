@@ -1,13 +1,10 @@
 package com.dercio.database_proxy.postgres;
 
 import com.dercio.database_proxy.common.database.ColumnMetadata;
-import com.dercio.database_proxy.common.database.TableMetadata;
-import com.dercio.database_proxy.postgres.type.PgType;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.SqlClient;
 import io.vertx.sqlclient.SqlResult;
-import io.vertx.sqlclient.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -15,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static java.lang.String.format;
 
@@ -59,8 +55,8 @@ public class PgObjectDeleter {
     }
 
     private String generateColumnsToDeleteBy(List<String> columnNames) {
-        return IntStream.range(0, columnNames.size())
-                .mapToObj(i -> format("%s = $%d", columnNames.get(i), i + 1))
+        return columnNames.stream()
+                .map(columnName -> format("%s = ?", columnName))
                 .collect(Collectors.joining(" AND "));
     }
 }

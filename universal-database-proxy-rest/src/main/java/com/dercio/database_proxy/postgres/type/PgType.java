@@ -1,6 +1,7 @@
 package com.dercio.database_proxy.postgres.type;
 
 import com.dercio.database_proxy.openapi.OpenApiType;
+import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -10,6 +11,7 @@ import java.time.OffsetDateTime;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+// TODO: cleanup
 @RequiredArgsConstructor
 public enum PgType {
     INTEGER("integer", OpenApiType.INTEGER, PgType::blankSanitizer, Integer::parseInt),
@@ -23,8 +25,8 @@ public enum PgType {
     CHARACTER("character", OpenApiType.STRING, PgType::emptySanitizer, Function.identity()),
     TIMESTAMP_WITHOUT_TIME_ZONE("timestamp without time zone", OpenApiType.STRING, PgType::emptySanitizer, LocalDateTime::parse),
     TIMESTAMP_WITH_TIME_ZONE("timestamp with time zone", OpenApiType.STRING, PgType::emptySanitizer, OffsetDateTime::parse),
-    JSON("json", OpenApiType.OBJECT, PgType::blankSanitizer, Function.identity()),
-    JSONB("jsonb", OpenApiType.OBJECT, PgType::blankSanitizer, Function.identity()),
+    JSON("json", OpenApiType.OBJECT, PgType::blankSanitizer, JsonObject::new),
+    JSONB("jsonb", OpenApiType.OBJECT, PgType::blankSanitizer, JsonObject::new),
     USER_DEFINED("USER-DEFINED", OpenApiType.ANY, PgType::blankSanitizer, Function.identity()),
     UNKNOWN("UNKNOWN", OpenApiType.ANY, PgType::blankSanitizer, Function.identity());
 

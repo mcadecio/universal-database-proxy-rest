@@ -49,7 +49,7 @@ public class PgTableFinder {
                             AND columns.table_schema = pk_columns.table_schema
                             AND columns.column_name = pk_columns.column_name) AS is_primary_key
             FROM information_schema.columns
-            WHERE columns.table_catalog = $1
+            WHERE columns.table_catalog = ?
               AND columns.table_schema NOT IN ('pg_catalog', 'information_schema', 'crdb_internal', 'pg_extension')
             """;
 

@@ -13,8 +13,7 @@ import org.mybatis.guice.transactional.Transactional;
 import java.util.List;
 
 import static com.dercio.database_proxy.cars.CarFactory.*;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ScenarioScoped
@@ -84,7 +83,7 @@ public class CreateCarSteps {
                 .statusCode(400)
                 .body("timestamp", notNullValue())
                 .body("path", equalTo("/cars/"))
-                .body("message", equalTo("ERROR: duplicate key value violates unique constraint \"cars_car_id_uindex\" (23505)"))
+                .body("message", startsWith("ERROR: duplicate key value violates unique constraint \"cars_car_id_uindex\""))
                 .body("code", equalTo(400));
     }
 

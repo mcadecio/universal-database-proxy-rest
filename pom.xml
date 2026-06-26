@@ -16,6 +16,7 @@
     <name>Universal Database Proxy Rest Parent</name>
 
     <properties>
+        <agroal.version>1.16</agroal.version>
         <cucumber.version>7.34.3</cucumber.version>
         <http-status-codes.version>1.1.0</http-status-codes.version>
         <log4j.version>2.26.0</log4j.version>
@@ -66,6 +67,12 @@
 
             <dependency>
                 <groupId>io.vertx</groupId>
+                <artifactId>vertx-jdbc-client</artifactId>
+                <version>${vertx.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.vertx</groupId>
                 <artifactId>vertx-config</artifactId>
                 <version>${vertx.version}</version>
             </dependency>
@@ -93,6 +100,18 @@
                 <groupId>com.ongres.scram</groupId>
                 <artifactId>scram-common</artifactId>
                 <version>${ongres.scram.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.agroal</groupId>
+                <artifactId>agroal-api</artifactId>
+                <version>${agroal.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.agroal</groupId>
+                <artifactId>agroal-pool</artifactId>
+                <version>${agroal.version}</version>
             </dependency>
 
             <dependency>

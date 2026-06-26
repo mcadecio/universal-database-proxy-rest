@@ -18,6 +18,7 @@ public class Application {
         vertx.exceptionHandler(error -> {
             if (error instanceof ProvisionException provisionException) {
                 log.error(provisionException.getCause().getMessage());
+                log.error(provisionException);
                 vertx.close();
             }
         });

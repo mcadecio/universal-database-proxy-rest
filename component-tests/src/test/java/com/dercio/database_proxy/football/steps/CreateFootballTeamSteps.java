@@ -15,8 +15,7 @@ import java.util.List;
 
 import static com.dercio.database_proxy.football.FootballFactory.createFranceTeam;
 import static com.dercio.database_proxy.football.FootballFactory.createInvalidFootbalTeam;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ScenarioScoped
@@ -80,7 +79,7 @@ public class CreateFootballTeamSteps {
                 .statusCode(400)
                 .body("timestamp", notNullValue())
                 .body("path", equalTo("/national_football_teams/"))
-                .body("message", equalTo("ERROR: duplicate key value violates unique constraint \"national_football_teams_pkey\" (23505)"))
+                .body("message", startsWith("ERROR: duplicate key value violates unique constraint \"national_football_teams_pkey\""))
                 .body("code", equalTo(400));
     }
 

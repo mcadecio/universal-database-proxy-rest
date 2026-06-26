@@ -37,6 +37,11 @@
 
         <dependency>
             <groupId>io.vertx</groupId>
+            <artifactId>vertx-jdbc-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.vertx</groupId>
             <artifactId>vertx-config</artifactId>
         </dependency>
 
@@ -51,6 +56,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.ongres.scram</groupId>
             <artifactId>scram-common</artifactId>
         </dependency>
@@ -58,6 +68,16 @@
         <dependency>
             <groupId>com.ongres.scram</groupId>
             <artifactId>scram-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.agroal</groupId>
+            <artifactId>agroal-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.agroal</groupId>
+            <artifactId>agroal-pool</artifactId>
         </dependency>
 
         <!-- GUICE-->

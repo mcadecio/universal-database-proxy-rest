@@ -1,8 +1,8 @@
 package com.dercio.database_proxy.budgets.steps;
 
-import com.dercio.database_proxy.budgets.BudgetsService;
 import com.dercio.database_proxy.budgets.Budget;
 import com.dercio.database_proxy.budgets.BudgetsRepository;
+import com.dercio.database_proxy.budgets.BudgetsService;
 import com.google.inject.Inject;
 import io.cucumber.guice.ScenarioScoped;
 import io.cucumber.java.en.Given;
@@ -13,8 +13,7 @@ import io.restassured.response.Response;
 import java.util.List;
 
 import static com.dercio.database_proxy.budgets.BudgetsFactory.*;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ScenarioScoped
@@ -67,7 +66,7 @@ public class CreateBudgetsSteps {
                 .statusCode(400)
                 .body("timestamp", notNullValue())
                 .body("path", equalTo("/budgets/"))
-                .body("message", equalTo("ERROR: duplicate key value violates unique constraint \"budgets_pkey\" (23505)"))
+                .body("message", startsWith("ERROR: duplicate key value violates unique constraint \"budgets_pkey\""))
                 .body("code", equalTo(400));
     }
 
