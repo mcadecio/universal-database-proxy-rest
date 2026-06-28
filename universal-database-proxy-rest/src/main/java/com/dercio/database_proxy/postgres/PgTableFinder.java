@@ -5,7 +5,6 @@ import com.dercio.database_proxy.common.database.TableMetadata;
 import com.dercio.database_proxy.common.database.TableRequest;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
-import io.vertx.pgclient.PgException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlClient;
@@ -49,7 +48,7 @@ public class PgTableFinder {
                             AND columns.table_schema = pk_columns.table_schema
                             AND columns.column_name = pk_columns.column_name) AS is_primary_key
             FROM information_schema.columns
-            WHERE columns.table_catalog = $1
+            WHERE columns.table_catalog = ?
               AND columns.table_schema NOT IN ('pg_catalog', 'information_schema', 'crdb_internal', 'pg_extension')
             """;
 
@@ -82,7 +81,7 @@ public class PgTableFinder {
                         .filter(tableMetadata -> schema.equals(tableMetadata.getSchemaName()))
                         .filter(tableMetadata -> table.equals(tableMetadata.getTableName()))
                         .findFirst()
-                        .orElseThrow(() -> new PgException("Table requested does not exist", null, null, null)));
+                        .orElseThrow(() -> new InconsistentStateException("Table requested does not exist")));
     }
 
     private List<ColumnMetadata> mapRowsToColumnMetadata(RowSet<Row> rows) {

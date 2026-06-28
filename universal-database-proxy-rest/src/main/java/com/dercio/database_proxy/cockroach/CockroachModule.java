@@ -15,12 +15,10 @@ import com.google.inject.multibindings.ProvidesIntoSet;
 import com.google.inject.name.Named;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
-import io.vertx.core.net.PemTrustOptions;
-import io.vertx.pgclient.PgConnectOptions;
-import io.vertx.sqlclient.Pool;
+import io.vertx.jdbcclient.JDBCConnectOptions;
+import io.vertx.jdbcclient.JDBCPool;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.SqlClient;
-import org.apache.commons.lang3.ObjectUtils;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -73,51 +71,33 @@ public class CockroachModule extends AbstractModule {
     SqlClient createSqlClient(
             Vertx vertx,
             CrApiConfig apiConfig,
-            @Nullable @Named("cr.connection.options") PgConnectOptions connectOptions,
+            @Nullable @Named("cr.connection.options") JDBCConnectOptions connectOptions,
             @Named("cr.pool.options") PoolOptions poolOptions
     ) {
         if (!apiConfig.isEnabled()) {
             return null;
         }
 
-        return Pool.pool(vertx, connectOptions, poolOptions);
+        return JDBCPool.pool(vertx, connectOptions, poolOptions);
     }
 
     @Inject
     @Provides
     @Named("cr.connection.options")
-    PgConnectOptions providesConnectionOptions(CrApiConfig crApiConfig,
-                                               @Named("system.env.variables") Map<String, String> envVariables) {
+    JDBCConnectOptions providesConnectionOptions(CrApiConfig crApiConfig,
+                                                 @Named("system.env.variables") Map<String, String> envVariables) {
         if (!crApiConfig.isEnabled()) {
             return null;
         }
 
         var databaseConfig = crApiConfig.getDatabase();
-        var host = envVariables.getOrDefault(databaseConfig.getHost(), databaseConfig.getHost());
-        var username = envVariables.getOrDefault(databaseConfig.getUsername(), databaseConfig.getUsername());
-        var password = envVariables.getOrDefault(databaseConfig.getPassword(), databaseConfig.getPassword());
-        var databaseName = envVariables.getOrDefault(databaseConfig.getDatabaseName(), databaseConfig.getDatabaseName());
-        var pemTrustOptions = new PemTrustOptions();
 
-        if (databaseConfig.isSslEnabled()) {
-            ObjectUtils.requireNonEmpty(databaseConfig.getSslCertPath(),
-                    "To create an ssl connection with the Cockroach Server a valid ssl certificate needs to be provided");
-            pemTrustOptions.addCertPath(databaseConfig.getSslCertPath());
-        }
-
-        return new PgConnectOptions()
-                .setSsl(databaseConfig.isSslEnabled())
-                .setPemTrustOptions(pemTrustOptions)
-                .setPort(databaseConfig.getPort())
-                .setHost(host)
-                .setDatabase(databaseName)
-                .setUser(username)
-                .setPassword(password);
+        return new PgJdbcConnectOptionsFactory().create(databaseConfig, envVariables);
     }
 
     @Provides
     @Named("cr.pool.options")
     PoolOptions providesPoolOptions() {
-        return new PoolOptions().setMaxSize(5);
+        return new PoolOptions().setMaxSize(5).setName("cr.pool");
     }
 }

@@ -7,4 +7,8 @@ public class InconsistentStateException extends RuntimeException {
     public InconsistentStateException() {
         super(INCONSISTENT_PRIMARY_KEY_VALUES);
     }
+
+    public InconsistentStateException(String message) {
+        super(message);
+    }
 }

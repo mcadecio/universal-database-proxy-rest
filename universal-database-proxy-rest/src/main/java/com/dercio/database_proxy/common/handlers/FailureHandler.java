@@ -12,10 +12,10 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.validation.BodyProcessorException;
 import io.vertx.ext.web.validation.ParameterProcessorException;
 import io.vertx.json.schema.ValidationException;
-import io.vertx.pgclient.PgException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.postgresql.util.PSQLException;
 
 import java.time.format.DateTimeParseException;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class FailureHandler implements Handler<RoutingContext> {
             exceptionMapper = Map.of(
             BodyProcessorException.class, this::handleBodyProcessorException,
             ParameterProcessorException.class, this::handleParameterProcessorException,
-            PgException.class, this::handlePgException,
+            PSQLException.class, this::handlePgException,
             InconsistentStateException.class, this::handleInconsistentStateException,
             IllegalStateException.class, this::handleIllegalStateException,
             DateTimeParseException.class, this::handleDateTimeParseException,

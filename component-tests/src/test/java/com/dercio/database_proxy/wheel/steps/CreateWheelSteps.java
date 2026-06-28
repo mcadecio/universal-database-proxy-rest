@@ -12,8 +12,7 @@ import org.mybatis.guice.transactional.Transactional;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ScenarioScoped
@@ -74,7 +73,7 @@ public class CreateWheelSteps {
                 .statusCode(400)
                 .body("timestamp", notNullValue())
                 .body("path", equalTo("/wheel/"))
-                .body("message", equalTo("ERROR: duplicate key value violates unique constraint \"wheel_pkey\" (23505)"))
+                .body("message", startsWith("ERROR: duplicate key value violates unique constraint \"wheel_pkey\""))
                 .body("code", equalTo(400));
     }
 

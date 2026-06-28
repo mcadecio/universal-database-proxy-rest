@@ -1,6 +1,7 @@
 package com.dercio.database_proxy.postgres.type;
 
 import com.dercio.database_proxy.openapi.OpenApiType;
+import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -23,8 +24,8 @@ public enum PgType {
     CHARACTER("character", OpenApiType.STRING, PgType::emptySanitizer, Function.identity()),
     TIMESTAMP_WITHOUT_TIME_ZONE("timestamp without time zone", OpenApiType.STRING, PgType::emptySanitizer, LocalDateTime::parse),
     TIMESTAMP_WITH_TIME_ZONE("timestamp with time zone", OpenApiType.STRING, PgType::emptySanitizer, OffsetDateTime::parse),
-    JSON("json", OpenApiType.OBJECT, PgType::blankSanitizer, Function.identity()),
-    JSONB("jsonb", OpenApiType.OBJECT, PgType::blankSanitizer, Function.identity()),
+    JSON("json", OpenApiType.OBJECT, PgType::blankSanitizer, JsonObject::new),
+    JSONB("jsonb", OpenApiType.OBJECT, PgType::blankSanitizer, JsonObject::new),
     USER_DEFINED("USER-DEFINED", OpenApiType.ANY, PgType::blankSanitizer, Function.identity()),
     UNKNOWN("UNKNOWN", OpenApiType.ANY, PgType::blankSanitizer, Function.identity());
 
@@ -41,6 +42,45 @@ public enum PgType {
         var sanitizedValue = sanitizer.apply(value);
 
         return sanitizedValue == null ? null: (T) mapper.apply(sanitizedValue);
+    }
+
+    public Object toSqlValue(Object value) {
+        if (value == null) return null;
+
+        return switch (this) {
+            case TIMESTAMP_WITH_TIME_ZONE, TIMESTAMP_WITHOUT_TIME_ZONE -> parse(value.toString());
+            case JSON, JSONB -> value instanceof JsonObject jsonObject ? jsonObject.encode() : value.toString();
+            default -> value;
+        };
+    }
+
+    public Object toRowValue(Object value) {
+        if (value == null) return null;
+
+        return switch (this) {
+            case JSON, JSONB -> value instanceof JsonObject ? value : parse(value.toString());
+            default -> value;
+        };
+    }
+
+    public String placeholder() {
+        return switch (this) {
+            case JSON -> "?::json";
+            case JSONB -> "?::jsonb";
+            default -> "?";
+        };
+    }
+
+    public static Object toSqlValue(String type, Object value) {
+        return from(type).toSqlValue(value);
+    }
+
+    public static Object toRowValue(String type, Object value) {
+        return from(type).toRowValue(value);
+    }
+
+    public static String placeholder(String type) {
+        return from(type).placeholder();
     }
 
     public static String fromPgToOpenApiType(String type) {
