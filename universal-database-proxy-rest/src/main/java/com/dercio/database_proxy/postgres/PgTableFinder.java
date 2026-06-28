@@ -5,7 +5,6 @@ import com.dercio.database_proxy.common.database.TableMetadata;
 import com.dercio.database_proxy.common.database.TableRequest;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
-import io.vertx.pgclient.PgException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlClient;
@@ -82,7 +81,7 @@ public class PgTableFinder {
                         .filter(tableMetadata -> schema.equals(tableMetadata.getSchemaName()))
                         .filter(tableMetadata -> table.equals(tableMetadata.getTableName()))
                         .findFirst()
-                        .orElseThrow(() -> new PgException("Table requested does not exist", null, null, null)));
+                        .orElseThrow(() -> new InconsistentStateException("Table requested does not exist")));
     }
 
     private List<ColumnMetadata> mapRowsToColumnMetadata(RowSet<Row> rows) {

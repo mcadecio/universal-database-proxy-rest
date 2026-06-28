@@ -11,7 +11,6 @@ import java.time.OffsetDateTime;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-// TODO: cleanup
 @RequiredArgsConstructor
 public enum PgType {
     INTEGER("integer", OpenApiType.INTEGER, PgType::blankSanitizer, Integer::parseInt),
@@ -43,6 +42,45 @@ public enum PgType {
         var sanitizedValue = sanitizer.apply(value);
 
         return sanitizedValue == null ? null: (T) mapper.apply(sanitizedValue);
+    }
+
+    public Object toSqlValue(Object value) {
+        if (value == null) return null;
+
+        return switch (this) {
+            case TIMESTAMP_WITH_TIME_ZONE, TIMESTAMP_WITHOUT_TIME_ZONE -> parse(value.toString());
+            case JSON, JSONB -> value instanceof JsonObject jsonObject ? jsonObject.encode() : value.toString();
+            default -> value;
+        };
+    }
+
+    public Object toRowValue(Object value) {
+        if (value == null) return null;
+
+        return switch (this) {
+            case JSON, JSONB -> value instanceof JsonObject ? value : parse(value.toString());
+            default -> value;
+        };
+    }
+
+    public String placeholder() {
+        return switch (this) {
+            case JSON -> "?::json";
+            case JSONB -> "?::jsonb";
+            default -> "?";
+        };
+    }
+
+    public static Object toSqlValue(String type, Object value) {
+        return from(type).toSqlValue(value);
+    }
+
+    public static Object toRowValue(String type, Object value) {
+        return from(type).toRowValue(value);
+    }
+
+    public static String placeholder(String type) {
+        return from(type).placeholder();
     }
 
     public static String fromPgToOpenApiType(String type) {

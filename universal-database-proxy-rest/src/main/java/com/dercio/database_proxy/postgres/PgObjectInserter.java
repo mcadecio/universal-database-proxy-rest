@@ -9,7 +9,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.SqlClient;
 import io.vertx.sqlclient.SqlResult;
-import io.vertx.sqlclient.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -29,9 +28,9 @@ public class PgObjectInserter {
     private final SqlClient sqlClient;
 
     public Future<Object> create(TableMetadata tableMetadata, JsonObject data) {
-
+        PgTableMetadata pgTableMetadata = new PgTableMetadata(tableMetadata);
         return sqlClient.preparedQuery(generateInsertQuery(tableMetadata))
-                .execute(generateTupleForInsert(tableMetadata, data, Map.of()))
+                .execute(pgTableMetadata.generateTupleForWrite(data, Map.of()))
                 .map(rows -> StreamSupport.stream(rows.spliterator(), false)
                         .map(Row::toJson)
                         .map(json-> json.getMap().values())
@@ -41,9 +40,9 @@ public class PgObjectInserter {
     }
 
     public Future<Integer> update(TableMetadata tableMetadata, JsonObject data, Map<String, String> pathParams) {
-
+        PgTableMetadata pgTableMetadata = new PgTableMetadata(tableMetadata);
         return sqlClient.preparedQuery(generateUpdateQuery(tableMetadata))
-                        .execute(generateTupleForInsert(tableMetadata, data, pathParams))
+                        .execute(pgTableMetadata.generateTupleForWrite(data, pathParams))
                 .map(SqlResult::rowCount)
                 .onSuccess(count -> log.info("Rows updated [{}]", count));
     }
@@ -58,7 +57,8 @@ public class PgObjectInserter {
 
         String valuePlaceholders = "(" +
                 IntStream.range(0, tableMetadata.getNumberOfColumns())
-                        .mapToObj(i -> placeHolder(tableMetadata.getColumns().get(i)))
+                        .mapToObj(i -> tableMetadata.getColumns().get(i).getDbType())
+                        .map(PgType::placeholder)
                         .collect(Collectors.joining(",")) +
                 ") RETURNING " + String.join(",", tableMetadata.getPrimaryKeyColumnNames());
 
@@ -69,46 +69,13 @@ public class PgObjectInserter {
         return finalQuery;
     }
 
-    private Tuple generateTupleForInsert(TableMetadata tableMetadata, JsonObject body, Map<String, String> pathParams) {
-
-        var tuples = Tuple.tuple();
-
-
-        tableMetadata.getColumns()
-                .stream()
-                .map(column -> {
-
-                    var columnName = column.getColumnName();
-                    var dbType = column.getDbType();
-
-                    // TODO: cleanup
-                    if (PgType.TIMESTAMP_WITHOUT_TIME_ZONE.getDbType().equals(dbType)) {
-                        var rawTimestamp = body.getString(columnName);
-                        return PgType.TIMESTAMP_WITHOUT_TIME_ZONE.parse(rawTimestamp);
-                    } else if (PgType.TIMESTAMP_WITH_TIME_ZONE.getDbType().equals(dbType)) {
-                        var rawTimestamp = body.getString(columnName);
-                        return PgType.TIMESTAMP_WITH_TIME_ZONE.parse(rawTimestamp);
-                    } else if (PgType.JSON.getDbType().equals(dbType) || PgType.JSONB.getDbType().equals(dbType)) {
-                        JsonObject jsonObject = body.getJsonObject(columnName);
-                        return jsonObject != null ? jsonObject.encode() : null;
-                    }
-
-                    return body.getValue(columnName);
-                })
-                .forEach(tuples::addValue);
-
-        tableMetadata.getPrimaryKeyColumns()
-                .stream()
-                .filter(column -> pathParams.containsKey(column.getColumnName()))
-                .map(column -> PgType.parse(column.getDbType(), pathParams.get(column.getColumnName())))
-                .forEach(tuples::addValue);
-
-        return tuples;
-    }
-
     private String generateColumnsToUpdate(List<ColumnMetadata> columns) {
         return columns.stream()
-                .map(column -> format("%s = %s", column.getColumnName(), placeHolder(column)))
+                .map(column -> {
+                    String columnName = column.getColumnName();
+                    String placeholder = PgType.placeholder(column.getDbType());
+                    return "%s = %s".formatted(columnName, placeholder);
+                })
                 .collect(Collectors.joining(", "));
     }
 
@@ -134,11 +101,4 @@ public class PgObjectInserter {
         return query;
     }
 
-    private String placeHolder(ColumnMetadata column) {
-        return switch (column.getDbType()) {
-            case "json" -> "?::json";
-            case "jsonb" -> "?::jsonb";
-            default -> "?";
-        };
-    }
 }

@@ -5,7 +5,6 @@ import io.vertx.jdbcclient.JDBCConnectOptions;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.StringJoiner;
 
 public class PgJdbcConnectOptionsFactory {
@@ -56,8 +55,9 @@ public class PgJdbcConnectOptionsFactory {
     }
 
     private String resolveValue(String value, Map<String, String> envVariables) {
-        return Optional.ofNullable(value)
-                .orElse(envVariables.get(value));
+        if (value == null) return null;
+
+        return envVariables.getOrDefault(value, value);
     }
 
 }

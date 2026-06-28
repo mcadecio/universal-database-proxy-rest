@@ -61,12 +61,6 @@
 
             <dependency>
                 <groupId>io.vertx</groupId>
-                <artifactId>vertx-pg-client</artifactId>
-                <version>${vertx.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.vertx</groupId>
                 <artifactId>vertx-jdbc-client</artifactId>
                 <version>${vertx.version}</version>
             </dependency>
