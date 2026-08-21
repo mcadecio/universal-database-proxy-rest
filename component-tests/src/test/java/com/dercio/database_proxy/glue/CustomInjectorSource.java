@@ -1,8 +1,8 @@
 package com.dercio.database_proxy.glue;
 
-import com.dercio.database_proxy.common.mapper.MapperModule;
 import com.dercio.database_proxy.budgets.BudgetsRepository;
 import com.dercio.database_proxy.cars.CarsRepository;
+import com.dercio.database_proxy.common.mapper.MapperModule;
 import com.dercio.database_proxy.football.NationalFootballTeamsRepository;
 import com.dercio.database_proxy.students.StudentRepository;
 import com.dercio.database_proxy.wheel.WheelsRepository;
@@ -57,6 +57,7 @@ public class CustomInjectorSource implements InjectorSource {
                         expose(StudentRepository.class);
                     }
                 },
+                new CassandraTestModule(),
                 CucumberModules.createScenarioModule(),
                 new MapperModule()
         );

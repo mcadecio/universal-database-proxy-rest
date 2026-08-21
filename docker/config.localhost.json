@@ -1,0 +1,51 @@
+{
+  "$schema": "config.schema.json",
+  "_comment": "Config for running the fat jar ON THE HOST against DB containers started with 'docker compose up -d crdb postgres cassandra'. Uses localhost + published ports instead of docker service hostnames. Run with: POSTGRES_PASSWORD=admin CRB_PASSWORD= CASSANDRA_PASSWORD=cassandra java -jar -Dproject.config=docker/config.localhost.json <fat.jar>",
+  "proxy": {
+    "enabled": false,
+    "httpServer": { "host": "0.0.0.0", "port": 1234 },
+    "source": { "host": "0.0.0.0", "port": 5433 },
+    "destination": { "host": "localhost", "port": 5432 }
+  },
+  "postgresApi": {
+    "enabled": true,
+    "host": "0.0.0.0",
+    "port": 8000,
+    "openApiFilePath": "./pgOpenApi.yaml",
+    "database": {
+      "host": "localhost",
+      "port": 5432,
+      "username": "postgres",
+      "password": "POSTGRES_PASSWORD",
+      "databaseName": "database-proxy"
+    }
+  },
+  "cockroachApi": {
+    "enabled": true,
+    "host": "0.0.0.0",
+    "port": 8010,
+    "openApiFilePath": "./crbOpenApi.yaml",
+    "database": {
+      "host": "localhost",
+      "port": 26257,
+      "username": "root",
+      "password": "CRB_PASSWORD",
+      "databaseName": "defaultdb"
+    }
+  },
+  "cassandraApi": {
+    "enabled": true,
+    "host": "0.0.0.0",
+    "port": 8020,
+    "openApiFilePath": "./cassandraOpenApi.yaml",
+    "allowFiltering": true,
+    "database": {
+      "host": "localhost",
+      "port": 9042,
+      "username": "cassandra",
+      "password": "CASSANDRA_PASSWORD",
+      "databaseName": "music",
+      "localDatacenter": "datacenter1"
+    }
+  }
+}

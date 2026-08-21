@@ -13,21 +13,21 @@ import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public enum PgType {
-    INTEGER("integer", OpenApiType.INTEGER, PgType::blankSanitizer, Integer::parseInt),
-    NUMERIC("numeric", OpenApiType.NUMBER, PgType::blankSanitizer, BigDecimal::new),
-    BIGINT("bigint", OpenApiType.INTEGER, PgType::blankSanitizer, Long::parseLong),
-    BOOLEAN("boolean", OpenApiType.BOOLEAN, PgType::blankSanitizer, Boolean::parseBoolean),
-    DATE("date", OpenApiType.STRING, PgType::blankSanitizer, Function.identity()),
-    CHARACTER_VARYING("character varying", OpenApiType.STRING, PgType::emptySanitizer, Function.identity()),
-    UUID("uuid", OpenApiType.STRING, PgType::blankSanitizer, Function.identity()),
-    TEXT("text", OpenApiType.STRING, PgType::emptySanitizer, Function.identity()),
-    CHARACTER("character", OpenApiType.STRING, PgType::emptySanitizer, Function.identity()),
-    TIMESTAMP_WITHOUT_TIME_ZONE("timestamp without time zone", OpenApiType.STRING, PgType::emptySanitizer, LocalDateTime::parse),
-    TIMESTAMP_WITH_TIME_ZONE("timestamp with time zone", OpenApiType.STRING, PgType::emptySanitizer, OffsetDateTime::parse),
-    JSON("json", OpenApiType.OBJECT, PgType::blankSanitizer, JsonObject::new),
-    JSONB("jsonb", OpenApiType.OBJECT, PgType::blankSanitizer, JsonObject::new),
-    USER_DEFINED("USER-DEFINED", OpenApiType.ANY, PgType::blankSanitizer, Function.identity()),
-    UNKNOWN("UNKNOWN", OpenApiType.ANY, PgType::blankSanitizer, Function.identity());
+    INTEGER("integer", OpenApiType.INTEGER, PgType::blankToNull, Integer::parseInt),
+    NUMERIC("numeric", OpenApiType.NUMBER, PgType::blankToNull, BigDecimal::new),
+    BIGINT("bigint", OpenApiType.INTEGER, PgType::blankToNull, Long::parseLong),
+    BOOLEAN("boolean", OpenApiType.BOOLEAN, PgType::blankToNull, Boolean::parseBoolean),
+    DATE("date", OpenApiType.STRING, PgType::blankToNull, Function.identity()),
+    CHARACTER_VARYING("character varying", OpenApiType.STRING, PgType::blankToNull, Function.identity()),
+    UUID("uuid", OpenApiType.STRING, PgType::blankToNull, Function.identity()),
+    TEXT("text", OpenApiType.STRING, PgType::blankToNull, Function.identity()),
+    CHARACTER("character", OpenApiType.STRING, PgType::blankToNull, Function.identity()),
+    TIMESTAMP_WITHOUT_TIME_ZONE("timestamp without time zone", OpenApiType.STRING, PgType::blankToNull, LocalDateTime::parse),
+    TIMESTAMP_WITH_TIME_ZONE("timestamp with time zone", OpenApiType.STRING, PgType::blankToNull, OffsetDateTime::parse),
+    JSON("json", OpenApiType.OBJECT, PgType::blankToNull, JsonObject::new),
+    JSONB("jsonb", OpenApiType.OBJECT, PgType::blankToNull, JsonObject::new),
+    USER_DEFINED("USER-DEFINED", OpenApiType.ANY, PgType::blankToNull, Function.identity()),
+    UNKNOWN("UNKNOWN", OpenApiType.ANY, PgType::blankToNull, Function.identity());
 
     @Getter
     private final String dbType;
@@ -91,11 +91,7 @@ public enum PgType {
         return from(type).parse(value);
     }
 
-    private static String blankSanitizer(String value) {
-        return (value == null || value.isBlank()) ? null : value;
-    }
-
-    private static String emptySanitizer(String value) {
+    private static String blankToNull(String value) {
         return (value == null || value.isBlank()) ? null : value;
     }
 

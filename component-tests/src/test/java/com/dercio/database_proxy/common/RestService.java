@@ -122,6 +122,17 @@ public class RestService {
                 .prettyPeek();
     }
 
+    public Response update(Object id, Object resource) {
+        return given()
+                .baseUri(baseUri)
+                .contentType(ContentType.JSON)
+                .body(mapper.encode(resource))
+                .log()
+                .all(true)
+                .put(path + id)
+                .prettyPeek();
+    }
+
     public Response update(Object firstId, Object secondId, Object resource) {
         return given()
                 .urlEncodingEnabled(false)

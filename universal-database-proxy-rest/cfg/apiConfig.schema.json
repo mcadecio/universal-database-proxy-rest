@@ -52,6 +52,14 @@
         5000
       ]
     },
+    "allowFiltering": {
+      "type": "boolean",
+      "description": "Cassandra only. Allows queries that filter on columns the primary key cannot satisfy, which requires a cluster-wide scan. Defaults to true; set to false to reject such queries with a 400 instead.",
+      "examples": [
+        true,
+        false
+      ]
+    },
     "database": {
       "type": "object",
       "required": [
@@ -94,7 +102,14 @@
         },
         "databaseName": {
           "type": "string",
-          "description": "The name of the database"
+          "description": "The name of the database. For Cassandra this is the keyspace."
+        },
+        "localDatacenter": {
+          "type": "string",
+          "description": "Cassandra only. The local datacenter the driver should route to. Defaults to 'datacenter1'.",
+          "examples": [
+            "datacenter1"
+          ]
         },
         "sslEnabled": {
           "type": "boolean",

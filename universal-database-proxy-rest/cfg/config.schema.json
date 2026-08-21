@@ -102,11 +102,16 @@
     "cockroachApi": {
       "type": "object",
       "$ref": "apiConfig.schema.json"
+    },
+    "cassandraApi": {
+      "type": "object",
+      "$ref": "apiConfig.schema.json"
     }
   },
   "required": [
     "proxy",
     "postgresApi",
-    "cockroachApi"
+    "cockroachApi",
+    "cassandraApi"
   ]
 }

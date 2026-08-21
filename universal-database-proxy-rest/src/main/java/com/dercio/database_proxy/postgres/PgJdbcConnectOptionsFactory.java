@@ -1,5 +1,6 @@
 package com.dercio.database_proxy.postgres;
 
+import com.dercio.database_proxy.common.database.ConfigValues;
 import com.dercio.database_proxy.common.database.DatabaseConfig;
 import io.vertx.jdbcclient.JDBCConnectOptions;
 import org.apache.commons.lang3.ObjectUtils;
@@ -55,9 +56,7 @@ public class PgJdbcConnectOptionsFactory {
     }
 
     private String resolveValue(String value, Map<String, String> envVariables) {
-        if (value == null) return null;
-
-        return envVariables.getOrDefault(value, value);
+        return ConfigValues.resolve(value, envVariables);
     }
 
 }

@@ -19,4 +19,6 @@ public class DatabaseConfig {
     private String targetServerType;
     private boolean sslEnabled;
     private String sslCertPath;
+    // Cassandra only: the DataStax driver requires a local datacenter whenever contact points are given.
+    private String localDatacenter;
 }

@@ -42,5 +42,20 @@
       "password": "",
       "databaseName": "defaultdb"
     }
+  },
+  "cassandraApi": {
+    "enabled": true,
+    "host": "localhost",
+    "port": 8020,
+    "openApiFilePath": "./cfg/cassandraOpenApi.yaml",
+    "allowFiltering": true,
+    "database": {
+      "host": "localhost",
+      "port": 9042,
+      "username": "cassandra",
+      "password": "cassandra",
+      "databaseName": "music",
+      "localDatacenter": "datacenter1"
+    }
   }
 }

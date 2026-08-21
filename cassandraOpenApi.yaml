@@ -1,0 +1,1447 @@
+openapi: 3.0.1
+info:
+  title: Auto Generated Open API
+  description: "Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/)\
+    \ or HTML."
+  version: 1.0.1
+servers:
+- url: /
+  description: "Optional server description, e.g. Main (production) server"
+tags:
+- name: albums
+- name: genres
+- name: tracks
+paths:
+  /albums:
+    get:
+      tags:
+      - albums
+      summary: Returns a list of albums
+      description: Auto Generated
+      operationId: get_albums
+      parameters:
+      - name: album_id
+        in: query
+        schema:
+          type: string
+          nullable: false
+      - name: artist
+        in: query
+        schema:
+          type: string
+          nullable: true
+      - name: in_print
+        in: query
+        schema:
+          type: boolean
+          nullable: true
+      - name: release_year
+        in: query
+        schema:
+          type: integer
+          nullable: true
+      - name: title
+        in: query
+        schema:
+          type: string
+          nullable: true
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /albums
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /albums
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "200":
+          description: A JSON array of albums
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  required:
+                  - album_id
+                  type: object
+                  properties:
+                    album_id:
+                      type: string
+                      nullable: false
+                    artist:
+                      type: string
+                      nullable: true
+                    in_print:
+                      type: boolean
+                      nullable: true
+                    release_year:
+                      type: integer
+                      nullable: true
+                    title:
+                      type: string
+                      nullable: true
+      x-metadata:
+        database: music
+        schema: music
+        table: albums
+    post:
+      tags:
+      - albums
+      summary: Creates a new albums
+      description: Auto Generated
+      operationId: create_albums
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - album_id
+              type: object
+              properties:
+                album_id:
+                  type: string
+                  nullable: false
+                artist:
+                  type: string
+                  nullable: true
+                in_print:
+                  type: boolean
+                  nullable: true
+                release_year:
+                  type: integer
+                  nullable: true
+                title:
+                  type: string
+                  nullable: true
+        required: true
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /albums
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /albums
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "201":
+          description: A new albums has been created.
+          headers:
+            Location:
+              description: The URI of the resource created.
+              schema:
+                type: string
+      x-metadata:
+        database: music
+        schema: music
+        table: albums
+    delete:
+      tags:
+      - albums
+      summary: Deletes albums
+      description: Auto Generated
+      operationId: delete_albums
+      parameters:
+      - name: album_id
+        in: query
+        schema:
+          type: string
+          nullable: false
+      - name: artist
+        in: query
+        schema:
+          type: string
+          nullable: true
+      - name: in_print
+        in: query
+        schema:
+          type: boolean
+          nullable: true
+      - name: release_year
+        in: query
+        schema:
+          type: integer
+          nullable: true
+      - name: title
+        in: query
+        schema:
+          type: string
+          nullable: true
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /albums
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /albums
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "204":
+          description: Deleted rows from albums successfully.
+      x-metadata:
+        database: music
+        schema: music
+        table: albums
+  /albums/{album_id}:
+    get:
+      tags:
+      - albums
+      summary: Get a albums by id
+      description: Auto Generated
+      operationId: get_albums_by_id
+      parameters:
+      - name: album_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /albums
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /albums
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "200":
+          description: A JSON representing albums
+          content:
+            application/json:
+              schema:
+                required:
+                - album_id
+                type: object
+                properties:
+                  album_id:
+                    type: string
+                    nullable: false
+                  artist:
+                    type: string
+                    nullable: true
+                  in_print:
+                    type: boolean
+                    nullable: true
+                  release_year:
+                    type: integer
+                    nullable: true
+                  title:
+                    type: string
+                    nullable: true
+      x-metadata:
+        database: music
+        schema: music
+        table: albums
+    put:
+      tags:
+      - albums
+      summary: Update a albums by id
+      description: Auto Generated
+      operationId: update_albums_by_id
+      parameters:
+      - name: album_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - album_id
+              type: object
+              properties:
+                album_id:
+                  type: string
+                  nullable: false
+                artist:
+                  type: string
+                  nullable: true
+                in_print:
+                  type: boolean
+                  nullable: true
+                release_year:
+                  type: integer
+                  nullable: true
+                title:
+                  type: string
+                  nullable: true
+        required: true
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /albums
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /albums
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "204":
+          description: The albums has been updated.
+      x-metadata:
+        database: music
+        schema: music
+        table: albums
+    delete:
+      tags:
+      - albums
+      summary: Delete albums by id
+      description: Auto Generated
+      operationId: delete_albums_by_id
+      parameters:
+      - name: album_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /albums
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /albums
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "200":
+          description: Deleted albums successfully.
+      x-metadata:
+        database: music
+        schema: music
+        table: albums
+  /genres:
+    get:
+      tags:
+      - genres
+      summary: Returns a list of genres
+      description: Auto Generated
+      operationId: get_genres
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+          nullable: false
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /genres
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /genres
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "200":
+          description: A JSON array of genres
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  required:
+                  - name
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      nullable: false
+      x-metadata:
+        database: music
+        schema: music
+        table: genres
+    post:
+      tags:
+      - genres
+      summary: Creates a new genres
+      description: Auto Generated
+      operationId: create_genres
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - name
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: false
+        required: true
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /genres
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /genres
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "201":
+          description: A new genres has been created.
+          headers:
+            Location:
+              description: The URI of the resource created.
+              schema:
+                type: string
+      x-metadata:
+        database: music
+        schema: music
+        table: genres
+    delete:
+      tags:
+      - genres
+      summary: Deletes genres
+      description: Auto Generated
+      operationId: delete_genres
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+          nullable: false
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /genres
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /genres
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "204":
+          description: Deleted rows from genres successfully.
+      x-metadata:
+        database: music
+        schema: music
+        table: genres
+  /genres/{name}:
+    get:
+      tags:
+      - genres
+      summary: Get a genres by id
+      description: Auto Generated
+      operationId: get_genres_by_id
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /genres
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /genres
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "200":
+          description: A JSON representing genres
+          content:
+            application/json:
+              schema:
+                required:
+                - name
+                type: object
+                properties:
+                  name:
+                    type: string
+                    nullable: false
+      x-metadata:
+        database: music
+        schema: music
+        table: genres
+    put:
+      tags:
+      - genres
+      summary: Update a genres by id
+      description: Auto Generated
+      operationId: update_genres_by_id
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - name
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: false
+        required: true
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /genres
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /genres
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "204":
+          description: The genres has been updated.
+      x-metadata:
+        database: music
+        schema: music
+        table: genres
+    delete:
+      tags:
+      - genres
+      summary: Delete genres by id
+      description: Auto Generated
+      operationId: delete_genres_by_id
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /genres
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /genres
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "200":
+          description: Deleted genres successfully.
+      x-metadata:
+        database: music
+        schema: music
+        table: genres
+  /tracks:
+    get:
+      tags:
+      - tracks
+      summary: Returns a list of tracks
+      description: Auto Generated
+      operationId: get_tracks
+      parameters:
+      - name: album_id
+        in: query
+        schema:
+          type: string
+          nullable: false
+      - name: track_no
+        in: query
+        schema:
+          type: integer
+          nullable: false
+      - name: duration_ms
+        in: query
+        schema:
+          type: integer
+          nullable: true
+      - name: title
+        in: query
+        schema:
+          type: string
+          nullable: true
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /tracks
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /tracks
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "200":
+          description: A JSON array of tracks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  required:
+                  - album_id
+                  - track_no
+                  type: object
+                  properties:
+                    album_id:
+                      type: string
+                      nullable: false
+                    track_no:
+                      type: integer
+                      nullable: false
+                    duration_ms:
+                      type: integer
+                      nullable: true
+                    title:
+                      type: string
+                      nullable: true
+      x-metadata:
+        database: music
+        schema: music
+        table: tracks
+    post:
+      tags:
+      - tracks
+      summary: Creates a new tracks
+      description: Auto Generated
+      operationId: create_tracks
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - album_id
+              - track_no
+              type: object
+              properties:
+                album_id:
+                  type: string
+                  nullable: false
+                track_no:
+                  type: integer
+                  nullable: false
+                duration_ms:
+                  type: integer
+                  nullable: true
+                title:
+                  type: string
+                  nullable: true
+        required: true
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /tracks
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /tracks
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "201":
+          description: A new tracks has been created.
+          headers:
+            Location:
+              description: The URI of the resource created.
+              schema:
+                type: string
+      x-metadata:
+        database: music
+        schema: music
+        table: tracks
+    delete:
+      tags:
+      - tracks
+      summary: Deletes tracks
+      description: Auto Generated
+      operationId: delete_tracks
+      parameters:
+      - name: album_id
+        in: query
+        schema:
+          type: string
+          nullable: false
+      - name: track_no
+        in: query
+        schema:
+          type: integer
+          nullable: false
+      - name: duration_ms
+        in: query
+        schema:
+          type: integer
+          nullable: true
+      - name: title
+        in: query
+        schema:
+          type: string
+          nullable: true
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /tracks
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /tracks
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "204":
+          description: Deleted rows from tracks successfully.
+      x-metadata:
+        database: music
+        schema: music
+        table: tracks
+  /tracks/{album_id}:{track_no}:
+    get:
+      tags:
+      - tracks
+      summary: Get a tracks by id
+      description: Auto Generated
+      operationId: get_tracks_by_id
+      parameters:
+      - name: album_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: track_no
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /tracks
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /tracks
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "200":
+          description: A JSON representing tracks
+          content:
+            application/json:
+              schema:
+                required:
+                - album_id
+                - track_no
+                type: object
+                properties:
+                  album_id:
+                    type: string
+                    nullable: false
+                  track_no:
+                    type: integer
+                    nullable: false
+                  duration_ms:
+                    type: integer
+                    nullable: true
+                  title:
+                    type: string
+                    nullable: true
+      x-metadata:
+        database: music
+        schema: music
+        table: tracks
+    put:
+      tags:
+      - tracks
+      summary: Update a tracks by id
+      description: Auto Generated
+      operationId: update_tracks_by_id
+      parameters:
+      - name: album_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: track_no
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - album_id
+              - track_no
+              type: object
+              properties:
+                album_id:
+                  type: string
+                  nullable: false
+                track_no:
+                  type: integer
+                  nullable: false
+                duration_ms:
+                  type: integer
+                  nullable: true
+                title:
+                  type: string
+                  nullable: true
+        required: true
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /tracks
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /tracks
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "204":
+          description: The tracks has been updated.
+      x-metadata:
+        database: music
+        schema: music
+        table: tracks
+    delete:
+      tags:
+      - tracks
+      summary: Delete tracks by id
+      description: Auto Generated
+      operationId: delete_tracks_by_id
+      parameters:
+      - name: album_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: track_no
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        "400":
+          description: The request submitted is not valid. This might be due because
+            the request does not pass the API validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /tracks
+                message: Bad Request
+                code: 400
+                errors: []
+        "404":
+          description: The resource/operation you tried to access/perform does not
+            exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /chairs
+                message: Not Found
+                code: 404
+                errors: []
+        "500":
+          description: An internal error occurred in the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                timestamp: 2026-08-21T15:45:31
+                path: /tracks
+                message: Internal Server Error
+                code: 500
+                errors: []
+        "200":
+          description: Deleted tracks successfully.
+      x-metadata:
+        database: music
+        schema: music
+        table: tracks
+  /openapi:
+    get:
+      tags:
+      - Open API
+      summary: Get OpenAPI
+      description: Auto Generated Open API
+      operationId: getOpenApi
+      responses:
+        "200":
+          description: The Open API Spec
+          content:
+            application/json:
+              schema:
+                type: object
+                example: |-
+                  {
+                    "openapi" : "3.0.1",
+                    "info" : {
+                      "title" : "Auto Generated Open API",
+                      "description" : "Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.",
+                      "version" : "1.0.1"
+                    },
+                    "servers" : [ {
+                      "url" : "/",
+                      "description" : "Optional server description, e.g. Main (production) server"
+                    } ],
+                    "paths" : {
+                      "/cars" : {
+                        "get" : {
+                          "summary" : "Returns a list of cars",
+                          "operationId" : "get_cars",
+                          "responses" : {
+                            "200" : {
+                              "description" : "A JSON array of cars",
+                              "content" : {
+                                "application/json" : {
+                                  "schema" : {
+                                    "type" : "array",
+                                    "items" : {
+                                      "required" : [ "doors", "id", "name" ],
+                                      "type" : "object",
+                                      "properties" : {
+                                        "id" : {
+                                          "type" : "integer",
+                                          "example" : "1"
+                                        },
+                                        "name" : {
+                                          "type" : "string",
+                                          "example" : "Ferrari"
+                                        },
+                                        "doors" : {
+                                          "type" : "integer",
+                                          "example" : "5"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+      x-metadata: {}
+components:
+  schemas:
+    ANY:
+      description: "Can be anything: string, number, array, object, etc., including\
+        \ `null`"
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          example: 2023-06-11T12:11:25
+        path:
+          type: string
+          description: The url path of the error
+          example: /cars/1
+        message:
+          type: string
+          description: The error message
+          example: Not found
+        code:
+          type: integer
+          description: The HTTP status code
+          format: int32
+          example: 404

@@ -8,13 +8,14 @@ Currently, it supports the following databases:
 
 * PostgresDB
 * CockroachDB
+* Apache Cassandra
 
 ## Installation
 
 ```shell
 mvn clean package
 cd universal-database-proxy-rest
-java -jar -Dproject.config=cfg/config.json target/universal-database-proxy-rest-1.0.2-fat.jar
+java -jar -Dproject.config=cfg/config.json target/universal-database-proxy-rest-*-fat.jar
 ```
 
 ## Usage
@@ -69,6 +70,34 @@ java -jar -Dproject.config=cfg/config.json target/universal-database-proxy-rest-
     10. Set the `databaseName` to the name of the database you want the OpenApi to be generated from. This can be the
         name of the database in plain text or the name of an ENVIRONMENT VARIABLE.
     11. Run the steps in the Installation section and set the `-Dproject.config=` argument to the path of
+        the `config.json` file you just create.
+
+### How to run against Apache Cassandra
+
+1. Create a config.json file. You can use the file in `docker/config.json` as a base.
+2. Update the `cassandraApi` object.
+    1. Set the `enabled` property to `true`
+    2. Set the `host` to the address the HTTP Server should attach to. This can be `localhost` or `0.0.0.0`
+       or `some.address.com`.
+    3. Set the `port` to the port number the HTTP Server should listen for connection on. This can be any valid port
+       number.
+    4. Set the `openApiFilePath` to where you want the OpenApi file generated to be stored. For
+       example: `./cassandraOpenApi.yaml`
+    5. Now the `database` object holds configuration regarding the database we are trying base of our API from.
+    6. Set the `host` to the address of a contact point in the cluster. For example: `localhost` or `0.0.0.0`
+       or `some.address.com`. This can be the host in plain text or the name of an ENVIRONMENT VARIABLE.
+    7. Set the `port` to the port the cluster is listening for CQL connections on, usually `9042`.
+    8. Set the `username` and `password` the driver should authenticate with. These can be in plain text or the name of
+       an ENVIRONMENT VARIABLE, for example `CASSANDRA_PASSWORD`. Leave `username` empty when the cluster runs with the
+       default `AllowAllAuthenticator` — sending empty credentials fails the handshake.
+    9. Set the `databaseName` to the **keyspace** you want the OpenApi to be generated from. Cassandra has no schemas,
+       so the keyspace plays that role and appears as the schema in the generated spec.
+    10. Set the `localDatacenter` to the datacenter the driver should route to. Defaults to `datacenter1`, which is what
+        a single-node cluster reports.
+    11. Optionally set `allowFiltering` to `false`. Queries that filter on anything the primary key cannot satisfy
+        require a cluster-wide scan; leaving this at the default `true` permits them, while `false` rejects them with a
+        400. See the Cassandra notes in [AGENTS.md](AGENTS.md) for the other behavioural differences.
+    12. Run the steps in the Installation section and set the `-Dproject.config=` argument to the path of
         the `config.json` file you just create.
 
 ### Docker

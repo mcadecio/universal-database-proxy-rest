@@ -17,6 +17,9 @@
 
     <properties>
         <agroal.version>1.16</agroal.version>
+        <!-- Must match the driver vertx-cassandra-client pulls in, so the component tests and the
+             application speak to Cassandra through the same driver version. -->
+        <cassandra-driver.version>4.15.0</cassandra-driver.version>
         <cucumber.version>7.34.3</cucumber.version>
         <http-status-codes.version>1.1.0</http-status-codes.version>
         <log4j.version>2.26.0</log4j.version>
@@ -62,6 +65,12 @@
             <dependency>
                 <groupId>io.vertx</groupId>
                 <artifactId>vertx-jdbc-client</artifactId>
+                <version>${vertx.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-cassandra-client</artifactId>
                 <version>${vertx.version}</version>
             </dependency>
 
@@ -243,6 +252,15 @@
                 <artifactId>mybatis</artifactId>
                 <version>${mybatis.version}</version>
                 <scope>test</scope>
+            </dependency>
+
+            <!-- Version only, deliberately no scope: the main module gets this transitively from
+                 vertx-cassandra-client at compile scope, and a managed <scope>test</scope> here would
+                 override that and break the build. The component tests set test scope themselves. -->
+            <dependency>
+                <groupId>com.datastax.oss</groupId>
+                <artifactId>java-driver-core</artifactId>
+                <version>${cassandra-driver.version}</version>
             </dependency>
 
             <dependency>

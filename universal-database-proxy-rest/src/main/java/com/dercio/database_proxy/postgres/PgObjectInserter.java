@@ -30,7 +30,7 @@ public class PgObjectInserter {
     public Future<Object> create(TableMetadata tableMetadata, JsonObject data) {
         PgTableMetadata pgTableMetadata = new PgTableMetadata(tableMetadata);
         return sqlClient.preparedQuery(generateInsertQuery(tableMetadata))
-                .execute(pgTableMetadata.generateTupleForWrite(data, Map.of()))
+                .execute(pgTableMetadata.generateTupleForInsert(data))
                 .map(rows -> StreamSupport.stream(rows.spliterator(), false)
                         .map(Row::toJson)
                         .map(json-> json.getMap().values())
@@ -42,7 +42,7 @@ public class PgObjectInserter {
     public Future<Integer> update(TableMetadata tableMetadata, JsonObject data, Map<String, String> pathParams) {
         PgTableMetadata pgTableMetadata = new PgTableMetadata(tableMetadata);
         return sqlClient.preparedQuery(generateUpdateQuery(tableMetadata))
-                        .execute(pgTableMetadata.generateTupleForWrite(data, pathParams))
+                        .execute(pgTableMetadata.generateTupleForUpdate(data, pathParams))
                 .map(SqlResult::rowCount)
                 .onSuccess(count -> log.info("Rows updated [{}]", count));
     }
@@ -79,16 +79,30 @@ public class PgObjectInserter {
                 .collect(Collectors.joining(", "));
     }
 
-    private String generateColumnsToUpdate(int startingIndex, List<ColumnMetadata> columns) {
-        return IntStream.range(startingIndex, startingIndex + columns.size())
-                .mapToObj(i -> format("%s = ?", columns.get(i - startingIndex).getColumnName()))
+    private String generateSetClause(TableMetadata tableMetadata) {
+        var nonPrimaryKeyColumns = tableMetadata.getNonPrimaryKeyColumns();
+
+        if (!nonPrimaryKeyColumns.isEmpty()) {
+            return generateColumnsToUpdate(nonPrimaryKeyColumns);
+        }
+
+        // Tables whose columns are all part of the primary key have nothing to update. Assign the
+        // primary key to itself so the statement stays valid and still reports row existence via
+        // the row count (a no-op update), without ever changing the primary key value.
+        return tableMetadata.getPrimaryKeyColumns().stream()
+                .map(column -> format("%s = %s", column.getColumnName(), column.getColumnName()))
+                .collect(Collectors.joining(", "));
+    }
+
+    private String generateWherePredicates(List<ColumnMetadata> columns) {
+        return columns.stream()
+                .map(column -> format("%s = ?", column.getColumnName()))
                 .collect(Collectors.joining(" AND "));
     }
 
     private String generateUpdateQuery(TableMetadata tableMetadata) {
-        var allColumns = tableMetadata.getColumns();
-        var valuesPlaceholders = generateColumnsToUpdate(allColumns);
-        var wherePredicates = generateColumnsToUpdate(allColumns.size(), tableMetadata.getPrimaryKeyColumns());
+        var valuesPlaceholders = generateSetClause(tableMetadata);
+        var wherePredicates = generateWherePredicates(tableMetadata.getPrimaryKeyColumns());
         var query = format("UPDATE %s.%s SET %s WHERE %s",
                 tableMetadata.getSchemaName(),
                 tableMetadata.getTableName(),

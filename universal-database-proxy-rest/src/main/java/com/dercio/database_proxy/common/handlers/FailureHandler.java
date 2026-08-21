@@ -1,5 +1,7 @@
 package com.dercio.database_proxy.common.handlers;
 
+import com.datastax.oss.driver.api.core.servererrors.InvalidQueryException;
+import com.datastax.oss.driver.api.core.servererrors.SyntaxError;
 import com.dercio.database_proxy.common.error.ErrorFactory;
 import com.dercio.database_proxy.common.error.ErrorResponse;
 import com.dercio.database_proxy.common.mapper.Mapper;
@@ -32,15 +34,19 @@ public class FailureHandler implements Handler<RoutingContext> {
 
     private final Mapper mapper;
     private final ErrorFactory errorFactory;
+    // Lookup is by exact class - there is no walk up the hierarchy - so every driver exception type
+    // that should not surface as a 500 needs its own entry here.
     private final Map<Class<? extends Throwable>, BiFunction<Throwable, HttpServerRequest, ErrorResponse>>
-            exceptionMapper = Map.of(
-            BodyProcessorException.class, this::handleBodyProcessorException,
-            ParameterProcessorException.class, this::handleParameterProcessorException,
-            PSQLException.class, this::handlePgException,
-            InconsistentStateException.class, this::handleInconsistentStateException,
-            IllegalStateException.class, this::handleIllegalStateException,
-            DateTimeParseException.class, this::handleDateTimeParseException,
-            NoStackTraceThrowable.class, this::handleNoStackTraceThrowable
+            exceptionMapper = Map.ofEntries(
+            Map.entry(BodyProcessorException.class, this::handleBodyProcessorException),
+            Map.entry(ParameterProcessorException.class, this::handleParameterProcessorException),
+            Map.entry(PSQLException.class, this::handleDatabaseException),
+            Map.entry(InvalidQueryException.class, this::handleDatabaseException),
+            Map.entry(SyntaxError.class, this::handleDatabaseException),
+            Map.entry(InconsistentStateException.class, this::handleInconsistentStateException),
+            Map.entry(IllegalStateException.class, this::handleIllegalStateException),
+            Map.entry(DateTimeParseException.class, this::handleDateTimeParseException),
+            Map.entry(NoStackTraceThrowable.class, this::handleNoStackTraceThrowable)
     );
 
     @SneakyThrows
@@ -93,7 +99,7 @@ public class FailureHandler implements Handler<RoutingContext> {
         return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
     }
 
-    ErrorResponse handlePgException(Throwable throwable, HttpServerRequest request) {
+    ErrorResponse handleDatabaseException(Throwable throwable, HttpServerRequest request) {
         return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
     }
 
