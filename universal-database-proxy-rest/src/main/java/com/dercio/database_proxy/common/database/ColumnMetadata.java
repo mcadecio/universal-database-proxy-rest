@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.function.UnaryOperator;
+import java.util.function.Function;
 
 @ToString
 @Getter
@@ -15,6 +15,8 @@ public class ColumnMetadata {
     private final String tableName;
     private final String columnName;
     private final String openApiType;
+    /** Only set when {@link #openApiType} is {@code array}; {@code null} for scalar columns. */
+    private final String openApiItemsType;
     private final String dbType;
     private final Long characterMaximumLength;
     private final Object columnDefault;
@@ -23,7 +25,7 @@ public class ColumnMetadata {
     private boolean isPrimaryKey;
 
     public ColumnMetadata(JsonObject jsonObject) {
-        this(jsonObject, PgType::fromPgToOpenApiType);
+        this(jsonObject, dbType -> OpenApiColumnType.scalar(PgType.fromPgToOpenApiType(dbType)));
     }
 
     /**
@@ -33,12 +35,16 @@ public class ColumnMetadata {
      *                            supply its own resolver or every column silently degrades to
      *                            {@code ANY}.
      */
-    public ColumnMetadata(JsonObject jsonObject, UnaryOperator<String> openApiTypeResolver) {
+    public ColumnMetadata(JsonObject jsonObject, Function<String, OpenApiColumnType> openApiTypeResolver) {
         this.tableSchema = jsonObject.getString("table_schema");
         this.tableName = jsonObject.getString("table_name");
         this.columnName = jsonObject.getString("column_name");
         this.dbType = jsonObject.getString("data_type");
-        this.openApiType = openApiTypeResolver.apply(dbType);
+
+        var resolvedType = openApiTypeResolver.apply(dbType);
+        this.openApiType = resolvedType.type();
+        this.openApiItemsType = resolvedType.itemsType();
+
         this.characterMaximumLength = jsonObject.getLong("character_maximum_length");
         this.columnDefault = jsonObject.getValue("column_default");
         this.isNullable = "YES".equals(jsonObject.getString("is_nullable"));

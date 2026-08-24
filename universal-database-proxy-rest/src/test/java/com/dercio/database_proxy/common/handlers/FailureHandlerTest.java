@@ -223,6 +223,19 @@ class FailureHandlerTest {
     }
 
     @Test
+    void shouldNameTheOffendingElementOfAnArrayColumn() {
+        // A set column validates element by element, so the scope is a nested pointer.
+        var validationException = validationException("type", "input don't match type INTEGER",
+                "not-a-number", JsonPointer.from("/ratings/0"));
+        var bodyProcessorException = new Throwable("wrapper", validationException);
+
+        var error = failureHandler.handleBodyProcessorException(bodyProcessorException, request);
+
+        assertEquals("property 'ratings.0' with value \"not-a-number\" is not a valid INTEGER",
+                error.getMessage());
+    }
+
+    @Test
     void shouldHandleBodyProcessorExceptionShouldUseTheRawMessageForNonValidationCauses() {
         var error = failureHandler.handleBodyProcessorException(new Throwable("malformed body"), request);
 

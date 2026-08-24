@@ -3,7 +3,8 @@ package com.dercio.database_proxy.openapi.operation;
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
 import com.google.inject.Inject;
-import io.swagger.v3.oas.models.media.*;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -11,7 +12,7 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import java.time.Clock;
 import java.util.List;
 
-import static com.simplaex.http.StatusCode.*;
+import static com.simplaex.http.StatusCode._200;
 
 public class GetOperation extends OpenApiOperation {
 
@@ -56,6 +57,6 @@ public class GetOperation extends OpenApiOperation {
         return new Parameter()
                 .name(column.getColumnName())
                 .in("query")
-                .schema(schemaFromColumn(column));
+                .schema(queryParameterSchemaFromColumn(column));
     }
 }

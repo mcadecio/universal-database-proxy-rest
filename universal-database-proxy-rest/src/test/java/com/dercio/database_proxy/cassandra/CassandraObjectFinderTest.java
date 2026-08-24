@@ -15,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -61,6 +62,58 @@ class CassandraObjectFinderTest {
         assertAll(
                 () -> assertEquals("SELECT * FROM music.albums WHERE artist = ? ALLOW FILTERING", statement.getQuery()),
                 () -> assertEquals(List.of("Miles Davis"), statement.getPositionalValues())
+        );
+    }
+
+    @Test
+    void shouldFilterSetColumnsByMembershipRatherThanEquality() {
+        // Equality would require the caller to spell out the whole set in the query string.
+        var statement = captureStatementFor(Map.of("tags", "jazz"), true);
+
+        assertAll(
+                () -> assertEquals("SELECT * FROM music.albums WHERE tags CONTAINS ? ALLOW FILTERING",
+                        statement.getQuery()),
+                // CONTAINS binds one element, not a set.
+                () -> assertEquals(List.of("jazz"), statement.getPositionalValues())
+        );
+    }
+
+    @Test
+    void shouldFilterSetElementsAsTheirDriverType() {
+        var statement = captureStatementFor(Map.of("ratings", "5"), true);
+
+        assertAll(
+                () -> assertEquals("SELECT * FROM music.albums WHERE ratings CONTAINS ? ALLOW FILTERING",
+                        statement.getQuery()),
+                () -> assertEquals(List.of(5), statement.getPositionalValues()),
+                () -> assertInstanceOf(Integer.class, statement.getPositionalValues().get(0))
+        );
+    }
+
+    @Test
+    void shouldCombineASetMembershipFilterWithAKeyRestriction() {
+        var statement = captureStatementFor(new LinkedHashMap<>(Map.of(
+                "album_id", ALBUM_ID.toString(),
+                "tags", "jazz"
+        )), true);
+
+        assertAll(
+                () -> assertEquals(
+                        "SELECT * FROM music.albums WHERE album_id = ? AND tags CONTAINS ? ALLOW FILTERING",
+                        statement.getQuery()),
+                () -> assertEquals(List.of(ALBUM_ID, "jazz"), statement.getPositionalValues())
+        );
+    }
+
+    @Test
+    void shouldRejectASetMembershipFilterWhenAllowFilteringIsDisabled() {
+        // CONTAINS always needs a scan, so it must be refused just like any other non-key filter.
+        var result = new CassandraObjectFinder(cassandraClient, false).find(albums(), Map.of("tags", "jazz"));
+
+        assertAll(
+                () -> assertTrue(result.failed()),
+                () -> assertInstanceOf(InconsistentStateException.class, result.cause()),
+                () -> verify(cassandraClient, never()).executeWithFullFetch(any(SimpleStatement.class))
         );
     }
 
@@ -136,7 +189,9 @@ class CassandraObjectFinderTest {
         var tableMetadata = new TableMetadata("music", "music", "albums", List.of(
                 column("album_id", "uuid", true),
                 column("title", "text", false),
-                column("artist", "text", false)
+                column("artist", "text", false),
+                column("tags", "set<text>", false),
+                column("ratings", "set<int>", false)
         ));
 
         return new CassandraTableMetadata(tableMetadata, List.of("album_id"), List.of());
@@ -149,6 +204,6 @@ class CassandraObjectFinderTest {
                 .put("column_name", name)
                 .put("data_type", dataType)
                 .put("is_nullable", primaryKey ? "NO" : "YES")
-                .put("is_primary_key", primaryKey), CassandraType::toOpenApiType);
+                .put("is_primary_key", primaryKey), CassandraType::toOpenApiColumnType);
     }
 }

@@ -19,8 +19,18 @@ public abstract class ByIdOperation extends OpenApiOperation {
         return tableMetadata.getColumns()
                 .stream()
                 .filter(ColumnMetadata::isPrimaryKey)
-                .map(column -> createParameter(true, column.getColumnName(), column.getOpenApiType()))
+                .map(column -> createParameter(true, column.getColumnName(), pathParameterType(column)))
                 .toList();
+    }
+
+    /**
+     * A frozen collection can legally be part of a primary key, and {@code array} without
+     * {@code items} is an invalid schema, so fall back to the element type.
+     */
+    private String pathParameterType(ColumnMetadata column) {
+        return column.getOpenApiItemsType() == null
+                ? column.getOpenApiType()
+                : column.getOpenApiItemsType();
     }
 
     private Parameter createParameter(boolean isPathParameter, String name, String type) {

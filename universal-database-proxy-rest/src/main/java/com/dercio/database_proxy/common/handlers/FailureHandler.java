@@ -76,16 +76,12 @@ public class FailureHandler implements Handler<RoutingContext> {
     ErrorResponse handleBodyProcessorException(Throwable throwable, HttpServerRequest request) {
         if (throwable.getCause() instanceof ValidationException validationException) {
             if ("nullable".equals(validationException.keyword())) {
-                var property = validationException.inputScope().toString().replace("/", "");
-                if (property.isBlank()) {
-                    property = "body";
-                }
-                var message = validationException.getMessage().replace("input", property);
+                var message = validationException.getMessage()
+                        .replace("input", propertyNameOf(validationException));
                 return errorFactory.createErrorResponse(_400.getCode(), request.uri(), message);
             } else if ("type".equals(validationException.keyword())) {
-                var property = validationException.inputScope().toString().replace("/", "");
                 String replacement = String.format("property '%s' with value \"%s\" is not a valid",
-                        property,
+                        propertyNameOf(validationException),
                         validationException.input()
                 );
                 var message = validationException.getMessage().replace("input don't match type", replacement);
@@ -93,6 +89,19 @@ public class FailureHandler implements Handler<RoutingContext> {
             }
         }
         return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
+    }
+
+    /**
+     * The scope is a JSON pointer, so an element of an array column arrives as {@code /ratings/0}.
+     * Dots read far better than running the segments together into {@code ratings0}.
+     */
+    private String propertyNameOf(ValidationException validationException) {
+        var property = validationException.inputScope()
+                .toString()
+                .replaceFirst("^/", "")
+                .replace("/", ".");
+
+        return property.isBlank() ? "body" : property;
     }
 
     ErrorResponse handleParameterProcessorException(Throwable throwable, HttpServerRequest request) {

@@ -1,5 +1,6 @@
 package com.dercio.database_proxy.cassandra.type;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,8 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Base64;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,9 +49,114 @@ class CassandraTypeTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"list<text>", "set<int>", "map<text, text>", "frozen<address>", "duration"})
-    void shouldFallBackToAnyForCollectionsAndUserDefinedTypes(String cqlType) {
+    @ValueSource(strings = {"list<text>", "map<text, text>", "frozen<address>", "duration"})
+    void shouldFallBackToAnyForUnsupportedCollectionsAndUserDefinedTypes(String cqlType) {
         assertEquals("ANY", CassandraType.toOpenApiType(cqlType));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "set<text>,string",
+            "set<int>,integer",
+            "set<bigint>,integer",
+            "set<double>,number",
+            "set<boolean>,boolean",
+            "set<uuid>,string",
+            "set<timestamp>,string",
+            "frozen<set<text>>,string",
+            "SET<TEXT>,string"
+    })
+    void shouldMapSetColumnsToAnArrayOfTheElementType(String cqlType, String expectedItemsType) {
+        assertAll(
+                () -> assertEquals("array", CassandraType.toOpenApiType(cqlType)),
+                () -> assertEquals(expectedItemsType, CassandraType.toOpenApiItemsType(cqlType)),
+                () -> assertTrue(CassandraType.isSet(cqlType))
+        );
+    }
+
+    @Test
+    void shouldNotTreatScalarsOrOtherCollectionsAsSets() {
+        assertAll(
+                () -> assertFalse(CassandraType.isSet("text")),
+                () -> assertFalse(CassandraType.isSet("list<text>")),
+                () -> assertFalse(CassandraType.isSet("map<text, int>")),
+                () -> assertFalse(CassandraType.isSet(null)),
+                () -> assertNull(CassandraType.toOpenApiItemsType("text"))
+        );
+    }
+
+    @Test
+    void shouldSurfaceASetOfAnUnsupportedElementTypeAsAnArrayOfAny() {
+        assertAll(
+                () -> assertEquals("array", CassandraType.toOpenApiType("set<frozen<address>>")),
+                () -> assertEquals("ANY", CassandraType.toOpenApiItemsType("set<frozen<address>>"))
+        );
+    }
+
+    @Test
+    void shouldBindSetColumnsAsAJavaSetOfDriverTypedElements() {
+        // The driver has no codec for a List where a set<int> is expected, nor for a String element
+        // where an int is expected, so both the collection type and the element type have to be right.
+        var value = CassandraType.toSqlValue("set<int>", new JsonArray().add(3).add(5));
+
+        assertAll(
+                () -> assertInstanceOf(Set.class, value),
+                () -> assertEquals(Set.of(3, 5), value),
+                () -> assertTrue(((Set<?>) value).stream().allMatch(Integer.class::isInstance))
+        );
+    }
+
+    @Test
+    void shouldBindSetElementsThatNeedConversionFromStrings() {
+        var uuid = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        var value = CassandraType.toSqlValue("set<uuid>", new JsonArray().add(uuid.toString()));
+
+        assertEquals(Set.of(uuid), value);
+    }
+
+    @Test
+    void shouldDeduplicateAndPreserveOrderWhenBindingASet() {
+        var value = CassandraType.toSqlValue("set<text>", new JsonArray().add("jazz").add("cool").add("jazz"));
+
+        assertAll(
+                () -> assertEquals(2, ((Set<?>) value).size()),
+                () -> assertEquals(List.of("jazz", "cool"), List.copyOf((Set<?>) value))
+        );
+    }
+
+    @Test
+    void shouldRenderASetReadBackFromTheDriverAsAJsonArray() {
+        var uuid = UUID.fromString("11111111-1111-1111-1111-111111111111");
+
+        assertAll(
+                () -> assertEquals(new JsonArray().add("jazz"),
+                        CassandraType.toRowValue("set<text>", new LinkedHashSet<>(List.of("jazz")))),
+                () -> assertEquals(new JsonArray().add(3).add(5),
+                        CassandraType.toRowValue("set<int>", new LinkedHashSet<>(List.of(3, 5)))),
+                // Elements with no JSON representation are rendered the same way scalars are.
+                () -> assertEquals(new JsonArray().add(uuid.toString()),
+                        CassandraType.toRowValue("set<uuid>", new LinkedHashSet<>(List.of(uuid))))
+        );
+    }
+
+    @Test
+    void shouldTreatNullAndEmptySetsConsistently() {
+        assertAll(
+                () -> assertNull(CassandraType.toSqlValue("set<text>", null)),
+                () -> assertNull(CassandraType.toRowValue("set<text>", null)),
+                () -> assertEquals(Set.of(), CassandraType.toSqlValue("set<text>", new JsonArray())),
+                () -> assertEquals(new JsonArray(), CassandraType.toRowValue("set<text>", Set.of()))
+        );
+    }
+
+    @Test
+    void shouldParseASetFilterValueAsASingleElement() {
+        // Set columns are filtered with CONTAINS, which binds one element rather than a whole set.
+        assertAll(
+                () -> assertEquals("jazz", CassandraType.parse("set<text>", "jazz")),
+                () -> assertEquals(7, CassandraType.parse("set<int>", "7")),
+                () -> assertInstanceOf(Integer.class, CassandraType.parse("set<int>", "7"))
+        );
     }
 
     @Test

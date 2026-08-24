@@ -35,8 +35,11 @@ public class AlbumRepository {
 
     public void save(Album album) {
         session.execute(session
-                .prepare("INSERT INTO music.albums (album_id, title, artist, release_year, in_print) VALUES (?,?,?,?,?)")
-                .bind(album.albumId(), album.title(), album.artist(), album.releaseYear(), album.inPrint()));
+                .prepare("INSERT INTO music.albums (album_id, title, artist, release_year, in_print, tags, ratings)"
+                        + " VALUES (?,?,?,?,?,?,?)")
+                .bind(album.albumId(), album.title(), album.artist(), album.releaseYear(), album.inPrint())
+                .setSet(5, album.tags(), String.class)
+                .setSet(6, album.ratings(), Integer.class));
     }
 
     public void deleteById(UUID albumId) {
@@ -49,7 +52,11 @@ public class AlbumRepository {
                 row.getString("title"),
                 row.getString("artist"),
                 row.isNull("release_year") ? null : row.getInt("release_year"),
-                row.isNull("in_print") ? null : row.getBoolean("in_print")
+                row.isNull("in_print") ? null : row.getBoolean("in_print"),
+                // Cassandra stores an empty collection as null, so these read back as null rather
+                // than as an empty set.
+                row.getSet("tags", String.class),
+                row.getSet("ratings", Integer.class)
         );
     }
 }

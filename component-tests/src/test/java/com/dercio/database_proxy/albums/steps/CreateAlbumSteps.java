@@ -10,6 +10,8 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -35,6 +37,21 @@ public class CreateAlbumSteps {
 
         assertNotNull(stored, "The album should have been persisted");
         assertEquals(AlbumFactory.createBlueTrain(), stored);
+    }
+
+    @Then("the album's sets should survive the round trip")
+    public void theAlbumsSetsShouldSurviveTheRoundTrip() {
+        var stored = albumRepository.findById(AlbumFactory.BLUE_TRAIN_ID);
+        var returned = mapper.decode(
+                albumService.getById(AlbumFactory.BLUE_TRAIN_ID.toString()).body().asString(), Album.class);
+
+        assertAll(
+                () -> assertEquals(Set.of(AlbumFactory.TEST_TAG, "blues"), stored.tags()),
+                () -> assertEquals(Set.of(4, 5), stored.ratings()),
+                // The JSON array has to come back as a set of the right element type, not strings.
+                () -> assertEquals(Set.of(AlbumFactory.TEST_TAG, "blues"), returned.tags()),
+                () -> assertEquals(Set.of(4, 5), returned.ratings())
+        );
     }
 
     @Then("the response should point at the new album")

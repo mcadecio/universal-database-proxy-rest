@@ -5,15 +5,14 @@ import com.datastax.oss.driver.api.core.cql.Row;
 import com.dercio.database_proxy.cassandra.type.CassandraType;
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -71,6 +70,51 @@ class CassandraTableMetadataTest {
     }
 
     @Test
+    void shouldRecogniseSetColumns() {
+        assertAll(
+                () -> assertTrue(albums().isSetColumn("tags")),
+                () -> assertFalse(albums().isSetColumn("artist")),
+                () -> assertFalse(albums().isSetColumn("not_a_column"))
+        );
+    }
+
+    @Test
+    void shouldAlwaysRequireAllowFilteringForASetMembershipFilter() {
+        // CONTAINS cannot be served from the primary key, so it is a scan even alongside one.
+        assertAll(
+                () -> assertTrue(albums().requiresAllowFiltering(List.of("tags"))),
+                () -> assertTrue(albums().requiresAllowFiltering(List.of("album_id", "tags")))
+        );
+    }
+
+    @Test
+    void shouldBindSetValuesFromTheBodyOnInsert() {
+        var body = new JsonObject()
+                .put("album_id", ALBUM_ID.toString())
+                .put("title", "Kind of Blue")
+                .put("artist", "Miles Davis")
+                .put("tags", new JsonArray().add("jazz").add("modal"));
+
+        var values = albums().generateValuesForInsert(body);
+
+        assertEquals(Set.of("jazz", "modal"), values.get(3));
+    }
+
+    @Test
+    void shouldRenderSetColumnsAsJsonArraysWhenNormalizingARow() {
+        lenient().when(row.getColumnDefinitions()).thenReturn(columnDefinitions);
+        lenient().when(columnDefinitions.contains(anyString())).thenReturn(true);
+        when(row.getObject("album_id")).thenReturn(ALBUM_ID);
+        when(row.getObject("title")).thenReturn("Kind of Blue");
+        when(row.getObject("artist")).thenReturn("Miles Davis");
+        when(row.getObject("tags")).thenReturn(new LinkedHashSet<>(List.of("jazz", "modal")));
+
+        var normalized = albums().normalizeRow(row);
+
+        assertEquals(new JsonArray().add("jazz").add("modal"), normalized.getJsonArray("tags"));
+    }
+
+    @Test
     void shouldParseOnlyRawValuesThatMatchKnownColumnsInColumnOrder() {
         var rawValues = new LinkedHashMap<String, String>();
         rawValues.put("artist", "Miles Davis");
@@ -98,12 +142,14 @@ class CassandraTableMetadataTest {
         var values = albums().generateValuesForInsert(body);
 
         assertAll(
-                () -> assertEquals(5, values.size()),
+                () -> assertEquals(6, values.size()),
                 () -> assertEquals(ALBUM_ID, values.get(0)),
                 () -> assertInstanceOf(UUID.class, values.get(0)),
                 () -> assertEquals("Kind of Blue", values.get(1)),
-                () -> assertEquals(1959, values.get(3)),
-                () -> assertEquals(true, values.get(4))
+                // "tags" is absent from the body, so it binds as null rather than an empty set.
+                () -> assertNull(values.get(3)),
+                () -> assertEquals(1959, values.get(4)),
+                () -> assertEquals(true, values.get(5))
         );
     }
 
@@ -155,10 +201,13 @@ class CassandraTableMetadataTest {
         when(row.getObject("artist")).thenReturn("Miles Davis");
         when(row.getObject("release_year")).thenReturn(1959);
         when(row.getObject("in_print")).thenReturn(null);
+        // Cassandra stores an empty collection as null, so a set column reads back as null too.
+        when(row.getObject("tags")).thenReturn(null);
 
         var normalized = albums().normalizeRow(row);
 
         assertAll(
+                () -> assertFalse(normalized.containsKey("tags")),
                 () -> assertEquals(ALBUM_ID.toString(), normalized.getString("album_id")),
                 () -> assertEquals("Kind of Blue", normalized.getString("title")),
                 () -> assertEquals(1959, normalized.getInteger("release_year")),
@@ -187,6 +236,7 @@ class CassandraTableMetadataTest {
                 column("albums", "album_id", "uuid", true),
                 column("albums", "title", "text", false),
                 column("albums", "artist", "text", false),
+                column("albums", "tags", "set<text>", false),
                 column("albums", "release_year", "int", false),
                 column("albums", "in_print", "boolean", false)
         ));
@@ -212,6 +262,6 @@ class CassandraTableMetadataTest {
                 .put("column_name", name)
                 .put("data_type", dataType)
                 .put("is_nullable", primaryKey ? "NO" : "YES")
-                .put("is_primary_key", primaryKey), CassandraType::toOpenApiType);
+                .put("is_primary_key", primaryKey), CassandraType::toOpenApiColumnType);
     }
 }

@@ -47,6 +47,16 @@ public class CassandraObjectFinder {
     }
 
     /**
+     * A set column is filtered by membership — {@code tags CONTAINS ?} — because equality would
+     * demand the caller spell out the whole set, which a query string cannot express well.
+     */
+    private String filterPredicate(CassandraTableMetadata tableMetadata, String columnName) {
+        return tableMetadata.isSetColumn(columnName)
+                ? format("%s CONTAINS ?", columnName)
+                : format("%s = ?", columnName);
+    }
+
+    /**
      * Cassandra reports no affected-row count, so writes establish existence with a read first.
      * Restricting by the full primary key is always a single-partition read — never a scan.
      */
@@ -76,7 +86,7 @@ public class CassandraObjectFinder {
         }
 
         var wherePredicates = columnsToFilterBy.stream()
-                .map(column -> format("%s = ?", column))
+                .map(column -> filterPredicate(tableMetadata, column))
                 .collect(Collectors.joining(" AND "));
 
         var query = baseQuery + " WHERE " + wherePredicates;

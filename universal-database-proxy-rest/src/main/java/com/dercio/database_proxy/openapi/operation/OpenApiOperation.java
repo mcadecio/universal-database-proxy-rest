@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.simplaex.http.StatusCode.*;
-import static com.simplaex.http.StatusCode._500;
 
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class OpenApiOperation {
@@ -102,13 +101,43 @@ public abstract class OpenApiOperation {
     }
 
     protected Schema<Object> schemaFromColumn(ColumnMetadata column) {
-        ObjectSchema schema = new ObjectSchema();
-        schema.type(column.getOpenApiType());
-        schema.nullable(column.isNullable());
-
-        if (OpenApiType.ANY.equals(column.getOpenApiType())) {
-            schema.type(null).$ref(column.getOpenApiType());
+        if (!OpenApiType.ARRAY.equals(column.getOpenApiType())) {
+            return scalarSchema(column.getOpenApiType(), column.isNullable());
         }
+
+        ObjectSchema schema = new ObjectSchema();
+        schema.type(OpenApiType.ARRAY);
+        schema.nullable(column.isNullable());
+        // OpenAPI 3 requires "items" whenever "type" is "array" - a spec that omits it fails
+        // validation when the router loads the generated file.
+        schema.items(scalarSchema(column.getOpenApiItemsType(), false));
+        // The only array columns are CQL sets, whose elements are unique by definition.
+        schema.uniqueItems(true);
+
+        return schema;
+    }
+
+    /**
+     * Set columns are filtered by membership (CQL {@code CONTAINS}), so their query parameter carries
+     * a single element rather than a whole set.
+     */
+    protected Schema<Object> queryParameterSchemaFromColumn(ColumnMetadata column) {
+        if (OpenApiType.ARRAY.equals(column.getOpenApiType())) {
+            return scalarSchema(column.getOpenApiItemsType(), column.isNullable());
+        }
+
+        return schemaFromColumn(column);
+    }
+
+    private Schema<Object> scalarSchema(String type, boolean nullable) {
+        ObjectSchema schema = new ObjectSchema();
+        schema.type(type);
+        schema.nullable(nullable);
+
+        if (type == null || OpenApiType.ANY.equals(type)) {
+            schema.type(null).$ref(OpenApiType.ANY);
+        }
+
         return schema;
     }
 

@@ -113,7 +113,7 @@ public class CassandraTableFinder {
                 .toList();
 
         var columns = orderedColumns.stream()
-                .map(json -> new ColumnMetadata(json, CassandraType::toOpenApiType))
+                .map(json -> new ColumnMetadata(json, CassandraType::toOpenApiColumnType))
                 .toList();
 
         var tableMetadata = new TableMetadata(keyspace, keyspace, tableName, columns);

@@ -169,6 +169,6 @@ class CassandraObjectDeleterTest {
                 .put("column_name", name)
                 .put("data_type", dataType)
                 .put("is_nullable", primaryKey ? "NO" : "YES")
-                .put("is_primary_key", primaryKey), CassandraType::toOpenApiType);
+                .put("is_primary_key", primaryKey), CassandraType::toOpenApiColumnType);
     }
 }

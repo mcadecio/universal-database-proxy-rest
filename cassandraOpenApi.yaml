@@ -35,10 +35,20 @@ paths:
         schema:
           type: boolean
           nullable: true
+      - name: ratings
+        in: query
+        schema:
+          type: integer
+          nullable: true
       - name: release_year
         in: query
         schema:
           type: integer
+          nullable: true
+      - name: tags
+        in: query
+        schema:
+          type: string
           nullable: true
       - name: title
         in: query
@@ -54,7 +64,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /albums
                 message: Bad Request
                 code: 400
@@ -67,7 +77,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -79,7 +89,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /albums
                 message: Internal Server Error
                 code: 500
@@ -104,9 +114,23 @@ paths:
                     in_print:
                       type: boolean
                       nullable: true
+                    ratings:
+                      uniqueItems: true
+                      type: array
+                      nullable: true
+                      items:
+                        type: integer
+                        nullable: false
                     release_year:
                       type: integer
                       nullable: true
+                    tags:
+                      uniqueItems: true
+                      type: array
+                      nullable: true
+                      items:
+                        type: string
+                        nullable: false
                     title:
                       type: string
                       nullable: true
@@ -138,9 +162,23 @@ paths:
                 in_print:
                   type: boolean
                   nullable: true
+                ratings:
+                  uniqueItems: true
+                  type: array
+                  nullable: true
+                  items:
+                    type: integer
+                    nullable: false
                 release_year:
                   type: integer
                   nullable: true
+                tags:
+                  uniqueItems: true
+                  type: array
+                  nullable: true
+                  items:
+                    type: string
+                    nullable: false
                 title:
                   type: string
                   nullable: true
@@ -154,7 +192,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /albums
                 message: Bad Request
                 code: 400
@@ -167,7 +205,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -179,7 +217,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /albums
                 message: Internal Server Error
                 code: 500
@@ -217,11 +255,29 @@ paths:
         schema:
           type: boolean
           nullable: true
+      - name: ratings
+        in: query
+        schema:
+          uniqueItems: true
+          type: array
+          nullable: true
+          items:
+            type: integer
+            nullable: false
       - name: release_year
         in: query
         schema:
           type: integer
           nullable: true
+      - name: tags
+        in: query
+        schema:
+          uniqueItems: true
+          type: array
+          nullable: true
+          items:
+            type: string
+            nullable: false
       - name: title
         in: query
         schema:
@@ -236,7 +292,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /albums
                 message: Bad Request
                 code: 400
@@ -249,7 +305,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -261,7 +317,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /albums
                 message: Internal Server Error
                 code: 500
@@ -294,7 +350,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /albums
                 message: Bad Request
                 code: 400
@@ -307,7 +363,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -319,7 +375,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /albums
                 message: Internal Server Error
                 code: 500
@@ -342,9 +398,23 @@ paths:
                   in_print:
                     type: boolean
                     nullable: true
+                  ratings:
+                    uniqueItems: true
+                    type: array
+                    nullable: true
+                    items:
+                      type: integer
+                      nullable: false
                   release_year:
                     type: integer
                     nullable: true
+                  tags:
+                    uniqueItems: true
+                    type: array
+                    nullable: true
+                    items:
+                      type: string
+                      nullable: false
                   title:
                     type: string
                     nullable: true
@@ -381,9 +451,23 @@ paths:
                 in_print:
                   type: boolean
                   nullable: true
+                ratings:
+                  uniqueItems: true
+                  type: array
+                  nullable: true
+                  items:
+                    type: integer
+                    nullable: false
                 release_year:
                   type: integer
                   nullable: true
+                tags:
+                  uniqueItems: true
+                  type: array
+                  nullable: true
+                  items:
+                    type: string
+                    nullable: false
                 title:
                   type: string
                   nullable: true
@@ -397,7 +481,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /albums
                 message: Bad Request
                 code: 400
@@ -410,7 +494,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -422,7 +506,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /albums
                 message: Internal Server Error
                 code: 500
@@ -454,7 +538,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /albums
                 message: Bad Request
                 code: 400
@@ -467,7 +551,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -479,7 +563,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /albums
                 message: Internal Server Error
                 code: 500
@@ -512,7 +596,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /genres
                 message: Bad Request
                 code: 400
@@ -525,7 +609,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -537,7 +621,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /genres
                 message: Internal Server Error
                 code: 500
@@ -588,7 +672,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /genres
                 message: Bad Request
                 code: 400
@@ -601,7 +685,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -613,7 +697,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /genres
                 message: Internal Server Error
                 code: 500
@@ -650,7 +734,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /genres
                 message: Bad Request
                 code: 400
@@ -663,7 +747,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -675,7 +759,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /genres
                 message: Internal Server Error
                 code: 500
@@ -708,7 +792,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /genres
                 message: Bad Request
                 code: 400
@@ -721,7 +805,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -733,7 +817,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /genres
                 message: Internal Server Error
                 code: 500
@@ -787,7 +871,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /genres
                 message: Bad Request
                 code: 400
@@ -800,7 +884,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -812,7 +896,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /genres
                 message: Internal Server Error
                 code: 500
@@ -844,7 +928,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /genres
                 message: Bad Request
                 code: 400
@@ -857,7 +941,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -869,7 +953,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /genres
                 message: Internal Server Error
                 code: 500
@@ -917,7 +1001,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /tracks
                 message: Bad Request
                 code: 400
@@ -930,7 +1014,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -942,7 +1026,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /tracks
                 message: Internal Server Error
                 code: 500
@@ -1013,7 +1097,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /tracks
                 message: Bad Request
                 code: 400
@@ -1026,7 +1110,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -1038,7 +1122,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /tracks
                 message: Internal Server Error
                 code: 500
@@ -1090,7 +1174,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /tracks
                 message: Bad Request
                 code: 400
@@ -1103,7 +1187,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -1115,7 +1199,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /tracks
                 message: Internal Server Error
                 code: 500
@@ -1153,7 +1237,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /tracks
                 message: Bad Request
                 code: 400
@@ -1166,7 +1250,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -1178,7 +1262,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /tracks
                 message: Internal Server Error
                 code: 500
@@ -1257,7 +1341,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /tracks
                 message: Bad Request
                 code: 400
@@ -1270,7 +1354,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -1282,7 +1366,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /tracks
                 message: Internal Server Error
                 code: 500
@@ -1319,7 +1403,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /tracks
                 message: Bad Request
                 code: 400
@@ -1332,7 +1416,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /chairs
                 message: Not Found
                 code: 404
@@ -1344,7 +1428,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                timestamp: 2026-08-21T15:45:31
+                timestamp: 2026-08-24T18:37:29
                 path: /tracks
                 message: Internal Server Error
                 code: 500

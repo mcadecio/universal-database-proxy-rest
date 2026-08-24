@@ -57,6 +57,14 @@ public class CassandraTableMetadata {
                 .toList();
     }
 
+    /** Set columns are restricted with {@code CONTAINS} rather than equality. */
+    public boolean isSetColumn(String columnName) {
+        return getColumns()
+                .stream()
+                .filter(column -> column.getColumnName().equals(columnName))
+                .anyMatch(column -> CassandraType.isSet(column.getDbType()));
+    }
+
     /**
      * CQL serves a restriction without a scan only when every partition key column is constrained
      * and the constrained clustering columns form a contiguous prefix. Anything else — a partial
@@ -65,6 +73,11 @@ public class CassandraTableMetadata {
     public boolean requiresAllowFiltering(Collection<String> filterNames) {
         if (filterNames.isEmpty()) {
             return false;
+        }
+
+        // A CONTAINS restriction always needs filtering; there is no collection index support here.
+        if (filterNames.stream().anyMatch(this::isSetColumn)) {
+            return true;
         }
 
         if (!filterNames.containsAll(partitionKeyColumnNames)) {

@@ -14,11 +14,11 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class GetAlbumSteps {
@@ -79,6 +79,49 @@ public class GetAlbumSteps {
 
         assertEquals(title, album.title());
         assertEquals(AlbumFactory.BLUE_TRAIN_ID, album.albumId());
+    }
+
+    @Then("I should see the album's tags and ratings")
+    public void iShouldSeeTheAlbumsTagsAndRatings() {
+        var album = mapper.decode(albumContext.getResponse().body().asString(), Album.class);
+
+        assertAll(
+                () -> assertEquals(Set.of(AlbumFactory.TEST_TAG, "blues"), album.tags()),
+                () -> assertEquals(Set.of(4, 5), album.ratings())
+        );
+    }
+
+    @When("I retrieve all the albums tagged {string}")
+    public void iRetrieveAllTheAlbumsTagged(String tag) {
+        albumContext.setResponse(albumService.getAll(Map.of("tags", tag)));
+    }
+
+    @Then("I should see only albums tagged {string}")
+    public void iShouldSeeOnlyAlbumsTagged(String tag) {
+        var albums = decodeAlbums();
+
+        assertAll(
+                // Membership, not equality - "Blue Train" carries a second tag as well.
+                () -> assertTrue(albums.stream().allMatch(album -> album.tags().contains(tag))),
+                () -> assertTrue(albums.contains(AlbumFactory.createBlueTrain())),
+                () -> assertTrue(albums.contains(AlbumFactory.createGiantSteps())),
+                () -> assertFalse(albums.contains(AlbumFactory.createSaxophoneColossus()))
+        );
+    }
+
+    @When("I retrieve all the albums rated {int}")
+    public void iRetrieveAllTheAlbumsRated(int rating) {
+        albumContext.setResponse(albumService.getAll(Map.of("ratings", rating)));
+    }
+
+    @Then("I should see the album rated {int} but not the others")
+    public void iShouldSeeTheAlbumRatedButNotTheOthers(int rating) {
+        var albums = decodeAlbums();
+
+        assertAll(
+                () -> assertTrue(albums.stream().allMatch(album -> album.ratings().contains(rating))),
+                () -> assertTrue(albums.contains(AlbumFactory.createBlueTrain()))
+        );
     }
 
     @Then("I should get an album not found error")

@@ -1,5 +1,6 @@
 package com.dercio.database_proxy.albums;
 
+import java.util.Set;
 import java.util.UUID;
 
 public class AlbumFactory {
@@ -18,15 +19,22 @@ public class AlbumFactory {
     // delete scenario provably only removes rows the scenario itself created.
     public static final String TEST_ARTIST = "Coltrane Quartet";
 
+    // A tag that does not appear in docker/init-cassandra.cql, so the CONTAINS filter scenario only
+    // ever matches rows the scenario itself created.
+    public static final String TEST_TAG = "hard-bop";
+
     public static Album createBlueTrain() {
-        return new Album(BLUE_TRAIN_ID, "Blue Train", TEST_ARTIST, 1958, true);
+        return new Album(BLUE_TRAIN_ID, "Blue Train", TEST_ARTIST, 1958, true,
+                Set.of(TEST_TAG, "blues"), Set.of(4, 5));
     }
 
     public static Album createGiantSteps() {
-        return new Album(GIANT_STEPS_ID, "Giant Steps", TEST_ARTIST, 1960, true);
+        return new Album(GIANT_STEPS_ID, "Giant Steps", TEST_ARTIST, 1960, true,
+                Set.of(TEST_TAG), Set.of(5));
     }
 
     public static Album createSaxophoneColossus() {
-        return new Album(SAXOPHONE_COLOSSUS_ID, "Saxophone Colossus", "Sonny Rollins", 1956, false);
+        return new Album(SAXOPHONE_COLOSSUS_ID, "Saxophone Colossus", "Sonny Rollins", 1956, false,
+                Set.of("calypso"), Set.of(4));
     }
 }

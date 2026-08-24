@@ -9,8 +9,9 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.RequiredArgsConstructor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class UpdateAlbumSteps {
@@ -21,7 +22,8 @@ public class UpdateAlbumSteps {
 
     @When("I update the album {string}")
     public void iUpdateTheAlbum(String albumId) {
-        var updated = new Album(AlbumFactory.BLUE_TRAIN_ID, "Blue Train (Remaster)", "John Coltrane", 1958, false);
+        var updated = new Album(AlbumFactory.BLUE_TRAIN_ID, "Blue Train (Remaster)", "John Coltrane", 1958, false,
+                Set.of("remastered", "blues"), Set.of(5));
 
         albumContext.setResponse(albumService.update(albumId, updated));
     }
@@ -36,9 +38,21 @@ public class UpdateAlbumSteps {
         assertEquals(false, stored.inPrint());
     }
 
+    @Then("the album's sets should be replaced")
+    public void theAlbumsSetsShouldBeReplaced() {
+        var stored = albumRepository.findById(AlbumFactory.BLUE_TRAIN_ID);
+
+        assertAll(
+                // An update replaces a set wholesale rather than merging into it.
+                () -> assertEquals(Set.of("remastered", "blues"), stored.tags()),
+                () -> assertEquals(Set.of(5), stored.ratings())
+        );
+    }
+
     @When("I update an album that does not exist")
     public void iUpdateAnAlbumThatDoesNotExist() {
-        var ghost = new Album(AlbumFactory.UNKNOWN_ID, "Ghost", "Nobody", 2000, false);
+        var ghost = new Album(AlbumFactory.UNKNOWN_ID, "Ghost", "Nobody", 2000, false,
+                Set.of("ghostly"), Set.of(1));
 
         albumContext.setResponse(albumService.update(AlbumFactory.UNKNOWN_ID.toString(), ghost));
     }

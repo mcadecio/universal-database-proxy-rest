@@ -99,8 +99,8 @@ for Cassandra, which has no JDBC driver and so seeds through the DataStax `CqlSe
 **How the pieces connect:**
 - Postgres-backed API is served on **`localhost:8000`** (tables: `budgets`, `national_football_teams`).
 - Cockroach-backed API is served on **`localhost:8010`** (tables: `cars`, `wheel`, `students`).
-- Cassandra-backed API is served on **`localhost:8020`** (keyspace `music`, tables: `albums`,
-  `tracks`, `genres`).
+- Cassandra-backed API is served on **`localhost:8020`** (keyspace `music`, tables: `albums` — which
+  carries the `set<text>` / `set<int>` columns — `tracks`, `genres`).
 - MyBatis (test setup/teardown) connects directly to **`localhost:5432`** (Postgres) and
   **`localhost:26257`** (Cockroach) — see `component-tests/src/test/resources/batis/*/*.properties`.
   The Cassandra tests connect to **`localhost:9042`** — see
@@ -122,6 +122,9 @@ for Cassandra, which has no JDBC driver and so seeds through the DataStax `CqlSe
    ```bash
    docker compose run --rm cassandra-init
    ```
+   The script uses `CREATE TABLE IF NOT EXISTS`, so it will **not** pick up a schema change against a
+   container that already has the keyspace. Either `docker compose down -v` first, or
+   `cqlsh -e "DROP KEYSPACE music"` and re-run it.
 
 2. Build the fat jar (`mvn clean package`) and run the proxy against the containers. The checked-in
    `docker/config.json` uses docker hostnames (`postgres`/`crdb`) and only works from inside the
@@ -163,19 +166,29 @@ outside. Don't "simplify" them away.
 | `WHERE any_column = ?` | Needs `ALLOW FILTERING` unless the whole partition key is restricted and the clustering columns form a contiguous prefix. Gated by the `allowFiltering` config flag (default `true`); when off, such a query is a 400 | `CassandraTableMetadata.requiresAllowFiltering` |
 | `DELETE FROM t` with no `WHERE` | Rejected by CQL, so a collection delete becomes `TRUNCATE`. It reports no count, so **`DELETE /table` always answers 204** — an already-empty table is not a 404 here. A *filtered* delete selects the matching rows then deletes each by primary key | `CassandraObjectDeleter` |
 
-Two further traps:
+Three further traps:
 
 - **The DataStax driver binds by exact Java type** and rejects mismatches where JDBC would coerce.
   A `bigint` column must receive a `Long`, not the `Integer` that JSON hands you; a `uuid` column a
   `UUID`, not a `String`. All of that lives in `CassandraType` — add new types there, not at call sites.
+- **`set<T>` is handled outside the `CassandraType` enum**, because a parameterized type cannot be an
+  enum constant — see `CassandraType.setElementType`, which also unwraps `frozen<set<T>>`. Sets
+  surface as OpenAPI `array` with a typed `items` (a spec that omits `items` fails validation when
+  the router loads it), bind as a `java.util.Set` of driver-typed elements, and read back as a
+  `JsonArray`. They are filtered by **membership**: `?tags=jazz` generates `tags CONTAINS ?`, which
+  binds one *element* rather than a set and always requires `ALLOW FILTERING`. Their query parameter
+  is therefore declared as a scalar of the element type — an array-typed query parameter would also
+  break `RestApiHandler`, which flattens the query string to one value per name.
 - **Tables whose columns are all part of the primary key** have nothing to `SET`, and CQL cannot
   assign a key column to itself the way `PgObjectInserter` does. The update issues no statement at
   all and answers from the existence check (`music.genres` covers this).
 
-**Known gaps** (fine to add later, currently out of scope): collection types (`list`/`set`/`map`),
-UDTs and `duration` fall through to OpenAPI `ANY` and are passed through untouched; no counter
-columns, TTL or consistency-level tuning; no materialized views; the filter planner is not aware of
-secondary indexes, so an indexed column still gets `ALLOW FILTERING`. Statements are built as
+**Known gaps** (fine to add later, currently out of scope): `list` and `map` collections, UDTs and
+`duration` fall through to OpenAPI `ANY` and are passed through untouched (`set` **is** supported —
+see the trap above); a set of an unsupported element type becomes an array of `ANY`; updating a set
+replaces it wholesale rather than supporting CQL's `+`/`-` append and remove; no counter columns, TTL
+or consistency-level tuning; no materialized views; the filter planner is not aware of secondary or
+collection indexes, so an indexed column still gets `ALLOW FILTERING`. Statements are built as
 `SimpleStatement`s rather than prepared statements — correct and injection-safe (values are always
 bound), but it forgoes server-side plan caching and token-aware routing.
 
