@@ -88,8 +88,7 @@ java -jar -Dproject.config=cfg/config.json target/universal-database-proxy-rest-
        default `AllowAllAuthenticator` — sending empty credentials fails the handshake.
     9. Set the `databaseName` to the **keyspace** you want the OpenApi to be generated from. Cassandra has no schemas,
        so the keyspace plays that role and appears as the schema in the generated spec.
-    10. Set the `localDatacenter` to the datacenter the driver should route to. This is **required** — startup fails
-        without it. A single-node cluster usually reports `datacenter1`.
+    10. Set the `localDatacenter` to the datacenter the driver should route to.
     11. Optionally set `allowFiltering` to `true`. Queries that filter on anything the primary key cannot satisfy
         require a cluster-wide scan; they are rejected with a 400 by default. See the Cassandra notes in
         [AGENTS.md](AGENTS.md) for the other behavioural differences.

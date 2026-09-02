@@ -93,6 +93,6 @@ public class CassandraModule extends AbstractModule {
             return null;
         }
 
-        return new CassandraClientOptionsFactory().create(apiConfig.getDatabase(), envVariables);
+        return new CassandraClientOptionsFactory().create(apiConfig, envVariables);
     }
 }

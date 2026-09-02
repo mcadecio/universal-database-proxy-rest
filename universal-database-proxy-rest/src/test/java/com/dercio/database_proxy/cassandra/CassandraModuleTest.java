@@ -5,9 +5,13 @@ import com.google.inject.*;
 import com.google.inject.name.Names;
 import io.vertx.cassandra.CassandraClientOptions;
 import io.vertx.core.Vertx;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import javax.net.ssl.X509TrustManager;
+import java.nio.file.Paths;
 import java.time.Clock;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -66,8 +70,7 @@ class CassandraModuleTest {
 
     @Test
     void shouldFailWhenNoLocalDatacenterIsConfigured() {
-        var databaseConfig = injector.getInstance(CassandraApiConfig.class).getDatabase();
-        databaseConfig.setLocalDatacenter(null);
+        injector.getInstance(CassandraApiConfig.class).setLocalDatacenter(null);
 
         var exception = assertThrows(ProvisionException.class, this::clientOptions);
 
@@ -80,6 +83,61 @@ class CassandraModuleTest {
         databaseConfig.setHosts(List.of("cassandra-1:9042", "cassandra-2:9042"));
 
         assertDoesNotThrow(this::clientOptions);
+    }
+
+    @Test
+    void shouldFailWhenSslIsEnabledWithoutACertificate() {
+        var databaseConfig = injector.getInstance(CassandraApiConfig.class).getDatabase();
+        databaseConfig.setSslEnabled(true);
+
+        var exception = assertThrows(ProvisionException.class, this::clientOptions);
+
+        assertTrue(exception.getMessage().contains("sslCertPath is required"));
+    }
+
+    @Test
+    void shouldFailWhenTheConfiguredCertificateCannotBeRead() {
+        var databaseConfig = injector.getInstance(CassandraApiConfig.class).getDatabase();
+        databaseConfig.setSslEnabled(true);
+        databaseConfig.setSslCertPath("/does/not/exist.pem");
+
+        var exception = assertThrows(ProvisionException.class, this::clientOptions);
+
+        assertTrue(exception.getMessage().contains("/does/not/exist.pem"));
+    }
+
+    @Test
+    void shouldBuildOptionsWhenSslIsEnabledWithAValidCertificate() {
+        var databaseConfig = injector.getInstance(CassandraApiConfig.class).getDatabase();
+        databaseConfig.setSslEnabled(true);
+        databaseConfig.setSslCertPath(certificatePath());
+
+        assertDoesNotThrow(this::clientOptions);
+    }
+
+    @Test
+    void shouldNotReadTheCertificateWhenSslIsDisabled() {
+        var databaseConfig = injector.getInstance(CassandraApiConfig.class).getDatabase();
+        databaseConfig.setSslEnabled(false);
+        databaseConfig.setSslCertPath("/does/not/exist.pem");
+
+        assertDoesNotThrow(this::clientOptions);
+    }
+
+    @Test
+    void shouldTrustOnlyTheConfiguredCertificate() {
+        var trustManager = (X509TrustManager) CassandraClientOptionsFactory.trustManagers(certificatePath())[0];
+
+        var issuers = Arrays.stream(trustManager.getAcceptedIssuers())
+                .map(certificate -> certificate.getSubjectX500Principal().getName())
+                .toList();
+
+        assertEquals(List.of("CN=cassandra-test"), issuers);
+    }
+
+    @SneakyThrows
+    private String certificatePath() {
+        return Paths.get(getClass().getClassLoader().getResource("cassandra-test-cert.pem").toURI()).toString();
     }
 
     private CassandraClientOptions clientOptions() {
@@ -96,8 +154,8 @@ class CassandraModuleTest {
         databaseConfig.setPassword("CASSANDRA_PASS");
         databaseConfig.setDatabaseName("CASSANDRA_KEYSPACE");
         databaseConfig.setPort(9042);
-        databaseConfig.setLocalDatacenter("datacenter1");
         apiConfig.setDatabase(databaseConfig);
+        apiConfig.setLocalDatacenter("datacenter1");
 
         return apiConfig;
     }

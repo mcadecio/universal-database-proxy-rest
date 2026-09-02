@@ -26,4 +26,6 @@ public class CassandraApiConfig implements ApiConfig {
 
     /** Permits filters the primary key cannot satisfy, which CQL only serves with a cluster-wide scan. */
     private boolean allowFiltering;
+
+    private String localDatacenter;
 }

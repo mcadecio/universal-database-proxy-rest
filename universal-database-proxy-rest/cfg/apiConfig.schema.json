@@ -60,6 +60,13 @@
         false
       ]
     },
+    "localDatacenter": {
+      "type": "string",
+      "description": "Cassandra only, and required there: the local datacenter the driver routes to. Startup fails without it.",
+      "examples": [
+        "datacenter1"
+      ]
+    },
     "database": {
       "type": "object",
       "required": [
@@ -136,13 +143,6 @@
           "type": "string",
           "description": "The name of the database. For Cassandra this is the keyspace."
         },
-        "localDatacenter": {
-          "type": "string",
-          "description": "Cassandra only, and required there: the local datacenter the driver routes to. Startup fails without it.",
-          "examples": [
-            "datacenter1"
-          ]
-        },
         "jdbcUrl": {
           "type": "string",
           "description": "Postgres and Cockroach only. Used verbatim when set, bypassing 'hosts', 'host' and 'port'."
@@ -157,11 +157,14 @@
         },
         "sslEnabled": {
           "type": "boolean",
-          "description": "Set to true to establish an SSL connection"
+          "description": "Set to true to establish an SSL connection. Supported by all three engines."
         },
         "sslCertPath": {
           "type": "string",
-          "description": "The path of the ssl certificate to use for ssl connections. Required when 'sslEnabled' is set to true"
+          "description": "The PEM encoded CA certificate the database's certificate was signed with. Required when 'sslEnabled' is true. Cassandra trusts only this certificate and does not verify that the certificate's hostname matches the host being connected to.",
+          "examples": [
+            "cfg/dummy-cert.pem"
+          ]
         }
       }
     }

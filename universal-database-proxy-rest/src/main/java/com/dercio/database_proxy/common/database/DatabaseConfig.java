@@ -22,5 +22,4 @@ public class DatabaseConfig {
     private String targetServerType;
     private boolean sslEnabled;
     private String sslCertPath;
-    private String localDatacenter;
 }

@@ -190,6 +190,13 @@ Three further traps:
   is therefore declared as a scalar of the element type — an array-typed query parameter would also
   break `RestApiHandler`, which flattens the query string to one value per name.
 - **`localDatacenter` is mandatory.** Startup fails without it rather than guessing `datacenter1`.
+  It sits on `cassandraApi` itself, next to `allowFiltering`, not inside `database` — both are
+  Cassandra-only, and `database` is shared with the Postgres and Cockroach configs.
+- **TLS** (`sslEnabled` + `sslCertPath`) trusts exactly the one PEM CA certificate at that path —
+  the DataStax driver's own SSL factory wants a Java truststore, so the `SSLContext` is built by
+  hand in `CassandraClientOptionsFactory` to keep `sslCertPath` meaning the same thing it does for
+  Postgres. Hostname validation is deliberately **off**, so this stops eavesdropping but not an
+  active MITM holding a certificate from that CA.
 - **Tables whose columns are all part of the primary key** have nothing to `SET`, and CQL cannot
   assign a key column to itself the way `PgObjectInserter` does. The update issues no statement at
   all and answers from the existence check (`music.genres` covers this).

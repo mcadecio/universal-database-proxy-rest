@@ -34,14 +34,14 @@
     "port": 8020,
     "openApiFilePath": "./cassandraOpenApi.yaml",
     "allowFiltering": true,
+    "localDatacenter": "datacenter1",
     "database": {
       "hosts": [
         "CASSANDRA_HOSTS"
       ],
       "username": "cassandra",
       "password": "CASSANDRA_PASSWORD",
-      "databaseName": "music",
-      "localDatacenter": "datacenter1"
+      "databaseName": "music"
     }
   }
 }
