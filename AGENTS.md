@@ -49,8 +49,10 @@ CI on JDK 25 (`.github/workflows/`):
 - `maven.yml` — `mvn -B package` (unit tests) on push/PR to `master`.
 - `functional-tests.yml` — starts the databases with compose, seeds Cassandra, runs the fat jar, then
   runs the Cucumber suite. Same flow as the manual steps below.
-- `publish-docker.yml` — pushes `mcadecio/universal-database-proxy-rest`; `:latest` on master, plus
-  `:<version>` on a `v*` tag. Needs the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets.
+- `publish-docker.yml` — pushes `mcadecio/universal-database-proxy-rest`. Every image is tagged with
+  the short commit hash; a release tag (`1.0.2`, or `v1.0.2` — the `v` is stripped) adds the version
+  as a second tag. There is deliberately no `:latest`, so every published image traces to a commit.
+  Needs the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets.
 
 All three check out with `fetch-depth: 0` because jgitver derives the version from git tags. The
 publish workflow must `clean` first: the Dockerfile copies a single `*-fat.jar` and fails if a stale

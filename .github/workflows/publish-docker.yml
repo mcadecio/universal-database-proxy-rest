@@ -3,7 +3,7 @@ name: Publish Docker image
 on:
   push:
     branches: [ "master" ]
-    tags: [ "v*" ]
+    tags: [ "[0-9]+.[0-9]+.[0-9]+"]
 
 jobs:
   publish:
@@ -30,12 +30,13 @@ jobs:
         id: tags
         run: |
           image=mcadecio/universal-database-proxy-rest
+          tags="$image:$(git rev-parse --short HEAD)"
+
           if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
-            version="${GITHUB_REF_NAME#v}"
-            echo "tags=$image:$version,$image:latest" >> "$GITHUB_OUTPUT"
-          else
-            echo "tags=$image:latest" >> "$GITHUB_OUTPUT"
+            tags="$tags,$image:${GITHUB_REF_NAME#v}"
           fi
+
+          echo "tags=$tags" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
