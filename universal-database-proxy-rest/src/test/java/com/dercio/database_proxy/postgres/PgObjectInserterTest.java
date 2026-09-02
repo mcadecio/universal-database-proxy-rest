@@ -2,6 +2,7 @@ package com.dercio.database_proxy.postgres;
 
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
+import com.dercio.database_proxy.postgres.type.PgType;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.*;
@@ -121,6 +122,6 @@ class PgObjectInserterTest {
                 .put("column_name", name)
                 .put("data_type", dataType)
                 .put("is_nullable", "YES")
-                .put("is_primary_key", primaryKey));
+                .put("is_primary_key", primaryKey), PgType::toOpenApiColumnType);
     }
 }

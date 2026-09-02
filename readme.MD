@@ -1,8 +1,7 @@
 # database-proxy
 
-This project is meant to provide a simple restful interface to interact with databases. It features the ability to
-act as a proxy between any servers over a TCP connection. Also, it has the ability to read selected tables and
-generate an OpenApi spec.
+This project is meant to provide a simple restful interface to interact with databases. It reads the selected
+tables and generates an OpenApi spec.
 
 Currently, it supports the following databases:
 
@@ -32,11 +31,10 @@ java -jar -Dproject.config=cfg/config.json target/universal-database-proxy-rest-
     4. Set the `openApiFilePath` to where you want the OpenApi file generated to be stored. For
        example: `./pgOpenApi.yaml`
     5. Now the `database` object holds configuration regarding the database we are trying base of our API from.
-    6. Set the `host` to the address of the database. For example: `localhost` or `0.0.0.0` or `some.address.com`. This
-       can be the host in plain text or the name of an ENVIRONMENT VARIABLE.
-    7. Set the `port` to the port number the database is listening for connections on. This can be any valid port
-       number.
-    8. Set the `username` to the database username the server should use to authenticate itself against your chosen
+    6. Set `hosts` to the database endpoints in `host:port` form, for example `["db-1:5432", "db-2:5432"]`. Each
+       entry can be the endpoint in plain text or the name of an ENVIRONMENT VARIABLE, which may itself hold a comma
+       separated list. A single `host` plus `port` is still accepted and is used when `hosts` is absent.
+    7. Set the `username` to the database username the server should use to authenticate itself against your chosen
        database. This can be the username in plain text or the name of an ENVIRONMENT VARIABLE.
     9. Set the `password` to the database password the server should use to authenticate itself against your chosen
        database. This can be the password in plain text or an ENVIRONMENT VARIABLE. For example: `admin`
@@ -58,11 +56,10 @@ java -jar -Dproject.config=cfg/config.json target/universal-database-proxy-rest-
     4. Set the `openApiFilePath` to where you want the OpenApi file generated to be stored. For
        example: `./crbOpenApi.yaml`
     5. Now the `database` object holds configuration regarding the database we are trying base of our API from.
-    6. Set the `host` to the address of the database. For example: `localhost` or `0.0.0.0` or `some.address.com`. This
-       can be the host in plain text or the name of an ENVIRONMENT VARIABLE.
-    7. Set the `port` to the port number the database is listening for connections on. This can be any valid port
-       number.
-    8. Set the `username` to the database username the server should use to authenticate itself against your chosen
+    6. Set `hosts` to the database endpoints in `host:port` form, for example `["db-1:5432", "db-2:5432"]`. Each
+       entry can be the endpoint in plain text or the name of an ENVIRONMENT VARIABLE, which may itself hold a comma
+       separated list. A single `host` plus `port` is still accepted and is used when `hosts` is absent.
+    7. Set the `username` to the database username the server should use to authenticate itself against your chosen
        database. This can be the username in plain text or the name of an ENVIRONMENT VARIABLE.
     9. Set the `password` to the database password the server should use to authenticate itself against your chosen
        database. This can be the password in plain text or an ENVIRONMENT VARIABLE. For example: `admin`
@@ -84,19 +81,18 @@ java -jar -Dproject.config=cfg/config.json target/universal-database-proxy-rest-
     4. Set the `openApiFilePath` to where you want the OpenApi file generated to be stored. For
        example: `./cassandraOpenApi.yaml`
     5. Now the `database` object holds configuration regarding the database we are trying base of our API from.
-    6. Set the `host` to the address of a contact point in the cluster. For example: `localhost` or `0.0.0.0`
-       or `some.address.com`. This can be the host in plain text or the name of an ENVIRONMENT VARIABLE.
-    7. Set the `port` to the port the cluster is listening for CQL connections on, usually `9042`.
-    8. Set the `username` and `password` the driver should authenticate with. These can be in plain text or the name of
+    6. Set `hosts` to the cluster contact points in `host:port` form, for example `["cassandra-1:9042"]`. Each entry
+       can be the endpoint in plain text or the name of an ENVIRONMENT VARIABLE.
+    7. Set the `username` and `password` the driver should authenticate with. These can be in plain text or the name of
        an ENVIRONMENT VARIABLE, for example `CASSANDRA_PASSWORD`. Leave `username` empty when the cluster runs with the
        default `AllowAllAuthenticator` — sending empty credentials fails the handshake.
     9. Set the `databaseName` to the **keyspace** you want the OpenApi to be generated from. Cassandra has no schemas,
        so the keyspace plays that role and appears as the schema in the generated spec.
-    10. Set the `localDatacenter` to the datacenter the driver should route to. Defaults to `datacenter1`, which is what
-        a single-node cluster reports.
-    11. Optionally set `allowFiltering` to `false`. Queries that filter on anything the primary key cannot satisfy
-        require a cluster-wide scan; leaving this at the default `true` permits them, while `false` rejects them with a
-        400. See the Cassandra notes in [AGENTS.md](AGENTS.md) for the other behavioural differences.
+    10. Set the `localDatacenter` to the datacenter the driver should route to. This is **required** — startup fails
+        without it. A single-node cluster usually reports `datacenter1`.
+    11. Optionally set `allowFiltering` to `true`. Queries that filter on anything the primary key cannot satisfy
+        require a cluster-wide scan; they are rejected with a 400 by default. See the Cassandra notes in
+        [AGENTS.md](AGENTS.md) for the other behavioural differences.
     12. Run the steps in the Installation section and set the `-Dproject.config=` argument to the path of
         the `config.json` file you just create.
 

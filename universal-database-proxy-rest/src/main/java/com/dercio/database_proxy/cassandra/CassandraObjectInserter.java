@@ -1,6 +1,5 @@
 package com.dercio.database_proxy.cassandra;
 
-import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.google.inject.Inject;
 import io.vertx.cassandra.CassandraClient;
@@ -12,6 +11,7 @@ import lombok.extern.log4j.Log4j2;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.lang.String.format;
 
@@ -23,22 +23,18 @@ public class CassandraObjectInserter {
     private final CassandraObjectFinder finder;
 
     /**
-     * CQL has no {@code RETURNING}, so the id used for the {@code Location} header is rebuilt from the
-     * primary key values in the request body. Cassandra never generates keys, so the client always
-     * supplies them.
+     * CQL has no RETURNING, so the Location id is rebuilt from the body. Cassandra never generates keys.
      */
     public Future<Object> create(CassandraTableMetadata tableMetadata, JsonObject data) {
-        var insertQuery = generateInsertQuery(tableMetadata);
-        var values = tableMetadata.generateValuesForInsert(data).toArray();
-
-        return cassandraClient.executeWithFullFetch(SimpleStatement.newInstance(insertQuery, values))
-                .map(rows -> generateResourceId(tableMetadata, data));
+        return CassandraStatements.execute(
+                        cassandraClient,
+                        generateInsertQuery(tableMetadata),
+                        tableMetadata.generateValuesForInsert(data))
+                .map(generateResourceId(tableMetadata, data));
     }
 
     /**
-     * Cassandra reports no affected-row count, so existence is established with a read before the
-     * write. Without it a {@code PUT} on a missing row would upsert it and answer 204 where the
-     * Postgres API answers 404.
+     * No affected-row count exists and INSERT is an upsert, so a missing row must be detected by reading.
      */
     public Future<Integer> update(
             CassandraTableMetadata tableMetadata,
@@ -51,19 +47,16 @@ public class CassandraObjectInserter {
                         return Future.succeededFuture(0);
                     }
 
-                    // A table whose columns are all part of the primary key has nothing to SET, and
-                    // CQL cannot assign a primary key column to itself the way the Postgres
-                    // implementation does. The existence check alone answers the request.
+                    // Nothing to SET, and CQL cannot assign a key column to itself as Postgres does.
                     if (tableMetadata.getNonPrimaryKeyColumns().isEmpty()) {
                         return Future.succeededFuture(1);
                     }
 
-                    var updateQuery = generateUpdateQuery(tableMetadata);
-                    var values = tableMetadata.generateValuesForUpdate(data, pathParams).toArray();
-
-                    return cassandraClient
-                            .executeWithFullFetch(SimpleStatement.newInstance(updateQuery, values))
-                            .map(rows -> 1);
+                    return CassandraStatements.execute(
+                                    cassandraClient,
+                                    generateUpdateQuery(tableMetadata),
+                                    tableMetadata.generateValuesForUpdate(data, pathParams))
+                            .map(1);
                 })
                 .onSuccess(count -> log.info("Rows updated [{}]", count));
     }
@@ -79,8 +72,8 @@ public class CassandraObjectInserter {
     private String generateInsertQuery(CassandraTableMetadata tableMetadata) {
         var columnNames = tableMetadata.getTableMetadata().getColumnNames();
 
-        var placeholders = columnNames.stream()
-                .map(column -> "?")
+        var placeholders = IntStream.range(0, columnNames.size())
+                .mapToObj(i -> "?")
                 .collect(Collectors.joining(","));
 
         var query = format("INSERT INTO %s(%s) VALUES (%s)",

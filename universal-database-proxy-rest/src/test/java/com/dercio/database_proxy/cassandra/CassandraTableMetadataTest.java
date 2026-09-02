@@ -125,7 +125,7 @@ class CassandraTableMetadataTest {
 
         assertAll(
                 () -> assertEquals(2, values.size()),
-                () -> assertEquals(ALBUM_ID, values.get(0)),
+                () -> assertEquals(ALBUM_ID, values.getFirst()),
                 () -> assertEquals("Miles Davis", values.get(1))
         );
     }
@@ -143,8 +143,8 @@ class CassandraTableMetadataTest {
 
         assertAll(
                 () -> assertEquals(6, values.size()),
-                () -> assertEquals(ALBUM_ID, values.get(0)),
-                () -> assertInstanceOf(UUID.class, values.get(0)),
+                () -> assertEquals(ALBUM_ID, values.getFirst()),
+                () -> assertInstanceOf(UUID.class, values.getFirst()),
                 () -> assertEquals("Kind of Blue", values.get(1)),
                 // "tags" is absent from the body, so it binds as null rather than an empty set.
                 () -> assertNull(values.get(3)),
@@ -169,7 +169,7 @@ class CassandraTableMetadataTest {
 
         assertAll(
                 () -> assertEquals(4, values.size()),
-                () -> assertEquals("So What", values.get(0)),
+                () -> assertEquals("So What", values.getFirst()),
                 () -> assertEquals(562000L, values.get(1)),
                 () -> assertInstanceOf(Long.class, values.get(1)),
                 () -> assertEquals(ALBUM_ID, values.get(2)),
@@ -187,7 +187,7 @@ class CassandraTableMetadataTest {
 
         assertAll(
                 () -> assertEquals(2, values.size()),
-                () -> assertEquals(ALBUM_ID, values.get(0)),
+                () -> assertEquals(ALBUM_ID, values.getFirst()),
                 () -> assertEquals(1, values.get(1))
         );
     }

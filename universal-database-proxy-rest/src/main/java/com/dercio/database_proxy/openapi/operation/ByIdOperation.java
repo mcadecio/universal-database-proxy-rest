@@ -9,7 +9,6 @@ import java.time.Clock;
 import java.util.List;
 
 public abstract class ByIdOperation extends OpenApiOperation {
-
     protected ByIdOperation(Clock clock) {
         super(clock);
     }
@@ -23,10 +22,6 @@ public abstract class ByIdOperation extends OpenApiOperation {
                 .toList();
     }
 
-    /**
-     * A frozen collection can legally be part of a primary key, and {@code array} without
-     * {@code items} is an invalid schema, so fall back to the element type.
-     */
     private String pathParameterType(ColumnMetadata column) {
         return column.getOpenApiItemsType() == null
                 ? column.getOpenApiType()

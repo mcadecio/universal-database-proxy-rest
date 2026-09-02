@@ -20,21 +20,21 @@ public class UpdateStudentSteps {
 
     @When("I update a student named {string}")
     public void iUpdateAStudentsNamed(String name) {
-        var student = studentContext.getStudents().get(0);
+        var student = studentContext.getStudents().getFirst();
         studentContext.setResponse(studentService.update(name,null, student));
     }
 
     @When("I update a student using its name and age")
     public void iUpdateAStudentUsingItsNameAndAge() {
-        var student = studentContext.getStudents().get(0);
+        var student = studentContext.getStudents().getFirst();
         var updatedStudent = new Student(student.name(), student.age(), "8340959");
         studentContext.setResponse(studentService.update(student.name(), student.age(), updatedStudent));
-        studentContext.getStudents().add(0, updatedStudent);
+        studentContext.getStudents().addFirst(updatedStudent);
     }
 
     @Then("I should see the newly updated student")
     public void iShouldSeeTheNewlyUpdatedStudent() {
-        var expectedStudent = studentContext.getStudents().get(0);
+        var expectedStudent = studentContext.getStudents().getFirst();
         studentContext.getResponse().then().statusCode(204);
         var actualStudent = studentRepository.findById(expectedStudent.name(), expectedStudent.age());
         assertEquals(expectedStudent, actualStudent);

@@ -1,5 +1,6 @@
 package com.dercio.database_proxy.postgres.type;
 
+import com.dercio.database_proxy.common.database.OpenApiColumnType;
 import com.dercio.database_proxy.openapi.OpenApiType;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
@@ -85,6 +86,10 @@ public enum PgType {
 
     public static String fromPgToOpenApiType(String type) {
         return from(type).getOpenApiType();
+    }
+
+    public static OpenApiColumnType toOpenApiColumnType(String type) {
+        return OpenApiColumnType.scalar(fromPgToOpenApiType(type));
     }
 
     public static Object parse(String type, String value) {

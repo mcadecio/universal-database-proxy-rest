@@ -1,7 +1,6 @@
 package com.dercio.database_proxy.cassandra;
 
 import com.datastax.oss.driver.api.core.cql.Row;
-import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.dercio.database_proxy.postgres.InconsistentStateException;
 import com.google.inject.Inject;
 import io.vertx.cassandra.CassandraClient;
@@ -16,10 +15,6 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
-/**
- * Builds every {@code SELECT} the Cassandra API issues, so the {@code ALLOW FILTERING} decision lives
- * in exactly one place.
- */
 @Log4j2
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CassandraObjectFinder {
@@ -41,25 +36,9 @@ public class CassandraObjectFinder {
             return Future.failedFuture(e);
         }
 
-        var values = tableMetadata.parseRawValues(queryFilters).toArray();
-
-        return cassandraClient.executeWithFullFetch(SimpleStatement.newInstance(selectQuery, values));
+        return CassandraStatements.execute(cassandraClient, selectQuery, tableMetadata.parseRawValues(queryFilters));
     }
 
-    /**
-     * A set column is filtered by membership — {@code tags CONTAINS ?} — because equality would
-     * demand the caller spell out the whole set, which a query string cannot express well.
-     */
-    private String filterPredicate(CassandraTableMetadata tableMetadata, String columnName) {
-        return tableMetadata.isSetColumn(columnName)
-                ? format("%s CONTAINS ?", columnName)
-                : format("%s = ?", columnName);
-    }
-
-    /**
-     * Cassandra reports no affected-row count, so writes establish existence with a read first.
-     * Restricting by the full primary key is always a single-partition read — never a scan.
-     */
     public Future<Boolean> existsByPrimaryKey(CassandraTableMetadata tableMetadata, Map<String, String> pathParams) {
         var query = format("SELECT %s FROM %s WHERE %s LIMIT 1",
                 String.join(", ", tableMetadata.getTableMetadata().getPrimaryKeyColumnNames()),
@@ -70,9 +49,7 @@ public class CassandraObjectFinder {
                         .collect(Collectors.joining(" AND "))
         );
 
-        var values = tableMetadata.primaryKeyValues(pathParams).toArray();
-
-        return cassandraClient.executeWithFullFetch(SimpleStatement.newInstance(query, values))
+        return CassandraStatements.execute(cassandraClient, query, tableMetadata.primaryKeyValues(pathParams))
                 .map(rows -> !rows.isEmpty());
     }
 
@@ -104,5 +81,11 @@ public class CassandraObjectFinder {
         log.info("Generated select query [{}]", query);
 
         return query;
+    }
+
+    private String filterPredicate(CassandraTableMetadata tableMetadata, String columnName) {
+        return tableMetadata.isSetColumn(columnName)
+                ? format("%s CONTAINS ?", columnName)
+                : format("%s = ?", columnName);
     }
 }

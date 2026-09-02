@@ -1,6 +1,5 @@
 package com.dercio.database_proxy.common.database;
 
-import com.dercio.database_proxy.postgres.type.PgType;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +14,6 @@ public class ColumnMetadata {
     private final String tableName;
     private final String columnName;
     private final String openApiType;
-    /** Only set when {@link #openApiType} is {@code array}; {@code null} for scalar columns. */
     private final String openApiItemsType;
     private final String dbType;
     private final Long characterMaximumLength;
@@ -24,16 +22,10 @@ public class ColumnMetadata {
     @Setter
     private boolean isPrimaryKey;
 
-    public ColumnMetadata(JsonObject jsonObject) {
-        this(jsonObject, dbType -> OpenApiColumnType.scalar(PgType.fromPgToOpenApiType(dbType)));
-    }
-
     /**
-     * @param openApiTypeResolver maps this database's {@code data_type} spelling to an
-     *                            {@link com.dercio.database_proxy.openapi.OpenApiType}. Each engine
-     *                            names its types differently, so a non-Postgres implementation must
-     *                            supply its own resolver or every column silently degrades to
-     *                            {@code ANY}.
+     * @param openApiTypeResolver maps this engine's {@code data_type} spelling to an
+     *                            {@link com.dercio.database_proxy.openapi.OpenApiType}. Engines name
+     *                            their types differently, so each supplies its own resolver.
      */
     public ColumnMetadata(JsonObject jsonObject, Function<String, OpenApiColumnType> openApiTypeResolver) {
         this.tableSchema = jsonObject.getString("table_schema");

@@ -74,7 +74,7 @@ public class TableMetadata {
                 .filter(ColumnMetadata::isPrimaryKey)
                 .findFirst()
                 .orElseGet(() -> {
-                    var column = columns.get(0);
+                    var column = columns.getFirst();
                     column.setPrimaryKey(true);
 
                     log.debug("Table [{}] does not have a PK. Using [{}] column as PK",

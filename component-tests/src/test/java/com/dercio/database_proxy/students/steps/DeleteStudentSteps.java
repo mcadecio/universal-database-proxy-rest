@@ -25,7 +25,7 @@ public class DeleteStudentSteps {
 
     @When("I delete a student using its name and age")
     public void iDeleteAStudentNamedAndAge() {
-        var student = studentContext.getStudents().get(0);
+        var student = studentContext.getStudents().getFirst();
         studentContext.setResponse(studentService.deleteById(student.name(), student.age()));
     }
 
@@ -36,7 +36,7 @@ public class DeleteStudentSteps {
 
     @Then("the student should be deleted")
     public void theStudentShouldBeDeleted() {
-        var student = studentContext.getStudents().get(0);
+        var student = studentContext.getStudents().getFirst();
         var response = studentContext.getResponse();
         response.then().statusCode(204);
         assertNull(studentRepository.findById(student.name(), student.age()));

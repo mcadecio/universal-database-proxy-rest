@@ -1,7 +1,6 @@
 package com.dercio.database_proxy.cassandra;
 
 import com.datastax.oss.driver.api.core.cql.Row;
-import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.dercio.database_proxy.cassandra.type.CassandraType;
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
@@ -10,7 +9,6 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -19,7 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,28 +33,24 @@ class CassandraObjectInserterTest {
 
     @Test
     void createShouldInsertEveryColumnWithoutAReturningClause() {
-        when(cassandraClient.executeWithFullFetch(any(SimpleStatement.class)))
-                .thenReturn(Future.succeededFuture(List.of()));
-        var captor = ArgumentCaptor.forClass(SimpleStatement.class);
+        var recorder = CassandraClientRecorder.record(cassandraClient);
 
         new CassandraObjectInserter(cassandraClient, finder).create(albums(), albumBody());
 
-        verify(cassandraClient).executeWithFullFetch(captor.capture());
-        var query = captor.getValue().getQuery();
+        var query = recorder.query();
 
         assertAll(
                 () -> assertEquals("INSERT INTO music.albums(album_id, title, artist) VALUES (?,?,?)", query),
                 // CQL has no RETURNING - the Location id is rebuilt from the body instead.
                 () -> assertFalse(query.contains("RETURNING")),
                 () -> assertEquals(List.of(ALBUM_ID, "Kind of Blue", "Miles Davis"),
-                        captor.getValue().getPositionalValues())
+                        recorder.values())
         );
     }
 
     @Test
     void createShouldBuildTheResourceIdFromThePrimaryKeyValuesInTheBody() {
-        when(cassandraClient.executeWithFullFetch(any(SimpleStatement.class)))
-                .thenReturn(Future.succeededFuture(List.of()));
+        var recorder = CassandraClientRecorder.record(cassandraClient);
 
         var created = new CassandraObjectInserter(cassandraClient, finder).create(albums(), albumBody());
 
@@ -65,8 +59,7 @@ class CassandraObjectInserterTest {
 
     @Test
     void createShouldJoinCompositePrimaryKeyValuesWithAColon() {
-        when(cassandraClient.executeWithFullFetch(any(SimpleStatement.class)))
-                .thenReturn(Future.succeededFuture(List.of()));
+        var recorder = CassandraClientRecorder.record(cassandraClient);
 
         var body = new JsonObject()
                 .put("album_id", ALBUM_ID.toString())
@@ -81,9 +74,7 @@ class CassandraObjectInserterTest {
     @Test
     void updateShouldNotIncludeThePrimaryKeyInTheSetClauseAndBindsPkFromPath() {
         when(finder.existsByPrimaryKey(any(), any())).thenReturn(Future.succeededFuture(true));
-        when(cassandraClient.executeWithFullFetch(any(SimpleStatement.class)))
-                .thenReturn(Future.succeededFuture(List.of()));
-        var captor = ArgumentCaptor.forClass(SimpleStatement.class);
+        var recorder = CassandraClientRecorder.record(cassandraClient);
 
         // The body carries a stale key that must be ignored; the key comes from the path.
         var body = new JsonObject()
@@ -94,14 +85,13 @@ class CassandraObjectInserterTest {
         var updated = new CassandraObjectInserter(cassandraClient, finder)
                 .update(albums(), body, Map.of("album_id", ALBUM_ID.toString()));
 
-        verify(cassandraClient).executeWithFullFetch(captor.capture());
-        var query = captor.getValue().getQuery();
+        var query = recorder.query();
 
         assertAll(
                 () -> assertEquals("UPDATE music.albums SET title = ?, artist = ? WHERE album_id = ?", query),
                 () -> assertFalse(query.split("SET")[1].split("WHERE")[0].contains("album_id")),
                 () -> assertEquals(List.of("Kind of Blue", "Miles Davis", ALBUM_ID),
-                        captor.getValue().getPositionalValues()),
+                        recorder.values()),
                 () -> assertEquals(1, updated.result())
         );
     }
@@ -117,7 +107,7 @@ class CassandraObjectInserterTest {
 
         assertAll(
                 () -> assertEquals(0, updated.result()),
-                () -> verify(cassandraClient, never()).executeWithFullFetch(any(SimpleStatement.class))
+                () -> verify(cassandraClient, never()).prepare(anyString())
         );
     }
 
@@ -132,29 +122,25 @@ class CassandraObjectInserterTest {
 
         assertAll(
                 () -> assertEquals(1, updated.result()),
-                () -> verify(cassandraClient, never()).executeWithFullFetch(any(SimpleStatement.class))
+                () -> verify(cassandraClient, never()).prepare(anyString())
         );
     }
 
     @Test
     void updateShouldRestrictByEveryColumnOfACompositePrimaryKey() {
         when(finder.existsByPrimaryKey(any(), any())).thenReturn(Future.succeededFuture(true));
-        when(cassandraClient.executeWithFullFetch(any(SimpleStatement.class)))
-                .thenReturn(Future.succeededFuture(List.of(mock(Row.class))));
-        var captor = ArgumentCaptor.forClass(SimpleStatement.class);
+        var recorder = CassandraClientRecorder.record(cassandraClient, List.of(mock(Row.class)));
 
         var body = new JsonObject().put("title", "So What").put("duration_ms", 562000);
         var pathParams = Map.of("album_id", ALBUM_ID.toString(), "track_no", "1");
 
         new CassandraObjectInserter(cassandraClient, finder).update(tracks(), body, pathParams);
 
-        verify(cassandraClient).executeWithFullFetch(captor.capture());
-
         assertAll(
-                () -> assertTrue(captor.getValue().getQuery()
+                () -> assertTrue(recorder.query()
                         .endsWith("WHERE album_id = ? AND track_no = ?")),
                 () -> assertEquals(List.of("So What", 562000L, ALBUM_ID, 1),
-                        captor.getValue().getPositionalValues())
+                        recorder.values())
         );
     }
 

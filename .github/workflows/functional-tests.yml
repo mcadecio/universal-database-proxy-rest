@@ -1,0 +1,86 @@
+name: Functional tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  functional-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build
+        run: mvn -B clean package -DskipTests
+
+      - name: Start databases
+        working-directory: docker
+        run: docker compose up -d crdb postgres cassandra
+
+      - name: Wait for databases
+        working-directory: docker
+        run: |
+          for i in $(seq 1 90); do
+            healthy=$(docker compose ps --format '{{.Status}}' | grep -c healthy || true)
+            if [ "$healthy" -ge 3 ]; then echo "all databases healthy"; exit 0; fi
+            sleep 5
+          done
+          docker compose ps
+          docker compose logs cassandra | tail -50
+          exit 1
+
+      - name: Seed Cassandra
+        working-directory: docker
+        run: docker compose run --rm cassandra-init
+
+      - name: Start the API
+        env:
+          POSTGRES_HOSTS: localhost:5432
+          POSTGRES_PASSWORD: admin
+          CRB_HOSTS: localhost:26257
+          CRB_PASSWORD: ""
+          CASSANDRA_HOSTS: localhost:9042
+          CASSANDRA_PASSWORD: cassandra
+        run: |
+          jar=$(ls universal-database-proxy-rest/target/*-fat.jar)
+          nohup java -jar -Dproject.config=docker/config.json "$jar" > api.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf localhost:8000/budgets > /dev/null \
+              && curl -sf localhost:8010/cars > /dev/null \
+              && curl -sf localhost:8020/albums > /dev/null; then
+              echo "all three APIs up"; exit 0
+            fi
+            sleep 2
+          done
+          tail -100 api.log
+          exit 1
+
+      - name: Run component tests
+        run: mvn -B -pl component-tests -am test -Dtest=TestRunner -Dsurefire.failIfNoSpecifiedTests=false
+
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: functional-test-logs
+          path: |
+            api.log
+            component-tests/target/surefire-reports/
+          if-no-files-found: ignore
+
+      - name: Tear down
+        if: always()
+        working-directory: docker
+        run: docker compose down -v

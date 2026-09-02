@@ -8,6 +8,7 @@ import io.vertx.core.Vertx;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,8 +60,26 @@ class CassandraModuleTest {
     }
 
     @Test
-    void shouldDefaultAllowFilteringToTrue() {
-        assertTrue(injector.getInstance(CassandraApiConfig.class).isAllowFiltering());
+    void shouldDefaultAllowFilteringToFalseSoAScanIsNeverImplicit() {
+        assertFalse(injector.getInstance(CassandraApiConfig.class).isAllowFiltering());
+    }
+
+    @Test
+    void shouldFailWhenNoLocalDatacenterIsConfigured() {
+        var databaseConfig = injector.getInstance(CassandraApiConfig.class).getDatabase();
+        databaseConfig.setLocalDatacenter(null);
+
+        var exception = assertThrows(ProvisionException.class, this::clientOptions);
+
+        assertTrue(exception.getMessage().contains("localDatacenter is required"));
+    }
+
+    @Test
+    void shouldUseEveryConfiguredHostAsAContactPoint() {
+        var databaseConfig = injector.getInstance(CassandraApiConfig.class).getDatabase();
+        databaseConfig.setHosts(List.of("cassandra-1:9042", "cassandra-2:9042"));
+
+        assertDoesNotThrow(this::clientOptions);
     }
 
     private CassandraClientOptions clientOptions() {
@@ -77,6 +96,7 @@ class CassandraModuleTest {
         databaseConfig.setPassword("CASSANDRA_PASS");
         databaseConfig.setDatabaseName("CASSANDRA_KEYSPACE");
         databaseConfig.setPort(9042);
+        databaseConfig.setLocalDatacenter("datacenter1");
         apiConfig.setDatabase(databaseConfig);
 
         return apiConfig;

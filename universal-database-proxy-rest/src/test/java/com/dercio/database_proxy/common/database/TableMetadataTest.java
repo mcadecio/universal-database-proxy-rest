@@ -1,5 +1,6 @@
 package com.dercio.database_proxy.common.database;
 
+import com.dercio.database_proxy.postgres.type.PgType;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 
@@ -53,7 +54,7 @@ class TableMetadataTest {
 
         assertAll(
                 () -> assertEquals("event", tableMetadata.getPkColumnName()),
-                () -> assertTrue(tableMetadata.getColumns().get(0).isPrimaryKey()),
+                () -> assertTrue(tableMetadata.getColumns().getFirst().isPrimaryKey()),
                 () -> assertEquals(List.of("event"), tableMetadata.getPrimaryKeyColumnNames())
         );
     }
@@ -67,7 +68,7 @@ class TableMetadataTest {
                 .put("data_type", "bigint")
                 .put("is_nullable", "NO");
 
-        var column = assertDoesNotThrow(() -> new ColumnMetadata(rawColumn));
+        var column = assertDoesNotThrow(() -> new ColumnMetadata(rawColumn, PgType::toOpenApiColumnType));
 
         assertFalse(column.isPrimaryKey());
     }
@@ -79,6 +80,6 @@ class TableMetadataTest {
                 .put("column_name", name)
                 .put("data_type", dataType)
                 .put("is_nullable", "NO")
-                .put("is_primary_key", primaryKey));
+                .put("is_primary_key", primaryKey), PgType::toOpenApiColumnType);
     }
 }

@@ -45,12 +45,12 @@ public class CreateCarSteps {
 
     @Then("I should get a link to the car")
     public void iShouldGetALinkToTheCar() {
-        var car = cars.get(0);
+        var car = cars.getFirst();
         var expectedUrl = "http://localhost:8010/cars/" + car.getCarId();
         carsContext.getResponse().then()
                 .statusCode(201)
                 .header("Location", expectedUrl);
-        assertEquals(car, carsRepository.findById(cars.get(0).getCarId()));
+        assertEquals(car, carsRepository.findById(cars.getFirst().getCarId()));
     }
 
     @When("I create a car with the required fields")
@@ -74,7 +74,7 @@ public class CreateCarSteps {
 
     @When("I create the same car")
     public void iCreateTheSameCar() {
-        carsContext.setResponse(carsService.createCar(cars.get(0)));
+        carsContext.setResponse(carsService.createCar(cars.getFirst()));
     }
 
     @Then("I should be alerted that a car with the same id already exists")

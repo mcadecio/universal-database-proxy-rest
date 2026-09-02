@@ -1,7 +1,6 @@
 package com.dercio.database_proxy.cassandra;
 
 import com.datastax.oss.driver.api.core.cql.Row;
-import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.dercio.database_proxy.cassandra.type.CassandraType;
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
@@ -22,14 +21,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Log4j2
-@RequiredArgsConstructor(onConstructor_ = {@Inject})
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CassandraTableFinder {
 
     private static final String PARTITION_KEY = "partition_key";
     private static final String CLUSTERING = "clustering";
 
-    // keyspace_name is the partition key of both system_schema tables, so these are single-partition
-    // reads and need no ALLOW FILTERING.
     private static final String RETRIEVE_TABLES_FOR_KEYSPACE =
             "SELECT table_name FROM system_schema.tables WHERE keyspace_name = ?";
 
@@ -64,21 +61,16 @@ public class CassandraTableFinder {
                         .orElseThrow(() -> new InconsistentStateException("Table requested does not exist")));
     }
 
-    /**
-     * {@code system_schema.columns} also describes materialized views. Only base tables are exposed,
-     * because a view cannot be written through.
-     */
+    /** Views also appear in system_schema.columns, but cannot be written through. */
     private Future<Set<String>> findBaseTableNames(String keyspace) {
-        return cassandraClient
-                .executeWithFullFetch(SimpleStatement.newInstance(RETRIEVE_TABLES_FOR_KEYSPACE, keyspace))
+        return CassandraStatements.execute(cassandraClient, RETRIEVE_TABLES_FOR_KEYSPACE, List.of(keyspace))
                 .map(rows -> rows.stream()
                         .map(row -> row.getString("table_name"))
                         .collect(Collectors.toSet()));
     }
 
     private Future<Map<String, List<JsonObject>>> findColumns(String keyspace, Set<String> baseTables) {
-        return cassandraClient
-                .executeWithFullFetch(SimpleStatement.newInstance(RETRIEVE_COLUMNS_FOR_KEYSPACE, keyspace))
+        return CassandraStatements.execute(cassandraClient, RETRIEVE_COLUMNS_FOR_KEYSPACE, List.of(keyspace))
                 .map(rows -> rows.stream()
                         .filter(row -> baseTables.contains(row.getString("table_name")))
                         .map(row -> toColumnJson(keyspace, row))
@@ -130,11 +122,7 @@ public class CassandraTableFinder {
         );
     }
 
-    /**
-     * Partition key columns first, then clustering columns, both in their declared {@code position}
-     * order, then everything else alphabetically. This order becomes the composite-key path parameter
-     * order in the generated OpenAPI, so it has to match the table's real key order.
-     */
+    /** This order becomes the composite-key path parameter order, so it must match the real key order. */
     private Comparator<JsonObject> columnOrder() {
         return Comparator.<JsonObject>comparingInt(json -> switch (json.getString("kind")) {
                     case PARTITION_KEY -> 0;

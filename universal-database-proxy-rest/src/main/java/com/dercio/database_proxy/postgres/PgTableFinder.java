@@ -3,6 +3,7 @@ package com.dercio.database_proxy.postgres;
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
 import com.dercio.database_proxy.common.database.TableRequest;
+import com.dercio.database_proxy.postgres.type.PgType;
 import com.google.inject.Inject;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Log4j2
-@RequiredArgsConstructor(onConstructor_ = {@Inject})
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class PgTableFinder {
 
     private static final String RETRIEVE_ALL_NON_DEFAULT_TABLES_FOR_DB = """
@@ -88,7 +89,7 @@ public class PgTableFinder {
         return StreamSupport.stream(rows.spliterator(), false)
                 .map(Row::toJson)
                 .sorted(Comparator.comparing(json -> json.getInteger("ordinal_position")))
-                .map(ColumnMetadata::new)
+                .map(json -> new ColumnMetadata(json, PgType::toOpenApiColumnType))
                 .toList();
     }
 

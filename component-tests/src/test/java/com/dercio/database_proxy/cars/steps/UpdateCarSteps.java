@@ -13,7 +13,7 @@ import java.util.List;
 
 import static com.dercio.database_proxy.cars.CarFactory.createFiatCar;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ScenarioScoped
 public class UpdateCarSteps {
@@ -42,30 +42,9 @@ public class UpdateCarSteps {
         carsRepository.save(fiatCar);
     }
 
-    @When("I update the id of the car")
-    public void iUpdateTheIdOfTheCar() {
-        var existingCar = cars.get(0);
-        var updatedCar = new Car()
-                .setCarId(100000)
-                .setDoors(existingCar.getDoors())
-                .setManufacturer(existingCar.getManufacturer());
-
-        carsContext.setResponse(carsService.updateCar(existingCar.getCarId(), updatedCar));
-    }
-
-    @Then("I should be alerted that the id of the car cannot be updated")
-    public void iShouldBeAlertedThatTheIdOfTheCarCannotBeUpdated() {
-        carsContext.getResponse().then()
-                .statusCode(400)
-                .body("timestamp", notNullValue())
-                .body("path", equalTo("/cars/2001"))
-                .body("message", containsString("inconsistent primary key values"))
-                .body("code", equalTo(400));
-    }
-
     @When("I update the manufacturer to no value")
     public void iUpdateTheManufacturerToNoValue() {
-        var existingCar = cars.get(0);
+        var existingCar = cars.getFirst();
         var updatedCar = new Car()
                 .setCarId(existingCar.getCarId())
                 .setDoors(existingCar.getDoors())
@@ -86,7 +65,7 @@ public class UpdateCarSteps {
 
     @When("I update the manufacturer")
     public void iUpdateTheManufacturer() {
-        var existingCar = cars.get(0)
+        var existingCar = cars.getFirst()
                 .setManufacturer("SOMETHING-ELSE");
 
         carsContext.setResponse(carsService.updateCar(existingCar.getCarId(), existingCar));
@@ -94,10 +73,10 @@ public class UpdateCarSteps {
 
     @Then("I should see the manufacturer in the car")
     public void iShouldSeeTheManufacturerInTheCar() {
-        var updatedCar = carsRepository.findById(cars.get(0).getCarId());
+        var updatedCar = carsRepository.findById(cars.getFirst().getCarId());
 
         assertEquals("SOMETHING-ELSE", updatedCar.getManufacturer());
-        assertEquals(cars.get(0), updatedCar);
+        assertEquals(cars.getFirst(), updatedCar);
     }
 
     @When("I update a car that does not exist")

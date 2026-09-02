@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Log4j2
-@RequiredArgsConstructor(onConstructor_ = {@Inject})
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class PgRepository implements Repository {
 
     private final PgObjectDeleter deleter;

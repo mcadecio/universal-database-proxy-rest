@@ -1,28 +1,14 @@
 {
   "$schema": "config.schema.json",
-  "proxy": {
-    "enabled": true,
-    "httpServer": {
-      "host": "localhost",
-      "port": 1234
-    },
-    "source": {
-      "host": "localhost",
-      "port": 5433
-    },
-    "destination": {
-      "host": "localhost",
-      "port": 5432
-    }
-  },
   "postgresApi": {
     "enabled": true,
     "host": "localhost",
     "port": 8000,
     "openApiFilePath": "./cfg/pgOpenApi.yaml",
     "database": {
-      "host": "localhost",
-      "port": 5432,
+      "hosts": [
+        "localhost:5432"
+      ],
       "username": "postgres",
       "password": "admin",
       "databaseName": "database-proxy"
@@ -34,8 +20,9 @@
     "port": 8010,
     "openApiFilePath": "./cfg/crbOpenApi.yaml",
     "database": {
-      "host": "localhost",
-      "port": 26257,
+      "hosts": [
+        "localhost:26257"
+      ],
       "sslEnabled": false,
       "sslCertPath": "cfg/dummy-cert.pem",
       "username": "root",
@@ -50,8 +37,9 @@
     "openApiFilePath": "./cfg/cassandraOpenApi.yaml",
     "allowFiltering": true,
     "database": {
-      "host": "localhost",
-      "port": 9042,
+      "hosts": [
+        "localhost:9042"
+      ],
       "username": "cassandra",
       "password": "cassandra",
       "databaseName": "music",

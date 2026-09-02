@@ -5,11 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class DatabaseConfig {
+    private List<String> hosts;
     private String host;
     private Integer port;
     private String username;
@@ -19,6 +22,5 @@ public class DatabaseConfig {
     private String targetServerType;
     private boolean sslEnabled;
     private String sslCertPath;
-    // Cassandra only: the DataStax driver requires a local datacenter whenever contact points are given.
     private String localDatacenter;
 }

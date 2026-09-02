@@ -1,7 +1,6 @@
 package com.dercio.database_proxy.cassandra;
 
 import com.datastax.oss.driver.api.core.cql.Row;
-import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.dercio.database_proxy.cassandra.type.CassandraType;
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
@@ -10,7 +9,6 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -19,7 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,16 +35,12 @@ class CassandraObjectDeleterTest {
     @Test
     void shouldTruncateWhenDeletingTheWholeCollection() {
         // CQL rejects a bare "DELETE FROM table", so clearing a table means TRUNCATE.
-        when(cassandraClient.executeWithFullFetch(any(SimpleStatement.class)))
-                .thenReturn(Future.succeededFuture(List.of()));
-        var captor = ArgumentCaptor.forClass(SimpleStatement.class);
+        var recorder = CassandraClientRecorder.record(cassandraClient);
 
         var deleted = new CassandraObjectDeleter(cassandraClient, finder).deleteData(albums(), Map.of());
 
-        verify(cassandraClient).executeWithFullFetch(captor.capture());
-
         assertAll(
-                () -> assertEquals("TRUNCATE music.albums", captor.getValue().getQuery()),
+                () -> assertEquals("TRUNCATE music.albums", recorder.query()),
                 // TRUNCATE reports no count, so this always answers 204 rather than 404.
                 () -> assertEquals(1, deleted.result())
         );
@@ -54,16 +48,12 @@ class CassandraObjectDeleterTest {
 
     @Test
     void shouldTruncateWhenEveryFilterNameIsUnknown() {
-        when(cassandraClient.executeWithFullFetch(any(SimpleStatement.class)))
-                .thenReturn(Future.succeededFuture(List.of()));
-        var captor = ArgumentCaptor.forClass(SimpleStatement.class);
+        var recorder = CassandraClientRecorder.record(cassandraClient);
 
         new CassandraObjectDeleter(cassandraClient, finder)
                 .deleteData(albums(), Map.of("not_a_column", "boom"));
 
-        verify(cassandraClient).executeWithFullFetch(captor.capture());
-
-        assertEquals("TRUNCATE music.albums", captor.getValue().getQuery());
+        assertEquals("TRUNCATE music.albums", recorder.query());
     }
 
     @Test
@@ -71,22 +61,17 @@ class CassandraObjectDeleterTest {
         // Stub the rows before the outer when(...), or Mockito sees nested stubbing.
         var rows = List.of(rowWith(FIRST_ALBUM), rowWith(SECOND_ALBUM));
         when(finder.findRows(any(), any())).thenReturn(Future.succeededFuture(rows));
-        when(cassandraClient.executeWithFullFetch(any(SimpleStatement.class)))
-                .thenReturn(Future.succeededFuture(List.of()));
-        var captor = ArgumentCaptor.forClass(SimpleStatement.class);
+        var recorder = CassandraClientRecorder.record(cassandraClient);
 
         var deleted = new CassandraObjectDeleter(cassandraClient, finder)
                 .deleteData(albums(), Map.of("artist", "Miles Davis"));
 
-        verify(cassandraClient, times(2)).executeWithFullFetch(captor.capture());
-
         assertAll(
                 () -> assertEquals(2, deleted.result()),
-                () -> assertTrue(captor.getAllValues().stream()
-                        .allMatch(statement -> "DELETE FROM music.albums WHERE album_id = ?"
-                                .equals(statement.getQuery()))),
-                () -> assertEquals(List.of(FIRST_ALBUM), captor.getAllValues().get(0).getPositionalValues()),
-                () -> assertEquals(List.of(SECOND_ALBUM), captor.getAllValues().get(1).getPositionalValues())
+                () -> assertTrue(recorder.queries().stream()
+                        .allMatch("DELETE FROM music.albums WHERE album_id = ?"::equals)),
+                () -> assertEquals(List.of(FIRST_ALBUM), recorder.allValues().getFirst()),
+                () -> assertEquals(List.of(SECOND_ALBUM), recorder.allValues().get(1))
         );
     }
 
@@ -99,7 +84,7 @@ class CassandraObjectDeleterTest {
 
         assertAll(
                 () -> assertEquals(0, deleted.result()),
-                () -> verify(cassandraClient, never()).executeWithFullFetch(any(SimpleStatement.class))
+                () -> verify(cassandraClient, never()).prepare(anyString())
         );
     }
 
@@ -113,26 +98,22 @@ class CassandraObjectDeleterTest {
 
         assertAll(
                 () -> assertEquals(0, deleted.result()),
-                () -> verify(cassandraClient, never()).executeWithFullFetch(any(SimpleStatement.class))
+                () -> verify(cassandraClient, never()).prepare(anyString())
         );
     }
 
     @Test
     void deleteByIdShouldRestrictByEveryColumnOfACompositePrimaryKey() {
         when(finder.existsByPrimaryKey(any(), any())).thenReturn(Future.succeededFuture(true));
-        when(cassandraClient.executeWithFullFetch(any(SimpleStatement.class)))
-                .thenReturn(Future.succeededFuture(List.of()));
-        var captor = ArgumentCaptor.forClass(SimpleStatement.class);
+        var recorder = CassandraClientRecorder.record(cassandraClient);
 
         var deleted = new CassandraObjectDeleter(cassandraClient, finder)
                 .deleteDataById(tracks(), Map.of("album_id", FIRST_ALBUM.toString(), "track_no", "2"));
 
-        verify(cassandraClient).executeWithFullFetch(captor.capture());
-
         assertAll(
                 () -> assertEquals("DELETE FROM music.tracks WHERE album_id = ? AND track_no = ?",
-                        captor.getValue().getQuery()),
-                () -> assertEquals(List.of(FIRST_ALBUM, 2), captor.getValue().getPositionalValues()),
+                        recorder.query()),
+                () -> assertEquals(List.of(FIRST_ALBUM, 2), recorder.values()),
                 () -> assertEquals(1, deleted.result())
         );
     }

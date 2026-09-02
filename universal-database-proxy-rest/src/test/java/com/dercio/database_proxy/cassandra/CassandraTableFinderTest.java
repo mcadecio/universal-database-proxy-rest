@@ -1,12 +1,10 @@
 package com.dercio.database_proxy.cassandra;
 
 import com.datastax.oss.driver.api.core.cql.Row;
-import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableRequest;
 import com.dercio.database_proxy.postgres.InconsistentStateException;
 import io.vertx.cassandra.CassandraClient;
-import io.vertx.core.Future;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -17,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,7 +29,7 @@ class CassandraTableFinderTest {
         stubSchema(List.of("tracks"), tracksColumns());
 
         var tables = new CassandraTableFinder(cassandraClient).findTables("music").result();
-        var columns = tables.get(0).getTableMetadata().getColumnNames();
+        var columns = tables.getFirst().getTableMetadata().getColumnNames();
 
         // duration_ms and title are regular columns, so they sort alphabetically after the key.
         assertEquals(List.of("album_id", "track_no", "duration_ms", "title"), columns);
@@ -41,7 +39,7 @@ class CassandraTableFinderTest {
     void shouldFlagPartitionAndClusteringColumnsAsThePrimaryKey() {
         stubSchema(List.of("tracks"), tracksColumns());
 
-        var table = new CassandraTableFinder(cassandraClient).findTables("music").result().get(0);
+        var table = new CassandraTableFinder(cassandraClient).findTables("music").result().getFirst();
 
         assertAll(
                 () -> assertEquals(List.of("album_id", "track_no"),
@@ -59,7 +57,7 @@ class CassandraTableFinderTest {
         stubSchema(List.of("tracks"), tracksColumns());
 
         var columns = new CassandraTableFinder(cassandraClient).findTables("music").result()
-                .get(0).getColumns();
+                .getFirst().getColumns();
 
         assertAll(
                 () -> assertEquals("string", openApiTypeOf(columns, "album_id")),
@@ -74,7 +72,7 @@ class CassandraTableFinderTest {
         stubSchema(List.of("tracks"), tracksColumns());
 
         var columns = new CassandraTableFinder(cassandraClient).findTables("music").result()
-                .get(0).getColumns();
+                .getFirst().getColumns();
 
         assertAll(
                 () -> assertFalse(columnNamed(columns, "album_id").isNullable()),
@@ -94,7 +92,7 @@ class CassandraTableFinderTest {
 
         assertAll(
                 () -> assertEquals(1, tables.size()),
-                () -> assertEquals("tracks", tables.get(0).getTableName())
+                () -> assertEquals("tracks", tables.getFirst().getTableName())
         );
     }
 
@@ -110,7 +108,7 @@ class CassandraTableFinderTest {
         assertAll(
                 () -> assertEquals("tracks", cached.result().getTableName()),
                 // Two statements for the first lookup (tables then columns) and none for the second.
-                () -> verify(cassandraClient, times(2)).executeWithFullFetch(any(SimpleStatement.class))
+                () -> verify(cassandraClient, times(2)).prepare(anyString())
         );
     }
 
@@ -130,9 +128,7 @@ class CassandraTableFinderTest {
     private void stubSchema(List<String> tableNames, List<Row> columns) {
         var tableRows = tableNames.stream().map(this::tableRow).toList();
 
-        when(cassandraClient.executeWithFullFetch(any(SimpleStatement.class)))
-                .thenReturn(Future.succeededFuture(tableRows))
-                .thenReturn(Future.succeededFuture(columns));
+        CassandraClientRecorder.recordSequence(cassandraClient, tableRows, columns);
     }
 
     private Row tableRow(String tableName) {

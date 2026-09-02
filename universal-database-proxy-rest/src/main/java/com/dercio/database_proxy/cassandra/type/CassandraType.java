@@ -25,18 +25,11 @@ import java.util.stream.Stream;
 
 /**
  * Maps CQL type names (as spelled in {@code system_schema.columns.type}) to OpenAPI types and to the
- * Java types the DataStax driver expects.
+ * Java types the DataStax driver expects. Unlike JDBC, the driver binds by <b>exact</b> Java type and
+ * rejects mismatches, so every value has to be converted here before it is bound.
  *
- * <p>Unlike JDBC, the DataStax driver binds values by <b>exact</b> Java type and rejects mismatches —
- * passing a {@code String} for a {@code uuid} column or an {@code Integer} for a {@code bigint} column
- * is an error, not a silent coercion. Every value therefore has to be converted here before it is
- * bound.
- *
- * <p>{@code set<T>} (and its {@code frozen<set<T>>} form) is handled separately from the enum, since
- * a parameterized type cannot be a constant — see {@link #setElementType(String)}. The remaining
- * collection types ({@code list<text>}, {@code map<text, text>}) and UDTs do not match any constant
- * and fall through to {@link #UNKNOWN}, which surfaces them as OpenAPI {@code ANY} and passes them
- * through untouched.
+ * <p>{@code set<T>} is handled outside the enum because a parameterized type cannot be a constant.
+ * Other collections and UDTs fall through to {@link #UNKNOWN} and are passed through untouched.
  */
 @RequiredArgsConstructor
 public enum CassandraType {
@@ -77,22 +70,14 @@ public enum CassandraType {
         return sanitizedValue == null ? null : (T) mapper.apply(sanitizedValue);
     }
 
-    /**
-     * Converts a JSON body value into the Java type the driver expects. Going via the string form
-     * keeps this uniform: every supported CQL type can be reconstructed from its text
-     * representation, and JSON only ever hands us strings, numbers and booleans.
-     */
+    /** Going via the string form is uniform: every supported CQL type parses back from its text. */
     public Object toSqlValue(Object value) {
         if (value == null) return null;
 
         return parse(String.valueOf(value));
     }
 
-    /**
-     * Converts a value read back from the driver into something {@code JsonObject} can encode.
-     * {@code UUID}, {@code LocalDate}, {@code LocalTime}, {@code InetAddress} and {@code ByteBuffer}
-     * have no JSON representation, so they are rendered as strings.
-     */
+    /** Driver types with no JSON representation are rendered as strings. */
     public Object toRowValue(Object value) {
         if (value == null) return null;
 
@@ -125,20 +110,14 @@ public enum CassandraType {
         return new OpenApiColumnType(toOpenApiType(type), toOpenApiItemsType(type));
     }
 
-    /**
-     * The OpenAPI type of the elements of an array column, or {@code null} for a scalar column.
-     * OpenAPI 3 requires {@code items} whenever {@code type} is {@code array}.
-     */
+    /** The element type of an array column, or {@code null} for a scalar one. */
     public static String toOpenApiItemsType(String type) {
         var elementType = setElementType(type);
 
         return elementType == null ? null : from(elementType).getOpenApiType();
     }
 
-    /**
-     * Parses a filter value supplied on the path or query string. For a set column this yields a
-     * single <b>element</b>, not a set, because set columns are filtered with {@code CONTAINS}.
-     */
+    /** For a set column this yields a single element, not a set, because sets filter with CONTAINS. */
     public static Object parse(String type, String value) {
         var elementType = setElementType(type);
 
@@ -149,10 +128,7 @@ public enum CassandraType {
         return setElementType(type) != null;
     }
 
-    /**
-     * Returns the element type of {@code set<T>} or {@code frozen<set<T>>}, or {@code null} when the
-     * type is not a set.
-     */
+    /** The element type of {@code set<T>} or {@code frozen<set<T>>}, or {@code null} otherwise. */
     public static String setElementType(String type) {
         if (type == null) {
             return null;
@@ -184,9 +160,6 @@ public enum CassandraType {
             return null;
         }
 
-        // The generated OpenAPI declares these columns as arrays, so a non-array body is already
-        // rejected with a 400 before reaching here. Treating a stray scalar as a single element
-        // keeps the driver from seeing a type it has no codec for.
         return elementsOf(value)
                 .stream()
                 .map(element -> toSqlValue(elementType, element))

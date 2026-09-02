@@ -44,12 +44,12 @@ public class CreateWheelSteps {
 
     @Then("I should get a link to the wheel")
     public void iShouldGetALinkToTheWheel() {
-        var wheel = wheels.get(0);
+        var wheel = wheels.getFirst();
         var expectedUrl = "http://localhost:8010/wheel/" + wheel.getWheelType();
         wheelsContext.getResponse().then()
                 .statusCode(201)
                 .header("Location", expectedUrl);
-        assertEquals(wheel, wheelsRepository.findByType(wheels.get(0).getWheelType().toString()));
+        assertEquals(wheel, wheelsRepository.findByType(wheels.getFirst().getWheelType().toString()));
     }
 
     @Given("the wheel I am trying to create already exists")
@@ -64,7 +64,7 @@ public class CreateWheelSteps {
 
     @When("I create the same wheel")
     public void iCreateTheSameWheel() {
-        wheelsContext.setResponse(wheelsService.createWheel(wheels.get(0)));
+        wheelsContext.setResponse(wheelsService.createWheel(wheels.getFirst()));
     }
 
     @Then("I should be alerted that a wheel with the same type already exists")

@@ -47,7 +47,7 @@ class ErrorFactoryTest {
                 () -> assertEquals(400, response.getCode()),
                 () -> assertEquals("Validation failed", response.getMessage()),
                 () -> assertEquals(2, response.getErrors().size()),
-                () -> assertEquals("name", response.getErrors().get(0).getFieldName())
+                () -> assertEquals("name", response.getErrors().getFirst().getFieldName())
         );
     }
 }

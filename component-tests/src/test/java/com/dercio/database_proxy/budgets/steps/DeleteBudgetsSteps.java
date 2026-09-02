@@ -1,8 +1,8 @@
 package com.dercio.database_proxy.budgets.steps;
 
-import com.dercio.database_proxy.budgets.BudgetsService;
 import com.dercio.database_proxy.budgets.Budget;
 import com.dercio.database_proxy.budgets.BudgetsRepository;
+import com.dercio.database_proxy.budgets.BudgetsService;
 import com.google.inject.Inject;
 import io.cucumber.guice.ScenarioScoped;
 import io.cucumber.java.en.Given;
@@ -18,7 +18,6 @@ import static com.dercio.database_proxy.budgets.BudgetsFactory.createJanuaryBudg
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ScenarioScoped
 public class DeleteBudgetsSteps {
@@ -49,14 +48,14 @@ public class DeleteBudgetsSteps {
 
     @When("I delete the budget")
     public void iDeleteTheBudget() {
-        response = budgetsService.deleteById(budgets.get(0).getId());
+        response = budgetsService.deleteById(budgets.getFirst().getId());
     }
 
     @Then("the budget should be deleted")
     public void theBudgetShouldBeDeleted() {
         response.then()
                 .statusCode(204);
-        assertNull(budgetsRepository.findById(budgets.get(0).getId()));
+        assertNull(budgetsRepository.findById(budgets.getFirst().getId()));
     }
 
     @When("I delete a budget that does not exist")
@@ -67,14 +66,6 @@ public class DeleteBudgetsSteps {
     @When("I delete the budgets by month {int}")
     public void iDeleteTheBudgetsByMonth(int month) {
         response = budgetsService.delete(Map.of("month", month));
-    }
-
-    @Then("bugdgets with month {int} should not exist")
-    public void budgetsWithMonthDoNotExist(int month) {
-        boolean result = budgetsRepository.find()
-                .stream()
-                .noneMatch(budget -> budget.getMonth().equals(month));
-        assertTrue(result);
     }
 
     @Then("I should be alerted that the budget does not exist")

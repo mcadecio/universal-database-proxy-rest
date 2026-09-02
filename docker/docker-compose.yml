@@ -33,8 +33,6 @@ services:
     ports:
       - "9042:9042"
     environment:
-      # A single node needs far less than the default heap, and Cassandra refuses to start on
-      # machines where the auto-sized heap exceeds what Docker allows it.
       MAX_HEAP_SIZE: 512M
       HEAP_NEWSIZE: 128M
       CASSANDRA_DC: datacenter1
@@ -44,8 +42,6 @@ services:
       timeout: 10s
       retries: 30
       start_period: 60s
-  # The Cassandra image has no /docker-entrypoint-initdb.d, so seeding is a one-shot companion
-  # container that waits for the healthcheck and pipes the schema through cqlsh.
   cassandra-init:
     image: cassandra:5.0
     depends_on:
@@ -55,24 +51,25 @@ services:
       - ./init-cassandra.cql:/init.cql
     command: cqlsh cassandra -f /init.cql
     restart: on-failure
-  database-proxy:
-    environment:
-      POSTGRES_PASSWORD: admin
-      CRB_PASSWORD:
-      CASSANDRA_PASSWORD: cassandra
-    image: mcadecio/universal-database-proxy-rest:1.0.3
-    depends_on:
-      postgres:
-        condition: service_healthy
-      crdb:
-        condition: service_healthy
-      cassandra:
-        condition: service_healthy
-    ports:
-      - "1234:1234"
-      - "5433:5433"
-      - "8000:8000"
-      - "8010:8010"
-      - "8020:8020"
-    volumes:
-      - ./config.json:/usr/database-proxy/config.json
+#  database-proxy:
+#    environment:
+#      POSTGRES_HOSTS: postgres:5432
+#      POSTGRES_PASSWORD: admin
+#      CRB_HOSTS: crdb:26257
+#      CRB_PASSWORD:
+#      CASSANDRA_HOSTS: cassandra:9042
+#      CASSANDRA_PASSWORD: cassandra
+#    image: mcadecio/universal-database-proxy-rest:1.0.3
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#      crdb:
+#        condition: service_healthy
+#      cassandra:
+#        condition: service_healthy
+#    ports:
+#      - "8000:8000"
+#      - "8010:8010"
+#      - "8020:8020"
+#    volumes:
+#      - ./config.json:/usr/database-proxy/config.json

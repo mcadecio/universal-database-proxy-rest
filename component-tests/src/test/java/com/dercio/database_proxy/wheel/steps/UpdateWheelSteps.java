@@ -42,7 +42,7 @@ public class UpdateWheelSteps {
 
     @When("I update the wheel with no value")
     public void iUpdateTheWheelWithNoValue() {
-        var existingWheel = wheels.get(0);
+        var existingWheel = wheels.getFirst();
 
         wheelsContext.setResponse(wheelsService.updateWheel(existingWheel.getWheelType().toString(), null));
     }

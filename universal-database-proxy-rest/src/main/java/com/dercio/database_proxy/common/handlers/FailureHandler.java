@@ -29,30 +29,26 @@ import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 @Log4j2
-@RequiredArgsConstructor(onConstructor_ = {@Inject})
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class FailureHandler implements Handler<RoutingContext> {
-
     private final Mapper mapper;
     private final ErrorFactory errorFactory;
-    // Lookup is by exact class - there is no walk up the hierarchy - so every driver exception type
-    // that should not surface as a 500 needs its own entry here.
     private final Map<Class<? extends Throwable>, BiFunction<Throwable, HttpServerRequest, ErrorResponse>>
-            exceptionMapper = Map.ofEntries(
-            Map.entry(BodyProcessorException.class, this::handleBodyProcessorException),
-            Map.entry(ParameterProcessorException.class, this::handleParameterProcessorException),
-            Map.entry(PSQLException.class, this::handleDatabaseException),
-            Map.entry(InvalidQueryException.class, this::handleDatabaseException),
-            Map.entry(SyntaxError.class, this::handleDatabaseException),
-            Map.entry(InconsistentStateException.class, this::handleInconsistentStateException),
-            Map.entry(IllegalStateException.class, this::handleIllegalStateException),
-            Map.entry(DateTimeParseException.class, this::handleDateTimeParseException),
-            Map.entry(NoStackTraceThrowable.class, this::handleNoStackTraceThrowable)
+            exceptionMapper = Map.of(
+            BodyProcessorException.class, this::handleBodyProcessorException,
+            ParameterProcessorException.class, this::handleParameterProcessorException,
+            PSQLException.class, this::handleDatabaseException,
+            InvalidQueryException.class, this::handleDatabaseException,
+            SyntaxError.class, this::handleDatabaseException,
+            InconsistentStateException.class, this::handleInconsistentStateException,
+            IllegalStateException.class, this::handleIllegalStateException,
+            DateTimeParseException.class, this::handleDateTimeParseException,
+            NoStackTraceThrowable.class, this::handleNoStackTraceThrowable
     );
 
     @SneakyThrows
     @Override
     public void handle(RoutingContext event) {
-
         log.error("Error: {}", event.failure().getMessage());
 
         var error = exceptionMapper.getOrDefault(event.failure().getClass(), this::handleException)
@@ -91,10 +87,6 @@ public class FailureHandler implements Handler<RoutingContext> {
         return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
     }
 
-    /**
-     * The scope is a JSON pointer, so an element of an array column arrives as {@code /ratings/0}.
-     * Dots read far better than running the segments together into {@code ratings0}.
-     */
     private String propertyNameOf(ValidationException validationException) {
         var property = validationException.inputScope()
                 .toString()

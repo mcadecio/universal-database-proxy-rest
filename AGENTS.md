@@ -8,8 +8,7 @@ build/test commands or module layout change.
 **Universal Database Proxy REST** turns a relational database into a REST API. At startup it
 introspects the configured database's schema (tables, columns, primary keys), generates an
 OpenAPI 3 spec, and serves auto-generated CRUD endpoints (`GET`/`POST`/`PUT`/`DELETE`) for each
-table — no per-table code required. It can also act as a raw TCP proxy between a client and a
-database server.
+table — no per-table code required.
 
 Supported databases: **PostgreSQL**, **CockroachDB** and **Apache Cassandra**. Cockroach is spoken
 to over the Postgres wire protocol, so both share the `postgres` code. Cassandra is not relational
@@ -27,7 +26,7 @@ This is a Maven reactor with three modules (see root `pom.xml`):
 | Module | Path | Purpose |
 | --- | --- | --- |
 | `common` | `common/` | Shared building blocks (config binding, JSON `Mapper`, Guice helpers). |
-| `universal-database-proxy-rest` | `universal-database-proxy-rest/` | The application: schema introspection, OpenAPI generation, REST handlers, DB access, proxy. |
+| `universal-database-proxy-rest` | `universal-database-proxy-rest/` | The application: schema introspection, OpenAPI generation, REST handlers, DB access. |
 | `component-tests` | `component-tests/` | Cucumber end-to-end tests that drive a **running** proxy against live databases. |
 
 Key packages in the main module (`universal-database-proxy-rest/src/main/java/com/dercio/database_proxy/`):
@@ -36,7 +35,6 @@ Key packages in the main module (`universal-database-proxy-rest/src/main/java/co
 - `cassandra/` — the same roles for CQL, over `vertx-cassandra-client` (DataStax driver) instead of the JDBC client: `CassandraTableFinder`, `CassandraObjectFinder`/`CassandraObjectInserter`/`CassandraObjectDeleter`, `CassandraTableMetadata`, `type/CassandraType`.
 - `openapi/` — builds the OpenAPI document from `TableMetadata`.
 - `common/database/` — `TableMetadata`, `ColumnMetadata`, `Repository` interface, `TableRequest`.
-- `proxy/` — raw TCP proxy verticle.
 
 ## Build
 
@@ -47,7 +45,16 @@ mvn clean package            # builds all modules + the runnable fat jar
 The runnable artifact is `universal-database-proxy-rest/target/universal-database-proxy-rest-*-fat.jar`
 (the version is derived from git tags via jgitver, so don't hardcode it).
 
-CI (`.github/workflows/maven.yml`) runs `mvn -B package` on JDK 25.
+CI on JDK 25 (`.github/workflows/`):
+- `maven.yml` — `mvn -B package` (unit tests) on push/PR to `master`.
+- `functional-tests.yml` — starts the databases with compose, seeds Cassandra, runs the fat jar, then
+  runs the Cucumber suite. Same flow as the manual steps below.
+- `publish-docker.yml` — pushes `mcadecio/universal-database-proxy-rest`; `:latest` on master, plus
+  `:<version>` on a `v*` tag. Needs the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets.
+
+All three check out with `fetch-depth: 0` because jgitver derives the version from git tags. The
+publish workflow must `clean` first: the Dockerfile copies a single `*-fat.jar` and fails if a stale
+jar from another version is present.
 
 ## Run the application
 
@@ -57,13 +64,15 @@ java -jar -Dproject.config=cfg/config.json target/universal-database-proxy-rest-
 ```
 
 `-Dproject.config` points at a JSON config (schema: `cfg/config.schema.json`). Each of
-`postgresApi` / `cockroachApi` / `cassandraApi` / `proxy` can be independently enabled. Every one of
+`postgresApi` / `cockroachApi` / `cassandraApi` can be independently enabled. Every one of
 those keys must be **present** in the config file even when disabled — `ConfigurationBinder` only
 logs a missing key and binds nothing, which later surfaces as an opaque Guice `ProvisionException`
 at deploy time. Config string values for
-`host`/`username`/`password`/`databaseName` are resolved as **environment-variable names first,
-falling back to the literal string** — e.g. `"password": "POSTGRES_PASSWORD"` reads
-`$POSTGRES_PASSWORD`. See `readme.MD` for the full field-by-field walkthrough.
+`hosts`/`host`/`username`/`password`/`databaseName` are resolved as **environment-variable names
+first, falling back to the literal string** — e.g. `"password": "POSTGRES_PASSWORD"` reads
+`$POSTGRES_PASSWORD`. Database endpoints are a `hosts` list of `host:port` (a single `host` + `port`
+still works as a fallback); a `hosts` entry may itself expand to a comma separated list, which is how
+one config file serves both compose and host runs. See `readme.MD` for the full walkthrough.
 
 ## Tests
 
@@ -126,13 +135,14 @@ for Cassandra, which has no JDBC driver and so seeds through the DataStax `CqlSe
    container that already has the keyspace. Either `docker compose down -v` first, or
    `cqlsh -e "DROP KEYSPACE music"` and re-run it.
 
-2. Build the fat jar (`mvn clean package`) and run the proxy against the containers. The checked-in
-   `docker/config.json` uses docker hostnames (`postgres`/`crdb`) and only works from inside the
-   compose network; to run the jar on the **host**, use `docker/config.localhost.json` (same file
-   with `host: localhost` and the published ports). Then:
+2. Build the fat jar (`mvn clean package`) and run the API against the containers. `docker/config.json`
+   takes its endpoints from environment variables, so the same file works inside compose and on the
+   host — only the exported values differ:
    ```bash
-   POSTGRES_PASSWORD=admin CRB_PASSWORD= CASSANDRA_PASSWORD=cassandra \
-     java -jar -Dproject.config=docker/config.localhost.json \
+   POSTGRES_HOSTS=localhost:5432 POSTGRES_PASSWORD=admin \
+   CRB_HOSTS=localhost:26257 CRB_PASSWORD= \
+   CASSANDRA_HOSTS=localhost:9042 CASSANDRA_PASSWORD=cassandra \
+     java -jar -Dproject.config=docker/config.json \
      universal-database-proxy-rest/target/universal-database-proxy-rest-*-fat.jar
    ```
    Wait until `curl -sf localhost:8000/budgets`, `curl -sf localhost:8010/cars` and
@@ -163,7 +173,7 @@ outside. Don't "simplify" them away.
 | `information_schema` introspection | `system_schema.tables` + `system_schema.columns`; materialized views are filtered out because they cannot be written through | `CassandraTableFinder` |
 | `INSERT ... RETURNING pk` for the `Location` header | No `RETURNING`; the id is rebuilt from the primary key values in the request body | `CassandraObjectInserter.create` |
 | `rowCount()` decides 204 vs 404 | Writes report no row count **and `INSERT` is an upsert**, so `PUT`/`DELETE` do a read-before-write; without it a `PUT` on a missing row would silently create it | `CassandraObjectFinder.existsByPrimaryKey` |
-| `WHERE any_column = ?` | Needs `ALLOW FILTERING` unless the whole partition key is restricted and the clustering columns form a contiguous prefix. Gated by the `allowFiltering` config flag (default `true`); when off, such a query is a 400 | `CassandraTableMetadata.requiresAllowFiltering` |
+| `WHERE any_column = ?` | Needs `ALLOW FILTERING` unless the whole partition key is restricted and the clustering columns form a contiguous prefix. Gated by the `allowFiltering` config flag (default **`false`**); when off, such a query is a 400 | `CassandraTableMetadata.requiresAllowFiltering` |
 | `DELETE FROM t` with no `WHERE` | Rejected by CQL, so a collection delete becomes `TRUNCATE`. It reports no count, so **`DELETE /table` always answers 204** — an already-empty table is not a 404 here. A *filtered* delete selects the matching rows then deletes each by primary key | `CassandraObjectDeleter` |
 
 Three further traps:
@@ -179,6 +189,7 @@ Three further traps:
   binds one *element* rather than a set and always requires `ALLOW FILTERING`. Their query parameter
   is therefore declared as a scalar of the element type — an array-typed query parameter would also
   break `RestApiHandler`, which flattens the query string to one value per name.
+- **`localDatacenter` is mandatory.** Startup fails without it rather than guessing `datacenter1`.
 - **Tables whose columns are all part of the primary key** have nothing to `SET`, and CQL cannot
   assign a key column to itself the way `PgObjectInserter` does. The update issues no statement at
   all and answers from the existence check (`music.genres` covers this).
@@ -188,9 +199,7 @@ Three further traps:
 see the trap above); a set of an unsupported element type becomes an array of `ANY`; updating a set
 replaces it wholesale rather than supporting CQL's `+`/`-` append and remove; no counter columns, TTL
 or consistency-level tuning; no materialized views; the filter planner is not aware of secondary or
-collection indexes, so an indexed column still gets `ALLOW FILTERING`. Statements are built as
-`SimpleStatement`s rather than prepared statements — correct and injection-safe (values are always
-bound), but it forgoes server-side plan caching and token-aware routing.
+collection indexes, so an indexed column still gets `ALLOW FILTERING`.
 
 ## Conventions & gotchas
 

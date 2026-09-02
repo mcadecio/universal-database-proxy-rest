@@ -1,4 +1,4 @@
-See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # server
 **/.idea/
@@ -8,6 +8,9 @@ See https://help.github.com/articles/ignoring-files/ for more about ignoring fil
 **/**.log
 **/**.log.**
 **/dependency-reduced-pom.xml
+
+# Generated at runtime by RouterFactory
+**/*OpenApi.yaml
 
 ## Front end
 # testing

@@ -9,12 +9,7 @@ import org.apache.ibatis.io.Resources;
 
 import java.net.InetSocketAddress;
 
-/**
- * Unlike the Postgres and Cockroach suites there is no MyBatis module to isolate here — Cassandra has
- * no JDBC driver — so this is a plain module rather than a {@code PrivateModule}.
- */
 public class CassandraTestModule extends AbstractModule {
-
     @Provides
     @Singleton
     @SneakyThrows

@@ -43,7 +43,7 @@ public class DeleteFootballTeamSteps {
 
     @When("I delete the national football team")
     public void iDeleteTheNationalFootballTeam() {
-        footballTeamContext.setResponse(footballTeamService.deleteFootballTeam(footballTeams.get(0).getName()));
+        footballTeamContext.setResponse(footballTeamService.deleteFootballTeam(footballTeams.getFirst().getName()));
     }
 
     @Then("the national football team should be deleted")
@@ -51,7 +51,7 @@ public class DeleteFootballTeamSteps {
         var response = footballTeamContext.getResponse();
         response.then()
                 .statusCode(204);
-        assertNull(footballTeamsRepository.findTeamByName(footballTeams.get(0).getName()));
+        assertNull(footballTeamsRepository.findTeamByName(footballTeams.getFirst().getName()));
     }
 
     @When("I delete a national football team that does not exist")

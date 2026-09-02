@@ -46,12 +46,12 @@ public class CreateFootballTeamSteps {
 
     @Then("I should get a link to the national football team")
     public void iShouldGetALinkToTheNationalFootballTeam() {
-        var nationalFootballTeam = footballTeams.get(0);
+        var nationalFootballTeam = footballTeams.getFirst();
         var expectedUrl = "http://localhost:8000/national_football_teams/" + nationalFootballTeam.getName();
         response.then()
                 .statusCode(201)
                 .header("Location", expectedUrl);
-        assertEquals(nationalFootballTeam, footballTeamsRepository.findTeamByName(footballTeams.get(0).getName()));
+        assertEquals(nationalFootballTeam, footballTeamsRepository.findTeamByName(footballTeams.getFirst().getName()));
     }
 
     @When("I create a national football team with the required fields")
@@ -70,7 +70,7 @@ public class CreateFootballTeamSteps {
 
     @When("I create the same national football team")
     public void iCreateTheSameNationalFootballTeam() {
-        response = footballTeamService.createFootballTeam(footballTeams.get(0));
+        response = footballTeamService.createFootballTeam(footballTeams.getFirst());
     }
 
     @Then("I should be alerted that a national football with the same name already exists")

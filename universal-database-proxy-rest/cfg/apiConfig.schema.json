@@ -54,7 +54,7 @@
     },
     "allowFiltering": {
       "type": "boolean",
-      "description": "Cassandra only. Allows queries that filter on columns the primary key cannot satisfy, which requires a cluster-wide scan. Defaults to true; set to false to reject such queries with a 400 instead.",
+      "description": "Cassandra only. Allows queries that filter on columns the primary key cannot satisfy, which requires a cluster-wide scan. Defaults to false, so such queries are rejected with a 400.",
       "examples": [
         true,
         false
@@ -63,16 +63,47 @@
     "database": {
       "type": "object",
       "required": [
-        "host",
-        "port",
         "username",
         "password",
         "databaseName"
       ],
+      "anyOf": [
+        {
+          "required": [
+            "hosts"
+          ]
+        },
+        {
+          "required": [
+            "host",
+            "port"
+          ]
+        }
+      ],
       "properties": {
+        "hosts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "The database endpoints in host:port form. Each entry may instead be the name of an ENVIRONMENT VARIABLE, which may itself hold a comma separated list. Takes precedence over 'host' and 'port'.",
+          "examples": [
+            [
+              "localhost:5432"
+            ],
+            [
+              "db-1:5432",
+              "db-2:5432"
+            ],
+            [
+              "POSTGRES_HOSTS"
+            ]
+          ]
+        },
         "host": {
           "type": "string",
-          "description": "The host name of the database",
+          "description": "Single host of the database. Superseded by 'hosts'. This can be the host in plain text or the name of an ENVIRONMENT VARIABLE.",
           "examples": [
             "localhost",
             "0.0.0.0",
@@ -81,11 +112,12 @@
         },
         "port": {
           "type": "integer",
-          "description": "The port where the databse is listening for connection.",
+          "description": "The port the database is listening for connections on. Used together with 'host'.",
           "examples": [
             8080,
             26257,
-            5432
+            5432,
+            9042
           ]
         },
         "username": {
@@ -106,9 +138,21 @@
         },
         "localDatacenter": {
           "type": "string",
-          "description": "Cassandra only. The local datacenter the driver should route to. Defaults to 'datacenter1'.",
+          "description": "Cassandra only, and required there: the local datacenter the driver routes to. Startup fails without it.",
           "examples": [
             "datacenter1"
+          ]
+        },
+        "jdbcUrl": {
+          "type": "string",
+          "description": "Postgres and Cockroach only. Used verbatim when set, bypassing 'hosts', 'host' and 'port'."
+        },
+        "targetServerType": {
+          "type": "string",
+          "description": "Postgres and Cockroach only. Appended to the generated JDBC url.",
+          "examples": [
+            "primary",
+            "any"
           ]
         },
         "sslEnabled": {

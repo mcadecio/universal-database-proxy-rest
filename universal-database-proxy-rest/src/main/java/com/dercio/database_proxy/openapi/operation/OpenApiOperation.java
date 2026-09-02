@@ -29,7 +29,6 @@ import static com.simplaex.http.StatusCode.*;
 
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class OpenApiOperation {
-
     private static final String AUTO_GENERATED = "Auto Generated";
     private static final String ERROR_RESPONSE_SCHEMA_REF = "ErrorResponse";
 
@@ -108,19 +107,12 @@ public abstract class OpenApiOperation {
         ObjectSchema schema = new ObjectSchema();
         schema.type(OpenApiType.ARRAY);
         schema.nullable(column.isNullable());
-        // OpenAPI 3 requires "items" whenever "type" is "array" - a spec that omits it fails
-        // validation when the router loads the generated file.
         schema.items(scalarSchema(column.getOpenApiItemsType(), false));
-        // The only array columns are CQL sets, whose elements are unique by definition.
         schema.uniqueItems(true);
 
         return schema;
     }
 
-    /**
-     * Set columns are filtered by membership (CQL {@code CONTAINS}), so their query parameter carries
-     * a single element rather than a whole set.
-     */
     protected Schema<Object> queryParameterSchemaFromColumn(ColumnMetadata column) {
         if (OpenApiType.ARRAY.equals(column.getOpenApiType())) {
             return scalarSchema(column.getOpenApiItemsType(), column.isNullable());

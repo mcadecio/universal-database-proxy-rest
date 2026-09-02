@@ -24,11 +24,6 @@ public class CassandraApiConfig implements ApiConfig {
     private long startupDelay;
     private long reloadFrequency;
 
-    /**
-     * CQL rejects a {@code WHERE} on anything the primary key cannot satisfy unless
-     * {@code ALLOW FILTERING} is appended, which triggers a cluster-wide scan. Left on by default so
-     * filtering behaves like the Postgres API; set to {@code false} on a production cluster to get a
-     * 400 instead of a scan.
-     */
-    private boolean allowFiltering = true;
+    /** Permits filters the primary key cannot satisfy, which CQL only serves with a cluster-wide scan. */
+    private boolean allowFiltering;
 }

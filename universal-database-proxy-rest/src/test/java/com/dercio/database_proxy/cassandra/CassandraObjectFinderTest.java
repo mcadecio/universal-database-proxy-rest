@@ -1,17 +1,14 @@
 package com.dercio.database_proxy.cassandra;
 
 import com.datastax.oss.driver.api.core.cql.Row;
-import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.dercio.database_proxy.cassandra.type.CassandraType;
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
 import com.dercio.database_proxy.postgres.InconsistentStateException;
 import io.vertx.cassandra.CassandraClient;
-import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -21,7 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,74 +31,75 @@ class CassandraObjectFinderTest {
 
     @Test
     void shouldSelectEveryRowWhenThereAreNoFilters() {
-        var statement = captureStatementFor(Map.of(), true);
+        var recorder = captureStatementFor(Map.of(), true);
 
         assertAll(
-                () -> assertEquals("SELECT * FROM music.albums", statement.getQuery()),
-                () -> assertTrue(statement.getPositionalValues().isEmpty())
+                () -> assertEquals("SELECT * FROM music.albums", recorder.query()),
+                () -> assertTrue(recorder.values().isEmpty())
         );
     }
 
     @Test
     void shouldNotUseAllowFilteringWhenTheFilterIsSatisfiedByTheKey() {
-        var statement = captureStatementFor(Map.of("album_id", ALBUM_ID.toString()), true);
+        var recorder = captureStatementFor(Map.of("album_id", ALBUM_ID.toString()), true);
 
         assertAll(
-                () -> assertEquals("SELECT * FROM music.albums WHERE album_id = ?", statement.getQuery()),
-                () -> assertFalse(statement.getQuery().contains("ALLOW FILTERING")),
-                () -> assertEquals(1, statement.getPositionalValues().size()),
-                () -> assertEquals(ALBUM_ID, statement.getPositionalValues().get(0)),
-                () -> assertInstanceOf(UUID.class, statement.getPositionalValues().get(0))
+                () -> assertEquals("SELECT * FROM music.albums WHERE album_id = ?", recorder.query()),
+                () -> assertFalse(recorder.query().contains("ALLOW FILTERING")),
+                () -> assertEquals(1, recorder.values().size()),
+                () -> assertEquals(ALBUM_ID, recorder.values().getFirst()),
+                () -> assertInstanceOf(UUID.class, recorder.values().getFirst())
         );
     }
 
     @Test
     void shouldAppendAllowFilteringForANonKeyColumn() {
-        var statement = captureStatementFor(Map.of("artist", "Miles Davis"), true);
+        var recorder = captureStatementFor(Map.of("artist", "Miles Davis"), true);
 
         assertAll(
-                () -> assertEquals("SELECT * FROM music.albums WHERE artist = ? ALLOW FILTERING", statement.getQuery()),
-                () -> assertEquals(List.of("Miles Davis"), statement.getPositionalValues())
+                () -> assertEquals("SELECT * FROM music.albums WHERE artist = ? ALLOW FILTERING", recorder.query()),
+                () -> assertEquals(List.of("Miles Davis"), recorder.values())
         );
     }
 
     @Test
     void shouldFilterSetColumnsByMembershipRatherThanEquality() {
         // Equality would require the caller to spell out the whole set in the query string.
-        var statement = captureStatementFor(Map.of("tags", "jazz"), true);
+        var recorder = captureStatementFor(Map.of("tags", "jazz"), true);
 
         assertAll(
                 () -> assertEquals("SELECT * FROM music.albums WHERE tags CONTAINS ? ALLOW FILTERING",
-                        statement.getQuery()),
+                        recorder.query()),
                 // CONTAINS binds one element, not a set.
-                () -> assertEquals(List.of("jazz"), statement.getPositionalValues())
+                () -> assertEquals(List.of("jazz"), recorder.values())
         );
     }
 
     @Test
     void shouldFilterSetElementsAsTheirDriverType() {
-        var statement = captureStatementFor(Map.of("ratings", "5"), true);
+        var recorder = captureStatementFor(Map.of("ratings", "5"), true);
 
         assertAll(
                 () -> assertEquals("SELECT * FROM music.albums WHERE ratings CONTAINS ? ALLOW FILTERING",
-                        statement.getQuery()),
-                () -> assertEquals(List.of(5), statement.getPositionalValues()),
-                () -> assertInstanceOf(Integer.class, statement.getPositionalValues().get(0))
+                        recorder.query()),
+                () -> assertEquals(List.of(5), recorder.values()),
+                () -> assertInstanceOf(Integer.class, recorder.values().getFirst())
         );
     }
 
     @Test
     void shouldCombineASetMembershipFilterWithAKeyRestriction() {
-        var statement = captureStatementFor(new LinkedHashMap<>(Map.of(
-                "album_id", ALBUM_ID.toString(),
-                "tags", "jazz"
-        )), true);
+        var filters = new LinkedHashMap<String, String>();
+        filters.put("album_id", ALBUM_ID.toString());
+        filters.put("tags", "jazz");
+
+        var recorder = captureStatementFor(filters, true);
 
         assertAll(
                 () -> assertEquals(
                         "SELECT * FROM music.albums WHERE album_id = ? AND tags CONTAINS ? ALLOW FILTERING",
-                        statement.getQuery()),
-                () -> assertEquals(List.of(ALBUM_ID, "jazz"), statement.getPositionalValues())
+                        recorder.query()),
+                () -> assertEquals(List.of(ALBUM_ID, "jazz"), recorder.values())
         );
     }
 
@@ -113,7 +111,7 @@ class CassandraObjectFinderTest {
         assertAll(
                 () -> assertTrue(result.failed()),
                 () -> assertInstanceOf(InconsistentStateException.class, result.cause()),
-                () -> verify(cassandraClient, never()).executeWithFullFetch(any(SimpleStatement.class))
+                () -> verify(cassandraClient, never()).prepare(anyString())
         );
     }
 
@@ -127,45 +125,40 @@ class CassandraObjectFinderTest {
                 () -> assertTrue(result.failed()),
                 () -> assertInstanceOf(InconsistentStateException.class, result.cause()),
                 () -> assertTrue(result.cause().getMessage().contains("music.albums")),
-                () -> verify(cassandraClient, never()).executeWithFullFetch(any(SimpleStatement.class))
+                () -> verify(cassandraClient, never()).prepare(anyString())
         );
     }
 
     @Test
     void shouldDropFilterNamesThatAreNotRealColumns() {
         // The whitelist is what keeps caller-supplied names out of the generated CQL.
-        var statement = captureStatementFor(Map.of("definitely_not_a_column", "boom"), true);
+        var recorder = captureStatementFor(Map.of("definitely_not_a_column", "boom"), true);
 
         assertAll(
-                () -> assertEquals("SELECT * FROM music.albums", statement.getQuery()),
-                () -> assertTrue(statement.getPositionalValues().isEmpty())
+                () -> assertEquals("SELECT * FROM music.albums", recorder.query()),
+                () -> assertTrue(recorder.values().isEmpty())
         );
     }
 
     @Test
     void shouldCheckExistenceWithASinglePartitionReadOfThePrimaryKey() {
-        when(cassandraClient.executeWithFullFetch(any(SimpleStatement.class)))
-                .thenReturn(Future.succeededFuture(List.of()));
-        var captor = ArgumentCaptor.forClass(SimpleStatement.class);
+        var recorder = CassandraClientRecorder.record(cassandraClient);
 
         var exists = new CassandraObjectFinder(cassandraClient, true)
                 .existsByPrimaryKey(albums(), Map.of("album_id", ALBUM_ID.toString()));
 
-        verify(cassandraClient).executeWithFullFetch(captor.capture());
-
         assertAll(
                 () -> assertEquals("SELECT album_id FROM music.albums WHERE album_id = ? LIMIT 1",
-                        captor.getValue().getQuery()),
-                () -> assertFalse(captor.getValue().getQuery().contains("ALLOW FILTERING")),
-                () -> assertEquals(List.of(ALBUM_ID), captor.getValue().getPositionalValues()),
+                        recorder.query()),
+                () -> assertFalse(recorder.query().contains("ALLOW FILTERING")),
+                () -> assertEquals(List.of(ALBUM_ID), recorder.values()),
                 () -> assertEquals(Boolean.FALSE, exists.result())
         );
     }
 
     @Test
     void shouldReportExistenceWhenTheReadReturnsARow() {
-        when(cassandraClient.executeWithFullFetch(any(SimpleStatement.class)))
-                .thenReturn(Future.succeededFuture(List.of(mock(Row.class))));
+        CassandraClientRecorder.record(cassandraClient, List.of(mock(Row.class)));
 
         var exists = new CassandraObjectFinder(cassandraClient, true)
                 .existsByPrimaryKey(albums(), Map.of("album_id", ALBUM_ID.toString()));
@@ -173,16 +166,12 @@ class CassandraObjectFinderTest {
         assertEquals(Boolean.TRUE, exists.result());
     }
 
-    private SimpleStatement captureStatementFor(Map<String, String> filters, boolean allowFiltering) {
-        when(cassandraClient.executeWithFullFetch(any(SimpleStatement.class)))
-                .thenReturn(Future.succeededFuture(List.of()));
-        var captor = ArgumentCaptor.forClass(SimpleStatement.class);
+    private CassandraClientRecorder captureStatementFor(Map<String, String> filters, boolean allowFiltering) {
+        var recorder = CassandraClientRecorder.record(cassandraClient);
 
         new CassandraObjectFinder(cassandraClient, allowFiltering).find(albums(), filters);
 
-        verify(cassandraClient).executeWithFullFetch(captor.capture());
-
-        return captor.getValue();
+        return recorder;
     }
 
     private CassandraTableMetadata albums() {
