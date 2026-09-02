@@ -3,6 +3,7 @@ package com.dercio.database_proxy.openapi;
 import com.dercio.database_proxy.common.database.ColumnMetadata;
 import com.dercio.database_proxy.common.database.TableMetadata;
 import com.dercio.database_proxy.openapi.operation.*;
+import com.dercio.database_proxy.postgres.type.PgType;
 import io.swagger.v3.core.util.Json;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,7 +76,7 @@ class OpenApiCreatorTest {
         var columns = rawMetadata.getJsonArray("columns")
                 .stream()
                 .map(JsonObject.class::cast)
-                .map(ColumnMetadata::new)
+                .map(json -> new ColumnMetadata(json, PgType::toOpenApiColumnType))
                 .toList();
         return new TableMetadata(
                 rawMetadata.getString("databaseName"),

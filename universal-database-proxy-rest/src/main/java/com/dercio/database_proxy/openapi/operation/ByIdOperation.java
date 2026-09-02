@@ -9,7 +9,6 @@ import java.time.Clock;
 import java.util.List;
 
 public abstract class ByIdOperation extends OpenApiOperation {
-
     protected ByIdOperation(Clock clock) {
         super(clock);
     }
@@ -19,8 +18,14 @@ public abstract class ByIdOperation extends OpenApiOperation {
         return tableMetadata.getColumns()
                 .stream()
                 .filter(ColumnMetadata::isPrimaryKey)
-                .map(column -> createParameter(true, column.getColumnName(), column.getOpenApiType()))
+                .map(column -> createParameter(true, column.getColumnName(), pathParameterType(column)))
                 .toList();
+    }
+
+    private String pathParameterType(ColumnMetadata column) {
+        return column.getOpenApiItemsType() == null
+                ? column.getOpenApiType()
+                : column.getOpenApiItemsType();
     }
 
     private Parameter createParameter(boolean isPathParameter, String name, String type) {

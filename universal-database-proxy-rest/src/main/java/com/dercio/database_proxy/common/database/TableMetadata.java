@@ -28,9 +28,9 @@ public class TableMetadata {
     }
 
     public List<ColumnMetadata> getColumns() {
-        List<ColumnMetadata> columnsCopy = new ArrayList<>(getNonPrimaryKeyColumns());
-        columnsCopy.add(0, primaryKeyColumn);
-        return columnsCopy;
+        List<ColumnMetadata> orderedColumns = new ArrayList<>(getPrimaryKeyColumns());
+        orderedColumns.addAll(getNonPrimaryKeyColumns());
+        return orderedColumns;
     }
 
     public List<String> getColumnNames() {
@@ -43,7 +43,7 @@ public class TableMetadata {
     public List<ColumnMetadata> getNonPrimaryKeyColumns() {
         return columns
                 .stream()
-                .filter(column -> !column.getColumnName().equals(getPkColumnName()))
+                .filter(column -> !column.isPrimaryKey())
                 .toList();
     }
 
@@ -74,7 +74,7 @@ public class TableMetadata {
                 .filter(ColumnMetadata::isPrimaryKey)
                 .findFirst()
                 .orElseGet(() -> {
-                    var column = columns.get(0);
+                    var column = columns.getFirst();
                     column.setPrimaryKey(true);
 
                     log.debug("Table [{}] does not have a PK. Using [{}] column as PK",

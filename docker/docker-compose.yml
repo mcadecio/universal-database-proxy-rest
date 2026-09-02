@@ -28,20 +28,48 @@ services:
       interval: 1s
       timeout: 3s
       retries: 5
-  database-proxy:
-    environment:
-      POSTGRES_PASSWORD: admin
-      CRB_PASSWORD:
-    image: mcadecio/universal-database-proxy-rest:1.0.3
-    depends_on:
-      postgres:
-        condition: service_healthy
-      crdb:
-        condition: service_healthy
+  cassandra:
+    image: cassandra:5.0
     ports:
-      - "1234:1234"
-      - "5433:5433"
-      - "8000:8000"
-      - "8010:8010"
+      - "9042:9042"
+    environment:
+      MAX_HEAP_SIZE: 512M
+      HEAP_NEWSIZE: 128M
+      CASSANDRA_DC: datacenter1
+    healthcheck:
+      test: [ "CMD-SHELL", "cqlsh -e 'describe keyspaces' || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+  cassandra-init:
+    image: cassandra:5.0
+    depends_on:
+      cassandra:
+        condition: service_healthy
     volumes:
-      - ./config.json:/usr/database-proxy/config.json
+      - ./init-cassandra.cql:/init.cql
+    command: cqlsh cassandra -f /init.cql
+    restart: on-failure
+#  database-proxy:
+#    environment:
+#      POSTGRES_HOSTS: postgres:5432
+#      POSTGRES_PASSWORD: admin
+#      CRB_HOSTS: crdb:26257
+#      CRB_PASSWORD:
+#      CASSANDRA_HOSTS: cassandra:9042
+#      CASSANDRA_PASSWORD: cassandra
+#    image: mcadecio/universal-database-proxy-rest:1.0.3
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#      crdb:
+#        condition: service_healthy
+#      cassandra:
+#        condition: service_healthy
+#    ports:
+#      - "8000:8000"
+#      - "8010:8010"
+#      - "8020:8020"
+#    volumes:
+#      - ./config.json:/usr/database-proxy/config.json

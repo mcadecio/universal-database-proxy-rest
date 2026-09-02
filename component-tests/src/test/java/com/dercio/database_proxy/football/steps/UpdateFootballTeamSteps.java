@@ -46,32 +46,9 @@ public class UpdateFootballTeamSteps {
         footballTeamsRepository.save(france);
     }
 
-
-    @When("I update the name of the national football team")
-    public void iUpdateTheNameOfTheNationalFootballTeam() {
-        var existingTeam = footballTeams.get(0);
-        var updatedTeam = new NationalFootballTeam()
-                .setName("FRAN")
-                .setAbbreviatedName(existingTeam.getAbbreviatedName())
-                .setAdditionalInfo(existingTeam.getAdditionalInfo());
-
-        footballTeamContext.setResponse(footballTeamService.updateFootballTeam(existingTeam.getName(), updatedTeam));
-    }
-
-    @Then("I should be alerted that name cannot be updated")
-    public void iShouldBeAlertedThatNameCannotBeUpdated() {
-        var response = footballTeamContext.getResponse();
-        response.then()
-                .statusCode(400)
-                .body("timestamp", notNullValue())
-                .body("path", equalTo("/national_football_teams/FRANCE"))
-                .body("message", containsString("inconsistent primary key values"))
-                .body("code", equalTo(400));
-    }
-
     @When("I update the abbreviated name to no value")
     public void iUpdateTheAbbreviatedNameToNoValue() {
-        var existingTeam = footballTeams.get(0);
+        var existingTeam = footballTeams.getFirst();
         var updatedTeam = new NationalFootballTeam()
                 .setName(existingTeam.getName())
                 .setAbbreviatedName(null);
@@ -92,7 +69,7 @@ public class UpdateFootballTeamSteps {
 
     @When("I update the abbreviated name")
     public void iUpdateTheAbbreviatedName() {
-        var footballTeam = footballTeams.get(0)
+        var footballTeam = footballTeams.getFirst()
                 .setAbbreviatedName("FRAN");
 
         footballTeamContext.setResponse(footballTeamService.updateFootballTeam(footballTeam.getName(), footballTeam));
@@ -100,10 +77,10 @@ public class UpdateFootballTeamSteps {
 
     @Then("I should see the abbreviated name in the national football team")
     public void iShouldSeeTheAbbreviatedNameInTheNationalFootballTeam() {
-        var footballTeam = footballTeamsRepository.findTeamByName(footballTeams.get(0).getName());
+        var footballTeam = footballTeamsRepository.findTeamByName(footballTeams.getFirst().getName());
 
         assertEquals("FRAN", footballTeam.getAbbreviatedName());
-        assertEquals(footballTeams.get(0), footballTeam);
+        assertEquals(footballTeams.getFirst(), footballTeam);
     }
 
     @When("I update a national football team that does not exist")

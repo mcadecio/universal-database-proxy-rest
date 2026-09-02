@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -52,7 +51,7 @@ public class GetStudentSteps {
         var studentsResponse = mapper.decode(studentContext.getResponse().body().asString(), new TypeReference<List<Student>>() {});
         assertEquals(1, studentsResponse.size());
 
-        var student = studentsResponse.get(0);
+        var student = studentsResponse.getFirst();
         assertEquals(name, student.name());
         assertEquals(10, student.age());
     }

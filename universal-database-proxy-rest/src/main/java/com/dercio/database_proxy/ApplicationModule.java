@@ -1,6 +1,5 @@
 package com.dercio.database_proxy;
 
-import com.dercio.database_proxy.common.codec.CodecRegister;
 import com.dercio.database_proxy.common.configuration.ConfigurationBinder;
 import com.dercio.database_proxy.common.module.ModuleInstaller;
 import com.google.inject.AbstractModule;
@@ -19,7 +18,6 @@ public class ApplicationModule extends AbstractModule {
     protected void configure() {
         bind(Vertx.class).toInstance(vertx);
 
-        new CodecRegister().process(vertx.eventBus());
         new ModuleInstaller().process(this::install);
         new ConfigurationBinder(this::bind).process(config);
     }

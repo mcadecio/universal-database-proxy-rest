@@ -44,8 +44,8 @@ public class CreateBudgetsSteps {
     public void iShouldGetALinkToTheBudget() {
         response.then()
                 .statusCode(201)
-                .header("Location", "http://localhost:8000/budgets/" + budgets.get(0).getId());
-        assertEquals(budgets.get(0), budgetsRepository.findById(budgets.get(0).getId()));
+                .header("Location", "http://localhost:8000/budgets/" + budgets.getFirst().getId());
+        assertEquals(budgets.getFirst(), budgetsRepository.findById(budgets.getFirst().getId()));
     }
 
     @Given("the budget I am trying to create already exists")
@@ -57,7 +57,7 @@ public class CreateBudgetsSteps {
 
     @When("I create the same budget")
     public void iCreateTheSameBudget() {
-        response = budgetsService.createBudget(budgets.get(0));
+        response = budgetsService.createBudget(budgets.getFirst());
     }
 
     @Then("I should get an error message")

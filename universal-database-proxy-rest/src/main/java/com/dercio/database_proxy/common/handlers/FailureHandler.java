@@ -1,5 +1,7 @@
 package com.dercio.database_proxy.common.handlers;
 
+import com.datastax.oss.driver.api.core.servererrors.InvalidQueryException;
+import com.datastax.oss.driver.api.core.servererrors.SyntaxError;
 import com.dercio.database_proxy.common.error.ErrorFactory;
 import com.dercio.database_proxy.common.error.ErrorResponse;
 import com.dercio.database_proxy.common.mapper.Mapper;
@@ -27,16 +29,17 @@ import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 @Log4j2
-@RequiredArgsConstructor(onConstructor_ = {@Inject})
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class FailureHandler implements Handler<RoutingContext> {
-
     private final Mapper mapper;
     private final ErrorFactory errorFactory;
     private final Map<Class<? extends Throwable>, BiFunction<Throwable, HttpServerRequest, ErrorResponse>>
             exceptionMapper = Map.of(
             BodyProcessorException.class, this::handleBodyProcessorException,
             ParameterProcessorException.class, this::handleParameterProcessorException,
-            PSQLException.class, this::handlePgException,
+            PSQLException.class, this::handleDatabaseException,
+            InvalidQueryException.class, this::handleDatabaseException,
+            SyntaxError.class, this::handleDatabaseException,
             InconsistentStateException.class, this::handleInconsistentStateException,
             IllegalStateException.class, this::handleIllegalStateException,
             DateTimeParseException.class, this::handleDateTimeParseException,
@@ -46,7 +49,6 @@ public class FailureHandler implements Handler<RoutingContext> {
     @SneakyThrows
     @Override
     public void handle(RoutingContext event) {
-
         log.error("Error: {}", event.failure().getMessage());
 
         var error = exceptionMapper.getOrDefault(event.failure().getClass(), this::handleException)
@@ -70,16 +72,12 @@ public class FailureHandler implements Handler<RoutingContext> {
     ErrorResponse handleBodyProcessorException(Throwable throwable, HttpServerRequest request) {
         if (throwable.getCause() instanceof ValidationException validationException) {
             if ("nullable".equals(validationException.keyword())) {
-                var property = validationException.inputScope().toString().replace("/", "");
-                if (property.isBlank()) {
-                    property = "body";
-                }
-                var message = validationException.getMessage().replace("input", property);
+                var message = validationException.getMessage()
+                        .replace("input", propertyNameOf(validationException));
                 return errorFactory.createErrorResponse(_400.getCode(), request.uri(), message);
             } else if ("type".equals(validationException.keyword())) {
-                var property = validationException.inputScope().toString().replace("/", "");
                 String replacement = String.format("property '%s' with value \"%s\" is not a valid",
-                        property,
+                        propertyNameOf(validationException),
                         validationException.input()
                 );
                 var message = validationException.getMessage().replace("input don't match type", replacement);
@@ -89,11 +87,20 @@ public class FailureHandler implements Handler<RoutingContext> {
         return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
     }
 
+    private String propertyNameOf(ValidationException validationException) {
+        var property = validationException.inputScope()
+                .toString()
+                .replaceFirst("^/", "")
+                .replace("/", ".");
+
+        return property.isBlank() ? "body" : property;
+    }
+
     ErrorResponse handleParameterProcessorException(Throwable throwable, HttpServerRequest request) {
         return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
     }
 
-    ErrorResponse handlePgException(Throwable throwable, HttpServerRequest request) {
+    ErrorResponse handleDatabaseException(Throwable throwable, HttpServerRequest request) {
         return errorFactory.createErrorResponse(_400.getCode(), request.uri(), throwable.getMessage());
     }
 

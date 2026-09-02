@@ -27,7 +27,7 @@ public class CreateStudentSteps {
 
     @Then("I should get a link to the student")
     public void iShouldGetALinkToTheStudent() {
-        var student = studentContext.getStudents().get(0);
+        var student = studentContext.getStudents().getFirst();
         var expectedUrl = "http://localhost:8010/students/" + student.name() + ":" + student.age();
         studentContext.getResponse()
                 .then()

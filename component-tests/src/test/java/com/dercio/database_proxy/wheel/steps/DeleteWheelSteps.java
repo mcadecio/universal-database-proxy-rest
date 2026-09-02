@@ -40,14 +40,14 @@ public class DeleteWheelSteps {
 
     @When("I delete the wheel")
     public void iDeleteTheWheel() {
-        wheelsContext.setResponse(wheelsService.deleteWheelByType(wheels.get(0).getWheelType().toString()));
+        wheelsContext.setResponse(wheelsService.deleteWheelByType(wheels.getFirst().getWheelType().toString()));
     }
 
     @Then("the wheel should be deleted")
     public void theWheelShouldBeDeleted() {
         var response = wheelsContext.getResponse();
         response.then().statusCode(204);
-        assertNull(wheelsRepository.findByType(wheels.get(0).getWheelType().toString()));
+        assertNull(wheelsRepository.findByType(wheels.getFirst().getWheelType().toString()));
     }
 
     @When("I delete a wheel that does not exist")

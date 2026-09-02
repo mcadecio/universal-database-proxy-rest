@@ -1,8 +1,8 @@
 package com.dercio.database_proxy.budgets.steps;
 
-import com.dercio.database_proxy.budgets.BudgetsService;
 import com.dercio.database_proxy.budgets.Budget;
 import com.dercio.database_proxy.budgets.BudgetsRepository;
+import com.dercio.database_proxy.budgets.BudgetsService;
 import com.google.inject.Inject;
 import io.cucumber.guice.ScenarioScoped;
 import io.cucumber.java.en.Given;
@@ -14,7 +14,8 @@ import org.mybatis.guice.transactional.Transactional;
 import java.util.List;
 
 import static com.dercio.database_proxy.budgets.BudgetsFactory.createJanuaryBudget;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ScenarioScoped
@@ -46,7 +47,7 @@ public class UpdateBudgetsSteps {
 
     @When("I update the month to no value")
     public void iUpdateTheMonthToNoValue() {
-        var budget = budgets.get(0);
+        var budget = budgets.getFirst();
 
         budget.setMonth(null);
 
@@ -65,7 +66,7 @@ public class UpdateBudgetsSteps {
 
     @When("I update the user id field")
     public void iUpdateTheUserIdField() {
-        var budget = budgets.get(0);
+        var budget = budgets.getFirst();
 
         budget.setUserId("something-else");
 
@@ -77,7 +78,7 @@ public class UpdateBudgetsSteps {
         response.then()
                 .statusCode(204);
 
-        var budget = budgets.get(0);
+        var budget = budgets.getFirst();
         var actualBudget = budgetsRepository.findById(budget.getId());
         assertEquals("something-else", actualBudget.getUserId());
         assertEquals(budget, actualBudget);
@@ -85,7 +86,7 @@ public class UpdateBudgetsSteps {
 
     @When("I update the year field")
     public void iUpdateTheYearField() {
-        var budget = budgets.get(0);
+        var budget = budgets.getFirst();
 
         budget.setYear(1999);
 
@@ -97,7 +98,7 @@ public class UpdateBudgetsSteps {
         response.then()
                 .statusCode(204);
 
-        var budget = budgets.get(0);
+        var budget = budgets.getFirst();
         var actualBudget = budgetsRepository.findById(budget.getId());
         assertEquals(1999, actualBudget.getYear());
         assertEquals(budget, actualBudget);

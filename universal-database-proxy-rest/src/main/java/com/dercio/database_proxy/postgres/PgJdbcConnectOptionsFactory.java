@@ -1,5 +1,6 @@
 package com.dercio.database_proxy.postgres;
 
+import com.dercio.database_proxy.common.database.ConfigValues;
 import com.dercio.database_proxy.common.database.DatabaseConfig;
 import io.vertx.jdbcclient.JDBCConnectOptions;
 import org.apache.commons.lang3.ObjectUtils;
@@ -10,9 +11,9 @@ import java.util.StringJoiner;
 public class PgJdbcConnectOptionsFactory {
 
     public JDBCConnectOptions create(DatabaseConfig databaseConfig, Map<String, String> envVariables) {
-        var username = resolveValue(databaseConfig.getUsername(), envVariables);
-        var password = resolveValue(databaseConfig.getPassword(), envVariables);
-        var databaseName = resolveValue(databaseConfig.getDatabaseName(), envVariables);
+        var username = ConfigValues.resolve(databaseConfig.getUsername(), envVariables);
+        var password = ConfigValues.resolve(databaseConfig.getPassword(), envVariables);
+        var databaseName = ConfigValues.resolve(databaseConfig.getDatabaseName(), envVariables);
         var jdbcUrl = buildJdbcUrl(databaseConfig, databaseName, envVariables);
 
         return new JDBCConnectOptions()
@@ -24,18 +25,18 @@ public class PgJdbcConnectOptionsFactory {
     }
 
     private String buildJdbcUrl(DatabaseConfig databaseConfig, String databaseName, Map<String, String> envVariables) {
-        var targetServerType = databaseConfig.getTargetServerType();
         var configuredJdbcUrl = databaseConfig.getJdbcUrl();
 
         if (configuredJdbcUrl != null && !configuredJdbcUrl.isBlank()) {
             return configuredJdbcUrl;
         }
 
-        var host = resolveValue(databaseConfig.getHost(), envVariables);
+        var targetServerType = databaseConfig.getTargetServerType();
+        var hosts = String.join(",", ConfigValues.resolveHosts(databaseConfig, envVariables));
+
         StringJoiner jdbcUrlBuilder = new StringJoiner("");
         jdbcUrlBuilder.add("jdbc:postgresql://");
-        jdbcUrlBuilder.add(host).add(":");
-        jdbcUrlBuilder.add(databaseConfig.getPort().toString());
+        jdbcUrlBuilder.add(hosts);
         jdbcUrlBuilder.add("/");
         jdbcUrlBuilder.add(databaseName);
         jdbcUrlBuilder.add("?");
@@ -52,12 +53,6 @@ public class PgJdbcConnectOptionsFactory {
             jdbcUrlBuilder.add("&sslrootcert=").add(sslCertPath);
         }
         return jdbcUrlBuilder.toString();
-    }
-
-    private String resolveValue(String value, Map<String, String> envVariables) {
-        if (value == null) return null;
-
-        return envVariables.getOrDefault(value, value);
     }
 
 }

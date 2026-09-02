@@ -54,6 +54,14 @@
             <artifactId>mybatis-guice</artifactId>
         </dependency>
 
+        <!-- CASSANDRA - no JDBC driver exists, so these tests seed and verify through the
+             DataStax driver directly rather than MyBatis. -->
+        <dependency>
+            <groupId>com.datastax.oss</groupId>
+            <artifactId>java-driver-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- CUCUMBER -->
         <dependency>
             <groupId>io.cucumber</groupId>

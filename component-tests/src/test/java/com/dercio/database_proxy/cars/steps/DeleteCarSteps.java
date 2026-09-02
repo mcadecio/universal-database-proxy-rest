@@ -41,14 +41,14 @@ public class DeleteCarSteps {
 
     @When("I delete the car")
     public void iDeleteTheCar() {
-        carsContext.setResponse(carsService.deleteCarById(cars.get(0).getCarId()));
+        carsContext.setResponse(carsService.deleteCarById(cars.getFirst().getCarId()));
     }
 
     @Then("the car should be deleted")
     public void theCarShouldBeDeleted() {
         var response = carsContext.getResponse();
         response.then().statusCode(204);
-        assertNull(carsRepository.findById(cars.get(0).getCarId()));
+        assertNull(carsRepository.findById(cars.getFirst().getCarId()));
     }
 
     @When("I delete a car that does not exist")

@@ -4,7 +4,10 @@ import com.dercio.database_proxy.common.AnnotationProcessor;
 import com.dercio.database_proxy.common.exceptions.VerticleDisabledException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import io.vertx.core.*;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.reflections.Reflections;
@@ -12,11 +15,10 @@ import org.reflections.Reflections;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Log4j2
-@RequiredArgsConstructor(onConstructor_ = {@Inject})
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class VerticleDeployer implements AnnotationProcessor<Injector> {
 
     private final Vertx vertx;
