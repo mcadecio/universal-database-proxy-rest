@@ -22,7 +22,7 @@
         <cassandra-driver.version>4.15.0</cassandra-driver.version>
         <cucumber.version>7.34.3</cucumber.version>
         <http-status-codes.version>1.1.0</http-status-codes.version>
-        <log4j.version>2.26.0</log4j.version>
+        <log4j.version>2.26.1</log4j.version>
         <lombok.version>1.18.46</lombok.version>
         <guice.version>7.0.0</guice.version>
         <jackson.version>2.21.4</jackson.version>
@@ -40,7 +40,7 @@
         <mybatis-guice.version>4.1.0</mybatis-guice.version>
         <mockito.version>5.23.0</mockito.version>
         <ongres.scram.version>3.4</ongres.scram.version>
-        <postgresql.version>42.7.11</postgresql.version>
+        <postgresql.version>42.7.12</postgresql.version>
         <reflections.version>0.10.2</reflections.version>
         <rest-assured.version>6.0.0</rest-assured.version>
         <vertx.version>4.5.28</vertx.version>
