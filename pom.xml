@@ -16,7 +16,7 @@
     <name>Universal Database Proxy Rest Parent</name>
 
     <properties>
-        <agroal.version>1.16</agroal.version>
+        <agroal.version>3.2.1</agroal.version>
         <!-- Must match the driver vertx-cassandra-client pulls in, so the component tests and the
              application speak to Cassandra through the same driver version. -->
         <cassandra-driver.version>4.15.0</cassandra-driver.version>
