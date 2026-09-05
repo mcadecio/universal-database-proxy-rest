@@ -1,9 +1,9 @@
 package com.dercio.database_proxy.common.module;
 
 import com.dercio.database_proxy.common.AnnotationProcessor;
+import com.dercio.database_proxy.common.AnnotationScanner;
 import com.google.inject.Module;
 import lombok.SneakyThrows;
-import org.reflections.Reflections;
 
 import java.util.function.Consumer;
 
@@ -11,8 +11,7 @@ public class ModuleInstaller implements AnnotationProcessor<Consumer<Module>> {
 
     @Override
     public void process(Consumer<Module> install) {
-        new Reflections(basePackage())
-                .getTypesAnnotatedWith(GuiceModule.class)
+        AnnotationScanner.findAnnotatedClasses(basePackage(), GuiceModule.class)
                 .stream()
                 .map(this::createInstance)
                 .filter(Module.class::isInstance)

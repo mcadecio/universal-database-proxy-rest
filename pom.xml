@@ -41,7 +41,7 @@
         <mockito.version>5.23.0</mockito.version>
         <ongres.scram.version>3.4</ongres.scram.version>
         <postgresql.version>42.7.12</postgresql.version>
-        <reflections.version>0.10.2</reflections.version>
+        <classgraph.version>4.8.194</classgraph.version>
         <rest-assured.version>6.0.0</rest-assured.version>
         <vertx.version>4.5.28</vertx.version>
         <swagger.version>2.2.54</swagger.version>
@@ -121,11 +121,11 @@
                 <version>${mybatis-guice.version}</version>
             </dependency>
 
-            <!-- https://mvnrepository.com/artifact/org.reflections/reflections -->
+            <!-- https://mvnrepository.com/artifact/io.github.classgraph/classgraph -->
             <dependency>
-                <groupId>org.reflections</groupId>
-                <artifactId>reflections</artifactId>
-                <version>${reflections.version}</version>
+                <groupId>io.github.classgraph</groupId>
+                <artifactId>classgraph</artifactId>
+                <version>${classgraph.version}</version>
             </dependency>
 
             <!-- https://mvnrepository.com/artifact/com.simplaex/http-status-codes -->

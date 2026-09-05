@@ -1,6 +1,7 @@
 package com.dercio.database_proxy.common.verticle;
 
 import com.dercio.database_proxy.common.AnnotationProcessor;
+import com.dercio.database_proxy.common.AnnotationScanner;
 import com.dercio.database_proxy.common.exceptions.VerticleDisabledException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -10,7 +11,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.reflections.Reflections;
 
 import java.util.Collection;
 import java.util.List;
@@ -34,8 +34,7 @@ public class VerticleDeployer implements AnnotationProcessor<Injector> {
                 log.error(error.getMessage(), error);
         };
 
-        var annotatedVerticles = new Reflections(basePackage())
-                .getTypesAnnotatedWith(Verticle.class)
+        var annotatedVerticles = AnnotationScanner.findAnnotatedClasses(basePackage(), Verticle.class)
                 .stream()
                 .map(injector::getInstance)
                 .filter(AbstractVerticle.class::isInstance)

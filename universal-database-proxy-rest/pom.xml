@@ -86,10 +86,10 @@
             <artifactId>guice</artifactId>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.reflections/reflections -->
+        <!-- https://mvnrepository.com/artifact/io.github.classgraph/classgraph -->
         <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.simplaex/http-status-codes -->
