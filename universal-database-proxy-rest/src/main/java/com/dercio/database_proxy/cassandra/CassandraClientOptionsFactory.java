@@ -11,8 +11,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
+import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 
 public class CassandraClientOptionsFactory {
 
@@ -61,11 +64,15 @@ public class CassandraClientOptionsFactory {
     }
 
     static TrustManager[] trustManagers(String sslCertPath) {
-        try (var certificate = Files.newInputStream(Path.of(sslCertPath))) {
+        try (var sslCertificates = Files.newInputStream(Path.of(sslCertPath))) {
             var trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null, null);
-            trustStore.setCertificateEntry("default",
-                    CertificateFactory.getInstance("X.509").generateCertificate(certificate));
+
+            Collection<? extends Certificate> certificates = CertificateFactory.getInstance("X.509").generateCertificates(sslCertificates);
+
+            for (Certificate certificate : certificates) {
+                trustStore.setCertificateEntry(UUID.randomUUID().toString(), certificate);
+            }
 
             var trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(trustStore);
