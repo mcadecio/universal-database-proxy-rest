@@ -30,7 +30,7 @@
         <junit-jupiter.version>5.13.4</junit-jupiter.version>
         <junit-platform-suite.version>1.14.2</junit-platform-suite.version>
         <main.class>com.dercio.database_proxy.Application</main.class>
-        <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
