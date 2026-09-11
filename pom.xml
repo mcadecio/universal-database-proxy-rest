@@ -37,7 +37,7 @@
         <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
         <maven-surefire-plugin.version>3.5.6</maven-surefire-plugin.version>
         <mybatis.version>3.5.19</mybatis.version>
-        <mybatis-guice.version>4.1.0</mybatis-guice.version>
+        <mybatis-guice.version>4.1.1</mybatis-guice.version>
         <mockito.version>5.23.0</mockito.version>
         <ongres.scram.version>3.4</ongres.scram.version>
         <postgresql.version>42.7.12</postgresql.version>
