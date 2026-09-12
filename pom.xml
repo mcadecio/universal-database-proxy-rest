@@ -40,7 +40,7 @@
         <mybatis-guice.version>4.1.1</mybatis-guice.version>
         <mockito.version>5.23.0</mockito.version>
         <ongres.scram.version>3.4</ongres.scram.version>
-        <postgresql.version>42.7.12</postgresql.version>
+        <postgresql.version>42.7.13</postgresql.version>
         <classgraph.version>4.8.194</classgraph.version>
         <rest-assured.version>6.0.1</rest-assured.version>
         <vertx.version>4.5.28</vertx.version>
